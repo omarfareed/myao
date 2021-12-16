@@ -28,6 +28,11 @@ module.exports = {
     "passwordChangedAt",
     "passwordResetToken",
     "passwordResetExpires",
+    "address",
+    "jop",
+    "education",
+    "interests",
+    "cover_photo"
   ],
   marketer: [
     "id",
@@ -43,6 +48,7 @@ module.exports = {
     "passwordChangedAt",
     "passwordResetToken",
     "passwordResetExpires",
+    "cover_photo"
   ],
   post: [
     "id",
