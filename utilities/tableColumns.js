@@ -1,5 +1,17 @@
 module.exports = {
-  admin: ["admin_id", "type"],
+  admin: [
+  "admin_id", 
+  "type",
+  "fname",
+  "lname",
+  "email",
+  "password",
+  "photo",
+  "gender",
+  "passwordChangedAt",
+  "passwordResetToken",
+  "passwordResetExpires",
+],
   surfer: [
     "id",
     "fname",
@@ -13,6 +25,9 @@ module.exports = {
     "last_login",
     "is_active",
     "created_date",
+    "passwordChangedAt",
+    "passwordResetToken",
+    "passwordResetExpires",
   ],
   marketer: [
     "id",
@@ -25,6 +40,9 @@ module.exports = {
     "is_active",
     "last_published",
     "founded_at",
+    "passwordChangedAt",
+    "passwordResetToken",
+    "passwordResetExpires",
   ],
   post: [
     "id",
