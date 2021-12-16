@@ -4,15 +4,16 @@ const controller = require("./globalController");
 
 exports.getSurfers = controller.select("surfer");
 exports.createSurfer = controller.create("surfer");
-exports.updateSurfer = controller.update("surfer", ["id"]);
+exports.updateSurfer = controller.update("surfer", ["id", "gender", "created_date"]);
+exports.deleteSurfer = controller.delete("surfer");
 exports.searchSurfer = (req, res, next) => {
   let arr = []; //req.body.search.split(" ");
   let q;
 
   if (arr.length == 1)
-    q = `Select * from surfer where Fname like '%${arr[0]}' or Lname like '${arr[0]}'`;
+    q = `Select * from surfer where fname like '%${arr[0]}' or lname like '${arr[0]}'`;
   else
-    q = `Select * from surfer where Fname like '%${arr[0]}' or Lname like '${arr[1]}'`;
+    q = `Select * from surfer where fname like '%${arr[0]}' or lname like '${arr[1]}'`;
   connection.query(q, (err, data) => {
     if (err)
       return res.json({
