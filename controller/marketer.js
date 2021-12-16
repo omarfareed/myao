@@ -4,7 +4,7 @@ const controller = require("./globalController");
 
 exports.getMarketers = controller.select("marketer");
 exports.createMarketer = controller.create("marketer");
-exports.updateMarketer = controller.update("marketer", ["id"]);
+exports.updateMarketer = controller.update("marketer", ["id" , "created_at"]);
 exports.searchMarketer = (req, res, next) => {
   let arr = []; //req.body.search.split(" ");
   let q;

@@ -30,6 +30,7 @@ const filterObjTo = (Obj, fil = []) => {
 ////////////////////////////////////////////
 ///////////// global routes ////////////////
 // SELECT * FROM ((table)) WHERE ((get conditions from req.body))
+//
 exports.select = (table) => (req, res, next) => {
   req.body = filterObjTo(req.body, columns[table]);
   connection.query(
@@ -50,16 +51,18 @@ exports.select = (table) => (req, res, next) => {
 // INSERT INTO TABLE SET ? ==> get values from filtered req.body
 // filter from id if it doesn't have unique id
 // id is the 0 index of the table columns
-exports.create = (table, filter) => (req, res, next) => {
-  console.log(table, columns[table]);
-  req.body[columns[table][0]] = uniqueIdGenerator();
-  req.body = filterObjTo(req.body, columns[table]);
-  req.body = filterObjFrom(req.body, filter);
-  connection.query(`INSERT INTO ${table} SET ?`, req.body, (err, data) => {
-    if (err) return res.json({ status: "fail", err: err.message });
-    return res.json({ status: "success", data });
-  });
-};
+exports.create =
+  (table, filter, createUnique = true) =>
+  (req, res, next) => {
+    console.log(table, columns[table]);
+    createUnique && (req.body[columns[table][0]] = uniqueIdGenerator());
+    req.body = filterObjTo(req.body, columns[table]);
+    req.body = filterObjFrom(req.body, filter);
+    connection.query(`INSERT INTO ${table} SET ?`, req.body, (err, data) => {
+      if (err) return res.json({ status: "fail", err: err.message });
+      return res.json({ status: "success", data });
+    });
+  };
 // permanently delete be careful
 exports.delete = (table) => (req, res, next) => {
   req.body = filterObjTo(req.body, columns[table]);

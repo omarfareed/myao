@@ -4,7 +4,7 @@ const controller = require("./globalController");
 
 exports.getSurfers = controller.select("surfer");
 exports.createSurfer = controller.create("surfer");
-exports.updateSurfer = controller.update("surfer", ["id"]);
+exports.updateSurfer = controller.update("surfer", ["id", "created_date"]);
 exports.searchSurfer = (req, res, next) => {
   let arr = []; //req.body.search.split(" ");
   let q;

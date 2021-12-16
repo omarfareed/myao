@@ -10,12 +10,12 @@ router
   .route("/")
   .get(surferController.getSurfers)
   .post(surferController.createSurfer);
-router.route("/search").get(surferController.searchSurfer);
+  router.route("/search").get(surferController.searchSurfer);
+  router.get("/login", authController.login);
 router
   .route("/:id")
   .get(authController.transferParamsToBody, surferController.getSurfers)
   .patch(authController.transferParamsToBody, surferController.updateSurfer);
-//TODO:
-router.use("/:surfer_id/post", postRouter); // add post router here
+router.use("/:surfer_id/post", postRouter);
 
 module.exports = router;
