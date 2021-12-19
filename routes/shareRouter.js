@@ -1,38 +1,32 @@
 const express = require("express");
 const {
   transferParamsToBody,
-  protect,
   restrictTo,
+  protect,
 } = require("../controller/authController");
 const restriction = restrictTo("surfer", "admin");
-const commentController = require("../controller/comment");
+const shareController = require("../controller/share");
 const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .get(transferParamsToBody, commentController.getComments)
+  .get(transferParamsToBody, shareController.getShares)
   .post(
     transferParamsToBody,
     protect,
     restriction,
-    commentController.createComment
+    shareController.createShare
   );
 router
   .route("/:id")
-  .get(transferParamsToBody, commentController.getComments)
-  .patch(
-    transferParamsToBody,
-    protect,
-    restrictTo,
-    commentController.updateComment
-  )
+  .get(transferParamsToBody, shareController.getShares)
   .delete(
     transferParamsToBody,
     protect,
     restriction,
-    commentController.deleteComment
+    shareController.deleteShare
   );
 
-//TODO: add comment here
-// router.use("/:comment_id");
+//TODO: add share here
+// router.use("/:share_id");
 module.exports = router;

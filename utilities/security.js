@@ -5,4 +5,3 @@ exports.correctPassword = async (password, hashedPassword) =>
 exports.passwordChangedAfter = (JWTTimestamp, passwordChangedAt) =>
   passwordChangedAt &&
   JWTTimestamp < parseInt(passwordChangedAt.getTime() / 1000, 10);
-await bcrypt.compare(password, hashedPassword);

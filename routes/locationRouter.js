@@ -1,38 +1,36 @@
 const express = require("express");
+
 const {
   transferParamsToBody,
   protect,
   restrictTo,
 } = require("../controller/authController");
 const restriction = restrictTo("surfer", "admin");
-const commentController = require("../controller/comment");
+const locationController = require("../controller/location");
 const router = express.Router({ mergeParams: true });
-
 router
   .route("/")
-  .get(transferParamsToBody, commentController.getComments)
+  .get(transferParamsToBody, locationController.getLocations)
   .post(
     transferParamsToBody,
     protect,
     restriction,
-    commentController.createComment
+    locationController.createLocation
   );
 router
   .route("/:id")
-  .get(transferParamsToBody, commentController.getComments)
+  .get(transferParamsToBody, locationController.getLocations)
   .patch(
     transferParamsToBody,
     protect,
-    restrictTo,
-    commentController.updateComment
+    restriction,
+    locationController.updateLocation
   )
   .delete(
     transferParamsToBody,
     protect,
     restriction,
-    commentController.deleteComment
+    locationController.deleteLocation
   );
 
-//TODO: add comment here
-// router.use("/:comment_id");
 module.exports = router;

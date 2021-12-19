@@ -1,9 +1,18 @@
 const crypto = require("crypto");
+const catchAsync = require("../utilities/catchAsync");
 const jwt = require("jsonwebtoken");
 const connection = require("../connection");
 const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
 const security = require("../utilities/security");
+const appError = require("../utilities/appError");
+const {
+  uniqueIdGenerator,
+  filterObjFrom,
+  filterObjTo,
+  addWhereCondition,
+} = require("../utilities/control");
+const columns = require("../utilities/tableColumns");
 exports.transferParamsToBody = (req, res, next) => {
   for (const [key, val] of Object.entries(req.params)) {
     req.body[key] = val;
@@ -17,7 +26,7 @@ const signToken = (id, role) => {
 };
 
 const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user.id, req.body.role);
+  const token = signToken(user.id, user.role);
 
   res.cookie("jwt", token, {
     expires: new Date(
@@ -46,29 +55,40 @@ exports.logout = (req, res) => {
   res.status(200).json({ status: "success" });
 };
 exports.signup = catchAsync(async (req, res, next) => {
-  query(`INSERT INTO ${req.role} SET ? `);
-
+  const { role } = req.body;
+  if (!role) return next(new appError("no specific role determined"));
+  req.body = filterObjTo(req.body, columns[role]);
+  const id = uniqueIdGenerator();
+  req.body[columns[role][0]] = id;
+  query(`INSERT INTO ${role} SET ?`, req.body);
+  req.body.role = role;
   // const url = `${req.protocol}://${req.get("host")}/me`;
   // // console.log(url);
   // await new Email(newUser, url).sendWelcome();
 
-  createSendToken(newUser, 201, req, res);
+  createSendToken(req.body, 201, req, res);
 });
 exports.login = async (req, res, next) => {
-  const { email, password, role } = req.body;
-  if (!email || !password) return "ERROR!";
-  const user = await query(
-    `SELECT * FROM ${role} WHERE email="${email}" AND password="${password}"`
+  const { email, password } = req.body;
+  if (!email || !password)
+    return next(new appError("you must enter email and password"));
+  const userTypes = ["surfer", "marketer"];
+  const users = await Promise.all(
+    userTypes.map((table) =>
+      query(
+        `SELECT * FROM ${table} WHERE email="${email}" AND password="${password}"`
+      )
+    )
   );
-  if (!user)
-    return res.json({
-      status: "failed",
-      error: "wrong email or password",
-    });
-  createSendToken(user, 200, req, res);
+  userTypes.forEach((userType, i) => {
+    if (users[i] && users[i].length !== 0) {
+      return createSendToken({ ...users[i][0], role: userType }, 200, req, res);
+    }
+  });
+  next(new appError("unexpected error happens while login"));
 };
 
-exports.protect = catchAsync(async (req, res, next) => {
+exports.protect = async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
   if (
@@ -82,15 +102,16 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
+      new appError("You are not logged in! Please log in to get access.", 401)
     );
   }
 
   // 2) Verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  console.log(decoded);
   // 3) Check if user still exists
   const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id=${decoded.id}`
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
   );
   if (!currentUser) {
     return next(
@@ -111,6 +132,44 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // GRANT ACCESS TO PROTECTED ROUTE
-  req.user = currentUser;
+  req.body[`${decoded.role}_id`] = currentUser[0].id;
+  req.auth = { role: decoded.role, id: decoded.id };
   next();
-});
+};
+
+exports.updateMe = async (req, res, next) => {
+  const { role, id } = req.auth;
+  req.body = filterObjFrom(filterObjTo(req.body, columns[role]), [
+    "id",
+    "created_date",
+    "email",
+    "passwordChangedAt",
+    "passwordResetToken",
+    "passwordResetExpires",
+    "is_active",
+    "last_login",
+    "closed_admin",
+    "last_published",
+    "founded_at",
+  ]);
+  const data = await query(`UPDATE ${role} SET ? WHERE id="${id}"`, req.body);
+  res.json({
+    status: "success",
+    data,
+    updatedData: req.body,
+  });
+};
+exports.deleteMe = async (req, res, next) => {
+  const { role, id } = req.auth;
+  const data = await query(`UPDATE ${role} SET is_active=0 WHERE id="${id}"`);
+  return res.json({
+    status: "success",
+    data,
+  });
+};
+exports.restrictTo =
+  (...roles) =>
+  (req, body, next) => {
+    if (roles.includes(req.auth.role)) return next();
+    next(new appError(`you don't have the permission to make this action`));
+  };

@@ -1,38 +1,45 @@
 const express = require("express");
+
 const {
   transferParamsToBody,
   protect,
   restrictTo,
 } = require("../controller/authController");
 const restriction = restrictTo("marketer");
-const reviewController = require("../controller/review");
+const productMediaController = require("../controller/product_media");
 const router = express.Router({ mergeParams: true });
-
 router
   .route("/")
-  .get(transferParamsToBody, reviewController.getReviews)
+  .get(transferParamsToBody, productMediaController.getProductMedia)
   .post(
     transferParamsToBody,
     protect,
     restriction,
-    reviewController.createReview
+    productMediaController.createProductMedia
   );
 router
   .route("/:id")
-  .get(transferParamsToBody, reviewController.getReviews)
+  .get(transferParamsToBody, productMediaController.getProductMedia)
   .patch(
     transferParamsToBody,
     protect,
     restriction,
-    reviewController.updateReview
+    productMediaController.updateProductMedia
   )
   .delete(
     transferParamsToBody,
     protect,
-    restrictTo("marketer", "admin"),
-    reviewController.deleteReview
+    restriction,
+    productMediaController.deleteProductMedia
   );
 
-//TODO: add review here
-// router.use("/:review_id");
 module.exports = router;
+
+// share
+// sur_rep_mar
+// sur_rep_post
+// sur_rep_pro
+// sur_rep_sur
+// mar_report_mar
+// like
+// admin
