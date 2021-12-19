@@ -96,3 +96,17 @@ exports.updatePost = async (req, res, next) => {
     data: post,
   });
 };
+
+exports.getTimeLine = async (req, res, next) => {
+  const { id } = req.auth;
+  const data = await query(
+    `SELECT * FROM post JOIN friend 
+    WHERE (friend.source_id=post.surfer_id AND friend.target_id="${id}")
+    OR (friend.target_id=post.surfer_id AND friend.source_id="${id}")
+    AND friendship_time IS NOT NULL`
+  );
+  res.json({
+    status: "success",
+    data,
+  });
+};

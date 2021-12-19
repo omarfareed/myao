@@ -10,16 +10,14 @@ const {
   getReceivedRequests,
   getSentRequests,
   makeRequest,
+  getMyFriends,
   getFriends,
 } = require("../controller/friend");
 router.use(protect, restriction);
 router.get("/sent", getSentRequests);
 router.get("/received", getReceivedRequests);
 router.post("/accept", acceptRequest);
-// target_id
-router
-  .route("/")
-  .get(getFriends)
-  .post(beforeRequest, makeRequest)
-  .delete(deleteRequest);
+router.get("/:surfer_id", getFriends);
+router.get("/myFriends", getMyFriends);
+router.route("/").post(beforeRequest, makeRequest).delete(deleteRequest);
 module.exports = router;

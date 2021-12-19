@@ -3,6 +3,19 @@ const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
 const controller = require("./globalController");
 exports.getFriends = async (req, res, next) => {
+  const { surfer_id } = req.params;
+  const data = await query(
+    `SELECT * FROM friend 
+    WHERE (source_id="${surfer_id}" OR target_id="${surfer_id}")
+    AND friendship_time IS NOT NULL`
+  );
+  res.json({
+    status: "success",
+    data,
+  });
+};
+
+exports.getMyFriends = async (req, res, next) => {
   const data = await query(
     `SELECT * FROM friend 
     WHERE (source_id="${req.auth.id}" OR target_id="${req.auth.id}")
@@ -19,7 +32,7 @@ exports.getReceivedRequests = async (req, res, next) => {
   );
   res.json({
     status: "success",
-    data
+    data,
   });
 };
 exports.getSentRequests = async (req, res, next) => {

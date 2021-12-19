@@ -12,6 +12,7 @@ const postMediaRouter = require("./postMediaRouter");
 const commentRouter = require("./commentRouter");
 const shareRouter = require("./shareRouter.js");
 const likeRouter = require("./likeRouter");
+router.get("/timeline", protect, postController.getTimeLine);
 router
   .route("/")
   .get(transferParamsToBody, postController.getPosts)
