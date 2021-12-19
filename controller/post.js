@@ -1,6 +1,7 @@
 const { promisify } = require("util");
 const connection = require("../connection");
 const appError = require("../utilities/appError");
+const catchAsync = require("../utilities/catchAsync");
 const query = promisify(connection.query).bind(connection);
 const controller = require("./globalController");
 const {
@@ -10,7 +11,7 @@ const {
   uniqueIdGenerator,
 } = require("./../utilities/control");
 const columns = require("../utilities/tableColumns.js");
-exports.getPost = async (req, res, next) => {
+exports.getPost = catchAsync(async (req, res, next) => {
   const post = await query(`SELECT * FROM post WHERE id=${req.body.id}`);
   if (!post) return next(new appError("no post with this id"));
   post.media = (
@@ -20,8 +21,8 @@ exports.getPost = async (req, res, next) => {
     status: "success",
     data: post,
   });
-};
-exports.getPosts = async (req, res, next) => {
+});
+exports.getPosts = catchAsync(async (req, res, next) => {
   const posts = await query(
     addWhereCondition(
       `SELECT * FROM post`,
@@ -52,8 +53,8 @@ exports.getPosts = async (req, res, next) => {
     status: "success",
     data: Object.values(postsHashed),
   });
-};
-exports.createPost = async (req, res, next) => {
+});
+exports.createPost = catchAsync(async (req, res, next) => {
   const id = uniqueIdGenerator();
   req.body["id"] = id;
   const post = await query(
@@ -71,9 +72,9 @@ exports.createPost = async (req, res, next) => {
     [media]
   );
   return res.json({ status: "success", post_media });
-};
+});
 exports.deletePost = controller.delete("post"); // post media on delete cascade
-exports.updatePost = async (req, res, next) => {
+exports.updatePost = catchAsync(async (req, res, next) => {
   const Obj = filterObjFrom(filterObjTo(req.body, columns["post"]), [
     "id",
     "created_date",
@@ -95,9 +96,9 @@ exports.updatePost = async (req, res, next) => {
     status: "success",
     data: post,
   });
-};
+});
 
-exports.getTimeLine = async (req, res, next) => {
+exports.getTimeLine = catchAsync(async (req, res, next) => {
   const { id } = req.auth;
   const data = await query(
     `SELECT * FROM post JOIN friend 
@@ -109,4 +110,4 @@ exports.getTimeLine = async (req, res, next) => {
     status: "success",
     data,
   });
-};
+});

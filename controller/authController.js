@@ -68,7 +68,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   createSendToken(req.body, 201, req, res);
 });
-exports.login = async (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password)
     return next(new appError("you must enter email and password"));
@@ -86,9 +86,9 @@ exports.login = async (req, res, next) => {
     }
   });
   next(new appError("unexpected error happens while login"));
-};
+});
 
-exports.protect = async (req, res, next) => {
+exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
   if (
@@ -135,9 +135,9 @@ exports.protect = async (req, res, next) => {
   req.body[`${decoded.role}_id`] = currentUser[0].id;
   req.auth = { role: decoded.role, id: decoded.id };
   next();
-};
+});
 
-exports.updateMe = async (req, res, next) => {
+exports.updateMe = catchAsync(async (req, res, next) => {
   const { role, id } = req.auth;
   req.body = filterObjFrom(filterObjTo(req.body, columns[role]), [
     "id",
@@ -158,15 +158,15 @@ exports.updateMe = async (req, res, next) => {
     data,
     updatedData: req.body,
   });
-};
-exports.deleteMe = async (req, res, next) => {
+});
+exports.deleteMe = catchAsync(async (req, res, next) => {
   const { role, id } = req.auth;
   const data = await query(`UPDATE ${role} SET is_active=0 WHERE id="${id}"`);
   return res.json({
     status: "success",
     data,
   });
-};
+});
 exports.restrictTo =
   (...roles) =>
   (req, body, next) => {

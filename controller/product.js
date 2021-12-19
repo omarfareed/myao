@@ -3,6 +3,7 @@ const connection = require("../connection");
 const appError = require("../utilities/appError");
 const query = promisify(connection.query).bind(connection);
 const controller = require("./globalController");
+const catchAsync = require("../utilities/catchAsync");
 const {
   addWhereCondition,
   filterObjFrom,
@@ -10,7 +11,7 @@ const {
   uniqueIdGenerator,
 } = require("./../utilities/control");
 const columns = require("../utilities/tableColumns.js");
-exports.getProduct = async (req, res, next) => {
+exports.getProduct = catchAsync(async (req, res, next) => {
   const product = await query(`SELECT * FROM product WHERE id=${req.body.id}`);
   if (!product) return next(new appError("no product with this id"));
   product.media = (
@@ -20,8 +21,8 @@ exports.getProduct = async (req, res, next) => {
     status: "success",
     data: product,
   });
-};
-exports.getProducts = async (req, res, next) => {
+});
+exports.getProducts = catchAsync(async (req, res, next) => {
   const products = await query(
     addWhereCondition(
       `SELECT * FROM product`,
@@ -52,8 +53,8 @@ exports.getProducts = async (req, res, next) => {
     status: "success",
     data: Object.values(productsHashed),
   });
-};
-exports.createProduct = async (req, res, next) => {
+});
+exports.createProduct = catchAsync(async (req, res, next) => {
   const id = uniqueIdGenerator();
   req.body["id"] = id;
   req.body["avg_rating"] = 0;
@@ -72,9 +73,9 @@ exports.createProduct = async (req, res, next) => {
     [media]
   );
   return res.json({ status: "success", data: req.body });
-};
+});
 exports.deleteProduct = controller.delete("product");
-exports.updateProduct = async (req, res, next) => {
+exports.updateProduct = catchAsync(async (req, res, next) => {
   const Obj = filterObjFrom(filterObjTo(req.body, columns["product"]), [
     "id",
     "created_date",
@@ -102,9 +103,9 @@ exports.updateProduct = async (req, res, next) => {
     status: "success",
     data: product,
   });
-};
+});
 
-exports.addNewReview = async (req, body, next) => {
+exports.addNewReview = catchAsync(async (req, body, next) => {
   if (!req.body.rating || !req.body.product_id) return next();
   if (req.body.rating < 1 || req.body.rating > 5)
     return next(new appError("invalid rating value"));
@@ -123,4 +124,4 @@ exports.addNewReview = async (req, body, next) => {
     } , reviews_counter=${reviews_counter + 1}`
   );
   next();
-};
+});

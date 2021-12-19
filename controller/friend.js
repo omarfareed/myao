@@ -1,8 +1,9 @@
 const connection = require("../connection");
 const { promisify } = require("util");
+const catchAsync = require("../utilities/catchAsync");
 const query = promisify(connection.query).bind(connection);
 const controller = require("./globalController");
-exports.getFriends = async (req, res, next) => {
+exports.getFriends = catchAsync(async (req, res, next) => {
   const { surfer_id } = req.params;
   const data = await query(
     `SELECT * FROM friend 
@@ -13,9 +14,9 @@ exports.getFriends = async (req, res, next) => {
     status: "success",
     data,
   });
-};
+});
 
-exports.getMyFriends = async (req, res, next) => {
+exports.getMyFriends = catchAsync(async (req, res, next) => {
   const data = await query(
     `SELECT * FROM friend 
     WHERE (source_id="${req.auth.id}" OR target_id="${req.auth.id}")
@@ -25,8 +26,8 @@ exports.getMyFriends = async (req, res, next) => {
     status: "success",
     data,
   });
-};
-exports.getReceivedRequests = async (req, res, next) => {
+});
+exports.getReceivedRequests = catchAsync(async (req, res, next) => {
   const data = await query(
     `SELECT * FROM \`friend\` WHERE target_id="${req.auth.id}" AND friendship_time IS NULL`
   );
@@ -34,8 +35,8 @@ exports.getReceivedRequests = async (req, res, next) => {
     status: "success",
     data,
   });
-};
-exports.getSentRequests = async (req, res, next) => {
+});
+exports.getSentRequests = catchAsync(async (req, res, next) => {
   const data = await query(
     `SELECT * FROM \`friend\` WHERE source_id="${req.auth.id}" AND friendship_time IS NULL`
   );
@@ -43,10 +44,10 @@ exports.getSentRequests = async (req, res, next) => {
     status: "success",
     data,
   });
-};
+});
 
 exports.makeRequest = controller.create("friend", [], false);
-exports.acceptRequest = async (req, res, next) => {
+exports.acceptRequest = catchAsync(async (req, res, next) => {
   console.log(req.auth.id, req.body.source_id, req.body.friendship_time);
   const request = await query(
     `UPDATE friend SET friendship_time="${req.body.friendship_time}" 
@@ -57,12 +58,12 @@ exports.acceptRequest = async (req, res, next) => {
     status: "success",
     data: request,
   });
-};
+});
 exports.beforeRequest = (req, res, next) => {
   req.body.source_id = req.auth.id;
   next();
 };
-exports.deleteRequest = async (req, res, next) => {
+exports.deleteRequest = catchAsync(async (req, res, next) => {
   const data = await query(
     `DELETE FROM friend 
     WHERE (source_id="${req.auth.id}" AND target_id="${req.body.target_id}") 
@@ -72,8 +73,8 @@ exports.deleteRequest = async (req, res, next) => {
     status: "success",
     data,
   });
-};
-exports.checkFriendship = async (req, res, next) => {
+});
+exports.checkFriendship = catchAsync(async (req, res, next) => {
   const data = await query(
     `SELECT * FROM friend WHERE source_id="${req.auth.id}" AND target_id="${req.body.target_id}"`
   );
@@ -86,4 +87,4 @@ exports.checkFriendship = async (req, res, next) => {
     status: "success",
     friend: false,
   });
-};
+});
