@@ -1,5 +1,7 @@
 exports.uniqueIdGenerator = (table = "") =>
-  `${table.substring(0, 4)}${Date.now().toString(36)}`;
+  `${table.substring(0, 3)}${Date.now()
+    .toString(36)
+    .substring(0, 7)}${Math.floor(Math.random() * 100)}`;
 exports.addWhereCondition = (query, Obj) =>
   Object.keys(Obj).reduce(
     (prev, cur, i) =>

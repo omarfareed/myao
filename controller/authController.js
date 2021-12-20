@@ -49,7 +49,7 @@ const createSendToken = (user, statusCode, req, res) => {
 };
 exports.logout = (req, res) => {
   res.cookie("jwt", "loggedout", {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(Date.now() + 1000),
     httpOnly: true,
   });
   res.status(200).json({ status: "success" });
@@ -60,7 +60,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
-  query(`INSERT INTO ${role} SET ?`, req.body);
+  const data = await query(`INSERT INTO ${role} SET ?`, req.body);
   req.body.role = role;
   // const url = `${req.protocol}://${req.get("host")}/me`;
   // // console.log(url);
@@ -112,6 +112,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const currentUser = await query(
     `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
   );
+  console.log(currentUser);
   if (!currentUser) {
     return next(
       new AppError(
@@ -122,13 +123,13 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // 4) Check if user changed password after the token was issued
-  if (
-    security.passwordChangedAfter(decoded.iat, currentUser.passwordChangedAt)
-  ) {
-    return next(
-      new AppError("User recently changed password! Please log in again.", 401)
-    );
-  }
+  // if (
+  //   security.passwordChangedAfter(decoded.iat, currentUser.passwordChangedAt)
+  // ) {
+  //   return next(
+  //     new AppError("User recently changed password! Please log in again.", 401)
+  //   );
+  // }
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.body[`${decoded.role}_id`] = currentUser[0].id;

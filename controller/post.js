@@ -22,6 +22,7 @@ exports.getPost = catchAsync(async (req, res, next) => {
     data: post,
   });
 });
+
 exports.getPosts = catchAsync(async (req, res, next) => {
   const posts = await query(
     addWhereCondition(
@@ -55,7 +56,7 @@ exports.getPosts = catchAsync(async (req, res, next) => {
   });
 });
 exports.createPost = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator('post');
+  const id = uniqueIdGenerator("post");
   req.body["id"] = id;
   req.body["has_multimedia"] = 0;
   if (req.body.media?.length > 0) req.body["has_multimedia"] = 1;
@@ -68,9 +69,14 @@ exports.createPost = catchAsync(async (req, res, next) => {
       status: "success",
       data: post,
     });
-  const media = req.body.media.map(({ link, type }) => [type, id, link]);
+  const media = req.body.media.map(({ link, type }) => [
+    uniqueIdGenerator("MEPO"),
+    type,
+    id,
+    link,
+  ]);
   const post_media = await query(
-    "INSERT INTO post_media (type , post_id , link) VALUES ?",
+    "INSERT INTO post_media (id , type , post_id , link) VALUES ?",
     [media]
   );
   return res.json({ status: "success", post_media });
