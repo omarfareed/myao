@@ -55,7 +55,7 @@ exports.getProducts = catchAsync(async (req, res, next) => {
   });
 });
 exports.createProduct = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator();
+  const id = uniqueIdGenerator('product');
   req.body["id"] = id;
   req.body["avg_rating"] = 0;
   const product = await query(

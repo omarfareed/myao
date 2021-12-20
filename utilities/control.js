@@ -1,5 +1,5 @@
-exports.uniqueIdGenerator = () =>
-  `${Date.now().toString(32)}${Math.floor(Math.random() * 100).toString()}`;
+exports.uniqueIdGenerator = (table = "") =>
+  `${table.substring(0, 4)}${Date.now().toString(36)}`;
 exports.addWhereCondition = (query, Obj) =>
   Object.keys(Obj).reduce(
     (prev, cur, i) =>
@@ -8,7 +8,7 @@ exports.addWhereCondition = (query, Obj) =>
   );
 
 exports.filterObjFrom = (Obj, fil = []) => {
-  let newObj = {...Obj};
+  let newObj = { ...Obj };
   fil.forEach((val) => delete newObj[val]);
   return newObj;
 };

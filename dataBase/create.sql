@@ -209,7 +209,7 @@ create table `location` (
 delete cascade
 );
 
-drop table if exists `mar_reports_mar`;
+drop table if exists `mar_rep_mar`;
 
 /*!40101 set @saved_cs_client     = @@character_set_client */
 ;
@@ -217,7 +217,7 @@ drop table if exists `mar_reports_mar`;
 /*!50503 set character_set_client = utf8mb4 */
 ;
 
-create table `mar_reports_mar` (
+create table `mar_rep_mar` (
   `reported_id` varchar (12) not null,
   `reporter_id` varchar (12) not null default '-1',
   `report_option` smallint not null,
@@ -330,7 +330,7 @@ delete cascade,
   constraint `fk_sur_rep_mar_surfer` foreign key (`sur_id`) references `surfer` (`id`)
 );
 
-drop table if exists `sur_rep_post`;
+drop table if exists `sur_rep_pos`;
 
 /*!40101 set @saved_cs_client     = @@character_set_client */
 ;
@@ -338,7 +338,7 @@ drop table if exists `sur_rep_post`;
 /*!50503 set character_set_client = utf8mb4 */
 ;
 
-create table `sur_rep_post` (
+create table `sur_rep_pos` (
   `sur_id` varchar (12) not null,
   `post_id` varchar (12) not null,
   `report_option` smallint not null,
@@ -481,6 +481,9 @@ ADD
   COLUMN cover_photo LONGTEXT NULL DEFAULT NULL
 AFTER
   interests;
+
+ALTER TABLE
+  admin CHANGE COLUMN admin_id id VARCHAR(12) NOT NULL;
 
 ALTER TABLE
   myao.marketer

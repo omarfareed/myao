@@ -1,6 +1,6 @@
 module.exports = {
   admin: [
-    "admin_id",
+    "id",
     "type",
     "fname",
     "lname",

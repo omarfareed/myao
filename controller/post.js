@@ -55,7 +55,7 @@ exports.getPosts = catchAsync(async (req, res, next) => {
   });
 });
 exports.createPost = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator();
+  const id = uniqueIdGenerator('post');
   req.body["id"] = id;
   req.body["has_multimedia"] = 0;
   if (req.body.media?.length > 0) req.body["has_multimedia"] = 1;

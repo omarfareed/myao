@@ -35,7 +35,7 @@ exports.create = (table, filter = [], createUnique = true) =>
     req.body = filterObjTo(req.body, columns[table]);
     req.body = filterObjFrom(req.body, filter);
     let id;
-    createUnique && (id = req.body[columns[table][0]] = uniqueIdGenerator());
+    createUnique && (id = req.body[columns[table][0]] = uniqueIdGenerator(table));
     if (Object.keys(req.body).length === 0)
       return res.json({
         status: "fail",

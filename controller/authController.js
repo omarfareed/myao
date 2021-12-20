@@ -58,7 +58,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
   if (!role) return next(new appError("no specific role determined"));
   req.body = filterObjTo(req.body, columns[role]);
-  const id = uniqueIdGenerator();
+  const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
   query(`INSERT INTO ${role} SET ?`, req.body);
   req.body.role = role;
@@ -172,3 +172,7 @@ exports.restrictTo =
     if (roles.includes(req.auth.role)) return next();
     next(new appError(`you don't have the permission to make this action`));
   };
+exports.changeAuthTo = (newName) => (req, res, next) => {
+  req.body[newName] = req.auth.id;
+  next();
+};
