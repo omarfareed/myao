@@ -57,6 +57,7 @@ exports.logout = (req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
   if (!role) return next(new appError("no specific role determined"));
+
   req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
