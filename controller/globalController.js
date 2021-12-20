@@ -17,7 +17,6 @@ const {
 //
 exports.select = (table) =>
   catchAsync(async (req, res, next) => {
-    console.log(req.query);
     req.body = filterObjTo(req.body, columns[table]);
     const data = await query(
       addWhereCondition(`SELECT * FROM \`${table}\``, req.body)

@@ -72,7 +72,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     "INSERT INTO product_media (type , product_id , link) VALUES ?",
     [media]
   );
-  return res.json({ status: "success", data: req.body });
+  return res.json({ status: "success", data: { product, product_media } });
 });
 exports.deleteProduct = controller.delete("product");
 exports.updateProduct = catchAsync(async (req, res, next) => {

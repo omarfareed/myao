@@ -57,11 +57,13 @@ exports.getPosts = catchAsync(async (req, res, next) => {
 exports.createPost = catchAsync(async (req, res, next) => {
   const id = uniqueIdGenerator();
   req.body["id"] = id;
+  req.body["has_multimedia"] = 0;
+  if (req.body.media?.length > 0) req.body["has_multimedia"] = 1;
   const post = await query(
     `INSERT INTO post set ? `,
     filterObjTo(req.body, columns["post"])
   );
-  if (!req.body.media || !req.body.media.length)
+  if (!req.body.media?.length)
     return res.json({
       status: "success",
       data: post,

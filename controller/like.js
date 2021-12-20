@@ -8,5 +8,5 @@ exports.deleteLike = controller.delete("like");
 exports.updateLike = controller.updateNonPrimary(
   "like",
   ["type"],
-  ["liker_id", "post_id"]
+  ["surfer_id", "post_id"]
 );

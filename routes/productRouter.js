@@ -5,7 +5,7 @@ const {
   restrictTo,
   transferParamsToBody,
 } = require("../controller/authController");
-const restriction = restrictTo("surfer");
+const restriction = restrictTo("marketer");
 const productController = require("../controller/product");
 const reviewRouter = require("./reviewRouter");
 const productMediaRouter = require("./productMediaRouter");
