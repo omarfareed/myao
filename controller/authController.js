@@ -57,7 +57,7 @@ exports.logout = (req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
   if (!role) return next(new appError("no specific role determined"));
-  req.body = filterObjTo(req.body, columns[role]);
+  // req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
   const data = await query(`INSERT INTO ${role} SET ?`, req.body);
@@ -85,7 +85,7 @@ exports.login = catchAsync(async (req, res, next) => {
       return createSendToken({ ...users[i][0], role: userType }, 200, req, res);
     }
   });
-  next(new appError("unexpected error happens while login"));
+  next(new appError("wrong email or password"));
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -139,7 +139,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   const { role, id } = req.auth;
-  req.body = filterObjFrom(filterObjTo(req.body, columns[role]), [
+  req.body = filterObjFrom(req.body, [
     "id",
     "created_date",
     "email",

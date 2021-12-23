@@ -4,6 +4,7 @@ const appError = require("../utilities/appError");
 const query = promisify(connection.query).bind(connection);
 const controller = require("./globalController");
 const catchAsync = require("../utilities/catchAsync");
+const APIFeatures = require("../utilities/apiFeatures");
 const {
   addWhereCondition,
   filterObjFrom,
@@ -22,11 +23,44 @@ exports.getProduct = catchAsync(async (req, res, next) => {
     data: product,
   });
 });
+exports.getAllProducts = catchAsync(async (req, res, next) => {
+  if (req.body.marketer_id) req.query.marketer_id = req.body.marketer_id;
+  const queryStr = new APIFeatures("product", req.query)
+    .filter()
+    .sort()
+    .paginate().query;
+  const products = await query(queryStr);
+  if (products.length === 0)
+    return res.json({
+      status: "success",
+      data: products,
+    });
+  let productsHashed = {};
+  products.forEach((product) => {
+    productsHashed[product.id] = { ...product, media: [] };
+  });
+  const reducedCondition = products.reduce(
+    (prev, cur, index) =>
+      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
+    ""
+  );
+  const products_media = await query(
+    `SELECT * FROM product_media WHERE product_id IN (${reducedCondition})`
+  );
+  products_media.forEach(({ product_id, link }) =>
+    productsHashed[product_id].media.push(link)
+  );
+  res.json({
+    status: "success",
+    data: Object.values(productsHashed),
+  });
+});
 exports.getProducts = catchAsync(async (req, res, next) => {
   const products = await query(
     addWhereCondition(
       `SELECT * FROM product`,
-      filterObjTo(req.body, columns["product"])
+      // filterObjTo(req.body, columns["product"])
+      req.body
     )
   );
   if (products.length === 0)
@@ -54,13 +88,15 @@ exports.getProducts = catchAsync(async (req, res, next) => {
     data: Object.values(productsHashed),
   });
 });
+
 exports.createProduct = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator('product');
+  const id = uniqueIdGenerator("product");
   req.body["id"] = id;
   req.body["avg_rating"] = 0;
   const product = await query(
     `INSERT INTO product set ? `,
-    filterObjTo(req.body, columns["product"])
+    // filterObjTo(req.body, columns["product"])
+    req.body
   );
   if (!req.body.media || !req.body.media.length)
     return res.json({
@@ -76,7 +112,8 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 });
 exports.deleteProduct = controller.delete("product");
 exports.updateProduct = catchAsync(async (req, res, next) => {
-  const Obj = filterObjFrom(filterObjTo(req.body, columns["product"]), [
+  //filterObjTo
+  const Obj = filterObjFrom(req.body, [
     "id",
     "created_date",
     "marketer_id",

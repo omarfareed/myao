@@ -24,10 +24,12 @@ exports.getPost = catchAsync(async (req, res, next) => {
 });
 
 exports.getPosts = catchAsync(async (req, res, next) => {
+  console.log(req.query);
   const posts = await query(
     addWhereCondition(
       `SELECT * FROM post`,
-      filterObjTo(req.body, columns["post"])
+      // filterObjTo(req.body, columns["post"])
+      req.body
     )
   );
   if (posts.length === 0)
@@ -62,7 +64,8 @@ exports.createPost = catchAsync(async (req, res, next) => {
   if (req.body.media?.length > 0) req.body["has_multimedia"] = 1;
   const post = await query(
     `INSERT INTO post set ? `,
-    filterObjTo(req.body, columns["post"])
+    // filterObjTo(req.body, columns["post"])
+    req.body
   );
   if (!req.body.media?.length)
     return res.json({
@@ -83,11 +86,7 @@ exports.createPost = catchAsync(async (req, res, next) => {
 });
 exports.deletePost = controller.delete("post"); // post media on delete cascade
 exports.updatePost = catchAsync(async (req, res, next) => {
-  const Obj = filterObjFrom(filterObjTo(req.body, columns["post"]), [
-    "id",
-    "created_date",
-    "surfer_id",
-  ]);
+  const Obj = filterObjFrom(req.body, ["id", "created_date", "surfer_id"]);
   if (Object.keys(Obj).length === 0)
     return res.json({
       status: "success",

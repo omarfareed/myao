@@ -17,7 +17,7 @@ const {
 //
 exports.select = (table) =>
   catchAsync(async (req, res, next) => {
-    req.body = filterObjTo(req.body, columns[table]);
+    // req.body = filterObjTo(req.body, columns[table]);
     const data = await query(
       addWhereCondition(`SELECT * FROM \`${table}\``, req.body)
     );
@@ -32,10 +32,11 @@ exports.select = (table) =>
 exports.create = (table, filter = [], createUnique = true) =>
   catchAsync(async (req, res, next) => {
     // return console.log(req.body);
-    req.body = filterObjTo(req.body, columns[table]);
+    // req.body = filterObjTo(req.body, columns[table]);
     req.body = filterObjFrom(req.body, filter);
     let id;
-    createUnique && (id = req.body[columns[table][0]] = uniqueIdGenerator(table));
+    createUnique &&
+      (id = req.body[columns[table][0]] = uniqueIdGenerator(table));
     if (Object.keys(req.body).length === 0)
       return res.json({
         status: "fail",
@@ -50,7 +51,7 @@ exports.create = (table, filter = [], createUnique = true) =>
 // permanently delete be careful
 exports.delete = (table) =>
   catchAsync(async (req, res, next) => {
-    req.body = filterObjTo(req.body, columns[table]);
+    // req.body = filterObjTo(req.body, columns[table]);
     const data = await query(
       addWhereCondition(`DELETE FROM \`${table}\``, req.body)
     );
@@ -64,7 +65,7 @@ exports.delete = (table) =>
 // update table set ? ==> search from req.body and update from filtered req.body
 exports.update = (table, filter = []) =>
   catchAsync(async (req, res, next) => {
-    req.body = filterObjTo(req.body, columns[table]);
+    // req.body = filterObjTo(req.body, columns[table]);
     const idKey = columns[table][0];
     const data = query(
       `UPDATE \`${table}\` SET ? WHERE ${idKey}="${req.body[idKey]}"`,
@@ -81,10 +82,11 @@ exports.updateNonPrimary = (
   filterAttributes = []
 ) =>
   catchAsync(async (req, res, next) => {
-    req.body = filterObjTo(req.body, columns[table]);
+    // req.body = filterObjTo(req.body, columns[table]);
     const updated = await query(
       addWhereCondition(
         `UPDATE \`${table}\` SET ?`,
+        // req.body
         filterObjTo(req.body, filterAttributes)
       ),
       filterObjTo(req.body, searchAttributes)
