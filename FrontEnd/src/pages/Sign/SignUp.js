@@ -1,29 +1,54 @@
 import { Button, Grid, Typography } from "@mui/material";
 import useStyle from "./SignStyle";
 import MainLogo from "../../Material/Images/MainLogo.jpg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputFieldSimple from "../../components/InputField.js/InputField";
-
+import TextField from "@mui/material/TextField";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DatePicker from "@mui/lab/DatePicker";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import parseDateF from "../../Utilities/ParsingDate";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { UserActions } from "../../Store/UserSlice";
+import { useHistory } from "react-router-dom";
 function SignUp() {
   const classes = useStyle();
 
-  const [ErrorName, setErrorName] = useState(false);
+  const isAuth = useSelector((state) => state.reducer.isAuth);
+  const history = useHistory();
+
+  useEffect(() => {
+    if (isAuth) history.push("/");
+  }, [history, isAuth]);
+
+  const [Gender, setGender] = useState(null);
+  const [Role, setRole] = useState(null);
+  const [DateV, setDateV] = useState(null);
+
+  const dispatch = useDispatch();
+
+  // const [ErrorName, setErrorName] = useState(false);
   const [ErrorMail, setErrorMail] = useState(false);
   const [ErrorPassword, setErrorPassword] = useState(false);
   const [ErrorConfirm, setErrorConfirm] = useState(false);
 
-  const [Name, setName] = useState("");
+  const [FName, setFName] = useState("");
+  const [LName, setLName] = useState("");
   const [Mail, setMail] = useState("");
   const [Password, setPassword] = useState("");
   const [Confirm, setConfirm] = useState("");
 
   // Make the Button Disabled
   const isDisabled =
-    ErrorName ||
     ErrorMail ||
     ErrorPassword ||
     ErrorConfirm ||
-    Name.length === 0 ||
     Mail.length === 0 ||
     Password.length === 0 ||
     Confirm.length === 0;
@@ -52,13 +77,38 @@ function SignUp() {
     else setErrorConfirm(false);
   };
 
-  const HandleName = (e) => {
-    if (e.target.value === "") return setErrorName(false);
-    setName(e.target.value);
-    if (e.target.value.length < 2) setErrorName(true);
-    else setErrorName(false);
+  const HandleFName = (e) => {
+    // if (e.target.value === "") return setErrorName(false);
+    setFName(e.target.value);
+    // if (e.target.value.length < 2) setErrorName(true);
+    // else setErrorName(false);
   };
+
+  const HandleLName = (e) => {
+    setLName(e.target.value);
+  };
+
   ///////////////////////////////////////////////////
+
+  const handleSubmit = async () => {
+    const NOW = parseDateF(Date.now());
+    const data = {
+      email: Mail,
+      password: Password,
+      fname: FName,
+      lname: LName,
+      created_date: NOW,
+      last_login: NOW,
+      gender: Gender === "male" ? 1 : 0,
+      birth_date: parseDateF(DateV),
+      role: Role,
+    };
+    const POST = await axios.post("/api/v1/user/signup", data);
+
+    dispatch(UserActions.AddUser(POST.data.data));
+  };
+
+  ////////////////////////////////////////
   return (
     <Grid
       container
@@ -74,21 +124,89 @@ function SignUp() {
         <Typography variant="subtitle2" style={{ textAlign: "center" }}>
           Create New MYAO Account
         </Typography>
-
+        {/* // y3333333333333333333333333333333333333333333333333333333333333m */}
         <InputFieldSimple
-          label="Name"
-          placeholder="Enter name"
-          onChange={HandleName}
-          error={ErrorName}
+          label="First Name"
+          placeholder="Enter First Name"
+          onChange={HandleFName}
+          // error={ErrorName}
+        ></InputFieldSimple>
+        <InputFieldSimple
+          label="Last Name"
+          placeholder="Enter Last Name"
+          onChange={HandleLName}
+          // error={ErrorName}
         ></InputFieldSimple>
 
+        <FormControl
+          component="fieldset"
+          style={{ height: "5rem", margin: "-.5rem 0 0" }}
+        >
+          <Grid container height="100%">
+            <Grid item xs={6}>
+              <FormLabel component="legend">Gender</FormLabel>
+              <RadioGroup
+                row
+                aria-label="gender"
+                name="row-radio-buttons-group"
+                value={Gender}
+                onChange={(newv) => setGender(newv.target.value)}
+              >
+                <FormControlLabel
+                  value="female"
+                  control={<Radio />}
+                  label="Female"
+                />
+                <FormControlLabel
+                  value="male"
+                  control={<Radio />}
+                  label="Male"
+                />
+              </RadioGroup>
+            </Grid>
+            <Grid item xs={6}>
+              <FormLabel component="legend">Acount Type</FormLabel>
+              <RadioGroup
+                row
+                aria-label="role"
+                name="row-radio-buttons-group"
+                value={Role}
+                onChange={(newv) => setRole(newv.target.value)}
+              >
+                <FormControlLabel
+                  value="surfer"
+                  control={<Radio />}
+                  label="surfer"
+                />
+                <FormControlLabel
+                  value="marketer"
+                  control={<Radio />}
+                  label="marketer"
+                />
+              </RadioGroup>
+            </Grid>
+          </Grid>
+        </FormControl>
+
+        {/* //////////////////////////////////////////////// */}
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Basic example"
+            value={DateV}
+            onChange={(newValue) => {
+              setDateV(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
+        {/* //////////////////////////////////////////////// */}
         <InputFieldSimple
           label="Email Address"
           placeholder="Enter email"
+          styleTop={{ marginTop: "1.2rem" }}
           onChange={HandleMail}
           error={ErrorMail}
         ></InputFieldSimple>
-
         <InputFieldSimple
           label="Password"
           type="password"
@@ -96,7 +214,6 @@ function SignUp() {
           onChange={HandlePassword}
           error={ErrorPassword}
         ></InputFieldSimple>
-
         <InputFieldSimple
           label="Confirm Password"
           type="password"
@@ -112,6 +229,7 @@ function SignUp() {
             className={classes.Button}
             disableRipple
             disabled={isDisabled}
+            onClick={handleSubmit}
           >
             Create New Account
           </Button>

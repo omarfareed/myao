@@ -5,7 +5,6 @@ const useStyle = makeStyles({
   SignPage: {
     minHeight: "100vh",
     padding: "2%",
-    [theme.breakpoints.down("xs")]: {},
   },
   logo: {
     maxWidth: "3.5rem",
@@ -14,6 +13,7 @@ const useStyle = makeStyles({
   SignCard: {
     maxWidth: "30rem",
     height: "fit-content",
+    boxSizing: "unset",
     borderRight: `4px solid ${theme.palette.primary.main}`,
     borderBottom: `4px solid ${theme.palette.primary.main}`,
     padding: "1.5rem",

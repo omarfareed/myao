@@ -1,22 +1,23 @@
 import { Avatar, Grid, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { useEffect } from "react";
 import theme from "../../Utilities/Theme";
 
 const useStyle = makeStyles({
+  imageCont: {
+    width: "100%",
+    height: "0",
+    position: "relative",
+    paddingBottom: "100%",
+  },
   image: {
     "&.MuiAvatar-root": {
+      position: "absolute",
+      borderRadius: ".5rem",
+      top: "0",
+      left: "0",
       width: "100%",
-      height: "8rem",
-      borderRadius: "1rem",
-      [theme.breakpoints.down("lg")]: {
-        height: "7rem",
-      },
-      [theme.breakpoints.down("md")]: {
-        height: "8rem",
-      },
-      [theme.breakpoints.down("sm")]: {
-        height: "5rem",
-      },
+      height: "100%",
     },
   },
   name: {
@@ -28,35 +29,26 @@ const useStyle = makeStyles({
     },
   },
   card: {
-    // backgroundColor: "red",
-    maxWidth: "8rem",
-    minHeight: "9.8rem",
-    marginTop: "1rem",
-    [theme.breakpoints.down("lg")]: {
-      maxWidth: "7rem",
-      minHeight: "8.8rem",
-    },
-    [theme.breakpoints.down("md")]: {
-      maxWidth: "8rem",
-      minHeight: "10rem",
-    },
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: "5rem",
-      minHeight: "6.5rem",
-    },
+    margin: ".8rem 0",
+    position: "relative",
+    width: "100%",
   },
 });
 const FriendCard = ({ name, imageLink = undefined }) => {
   const classes = useStyle();
 
+  useEffect(() => {}, []);
+
   return (
-    <Grid
-      container
-      direction="column"
-      justifyContent="space-between"
-      className={classes.card}
-    >
-      <Avatar src={imageLink} className={classes.image}></Avatar>
+    <Grid container direction="column">
+      <div className={classes.card}>
+        <div item className={classes.imageCont}></div>
+        <Avatar
+          src={imageLink}
+          sx={{ height: "width" }}
+          className={classes.image}
+        ></Avatar>
+      </div>
       <Typography variant="h5" className={classes.name}>
         {name}
       </Typography>

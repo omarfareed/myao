@@ -1,11 +1,23 @@
 import { Button, Grid, Typography } from "@mui/material";
 import useStyle from "./SignStyle";
 import MainLogo from "../../Material/Images/MainLogo.jpg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputFieldSimple from "../../components/InputField.js/InputField";
-
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { UserActions } from "../../Store/UserSlice";
+import { useHistory } from "react-router-dom";
 function SignIn() {
+  const isAuth = useSelector((state) => state.reducer.isAuth);
+  const history = useHistory();
+
+  useEffect(() => {
+    if (isAuth) history.push("/");
+  }, [history, isAuth]);
+
   const classes = useStyle();
+
+  const dispatch = useDispatch();
 
   const [ErrorMail, setErrorMail] = useState(false);
   const [ErrorPassword, setErrorPassword] = useState(false);
@@ -34,6 +46,18 @@ function SignIn() {
     else setErrorPassword(false);
   };
 
+  const handleSubmit = async () => {
+    const data = {
+      email: Mail,
+      password: Password,
+    };
+    try {
+      const user = await axios.post("/api/v1/user/login", data);
+      dispatch(UserActions.AddUser(user.data.data));
+    } catch (err) {
+      console.log(err);
+    }
+  };
   ///////////////////////////////////////////////////
   return (
     <Grid
@@ -76,6 +100,7 @@ function SignIn() {
             className={classes.Button}
             disableRipple
             disabled={isDisabled}
+            onClick={handleSubmit}
           >
             Log In
           </Button>

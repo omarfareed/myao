@@ -108,10 +108,8 @@ const useStyle = makeStyles({
     },
   },
   friendSection: {
-    width: "45%",
-    maxWidth: "38rem",
     padding: "1rem",
-    minHeight: "24rem",
+    marginBottom: "2rem",
     [theme.breakpoints.down("md")]: {
       maxWidth: "100%",
       minHeight: "17rem",

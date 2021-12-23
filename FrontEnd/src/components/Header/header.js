@@ -12,17 +12,26 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import { BiSearch } from "react-icons/bi";
-import { Grid, Tab, Tabs } from "@mui/material";
+import { Grid, MenuItem, Tab, Tabs } from "@mui/material";
 import { AiFillHome } from "react-icons/ai";
 import { IoPersonCircle, IoSettingsSharp } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [value, setValue] = React.useState(0);
+
+  const [SettingIcon, setSettingIcon] = React.useState(false);
   const classes = useStyle();
   const history = useHistory();
+  const location = useLocation();
+  React.useEffect(() => {
+    if (location.pathname === "/") setValue(0);
+    else if (location.pathname === "/profile") setValue(1);
+    else if (location.pathname === "/fav") setValue(2);
+    else setValue(3);
+  }, [location.pathname]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -30,11 +39,12 @@ const Header = () => {
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
-    history.push("/setting");
+    setSettingIcon(1);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setSettingIcon(0);
   };
 
   return (
@@ -62,19 +72,34 @@ const Header = () => {
             <Tabs variant="fullWidth" value={value} onChange={handleChange}>
               <Tab
                 disableRipple
-                icon={<AiFillHome className={classes.icons} />}
+                icon={
+                  <AiFillHome
+                    style={{ color: value !== 0 ? "#555" : undefined }}
+                    className={classes.icons}
+                  />
+                }
                 aria-label="Home"
                 onClick={() => history.push("/")}
               />
               <Tab
                 disableRipple
-                icon={<IoPersonCircle className={classes.icons} />}
+                icon={
+                  <IoPersonCircle
+                    style={{ color: value !== 1 ? "#555" : undefined }}
+                    className={classes.icons}
+                  />
+                }
                 aria-label="person"
                 onClick={() => history.push("/profile")}
               />
               <Tab
                 disableRipple
-                icon={<MdFavorite className={classes.icons} />}
+                icon={
+                  <MdFavorite
+                    style={{ color: value !== 2 ? "#555" : undefined }}
+                    className={classes.icons}
+                  />
+                }
                 aria-label="favorite"
                 onClick={() => history.push("/fav")}
               />
@@ -91,7 +116,13 @@ const Header = () => {
               aria-haspopup="true"
               onClick={handleMenu}
             >
-              <IoSettingsSharp className={classes.color} />
+              <IoSettingsSharp
+                className={
+                  SettingIcon
+                    ? `${classes.moveSetting} ${classes.color}`
+                    : classes.color
+                }
+              />
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -105,11 +136,26 @@ const Header = () => {
                 vertical: "top",
                 horizontal: "right",
               }}
+              style={{ marginTop: "2.2rem" }}
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              {/* <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>Setting</MenuItem> */}
+              <MenuItem
+                onClick={() => {
+                  setValue(3);
+                  handleClose();
+                }}
+              >
+                Profile
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setValue(3);
+                  handleClose();
+                }}
+              >
+                Setting
+              </MenuItem>
             </Menu>
           </div>
         </Toolbar>

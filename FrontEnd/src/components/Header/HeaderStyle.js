@@ -64,5 +64,9 @@ export const useStyle = makeStyles({
   },
   color: {
     color: "#555",
+    transition: "transform .3s linear",
+  },
+  moveSetting: {
+    transform: "rotate(60deg)",
   },
 });
