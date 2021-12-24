@@ -64,11 +64,11 @@ exports.getReportsForTables = catchAsync(async (req, res, next) => {
 });
 exports.makeReport = catchAsync(async (req, res, next) => {
   req.body.reporter_id = req.auth.id;
-  req.body = filterObjTo(req.body, [
-    "reporter_id",
-    "reported_id",
-    "report_option",
-  ]);
+  // req.body = filterObjTo(req.body, [
+  //   "reporter_id",
+  //   "reported_id",
+  //   "report_option",
+  // ]);
   const data = await query(
     `INSERT INTO ${req.body.reporter_id.substr(
       0,

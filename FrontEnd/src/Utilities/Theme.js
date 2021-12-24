@@ -41,6 +41,9 @@ theme.typography.h5 = {
   fontFamily: "Roboto",
   fontWeight: "500",
   fontSize: "1.1rem",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "1rem",
+  },
 };
 theme.typography.h6 = {
   fontFamily: "Roboto",

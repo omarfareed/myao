@@ -42,7 +42,7 @@ function App() {
             <Route path="/profile/marketer">
               <MarketerPage />
             </Route>
-            <Route path="/profile">
+            <Route path="/profile/:id">
               <ProfilePage />
             </Route>
           </Switch>

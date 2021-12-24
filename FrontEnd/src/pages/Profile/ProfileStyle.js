@@ -4,18 +4,21 @@ const leftMargin = "3rem";
 const leftMarginSm = "1.5rem";
 const useStyle = makeStyles({
   page: {
-    margin: ".5rem auto",
-    maxWidth: "70rem",
-    height: "300vh",
-    [theme.breakpoints.down("lg")]: {
-      maxWidth: "95%",
+    "&.MuiGrid-root": {
+      margin: ".5rem auto",
+      maxWidth: "70rem",
+      [theme.breakpoints.down("lg")]: {
+        width: "43rem",
+        maxWidth: "95%",
+      },
     },
   },
   imageSection: {
     height: "35rem",
     marginBottom: "4rem",
-    [theme.breakpoints.down("md")]: {
-      height: "33rem",
+    [theme.breakpoints.down("lg")]: {
+      height: "30rem",
+      marginBottom: "2rem",
     },
     [theme.breakpoints.down("sm")]: {
       height: "30rem",
@@ -25,8 +28,8 @@ const useStyle = makeStyles({
     position: "relative",
     height: "20rem",
     backgroundColor: "#aaa",
-    [theme.breakpoints.down("md")]: {
-      height: "18rem",
+    [theme.breakpoints.down("lg")]: {
+      height: "15rem",
     },
     [theme.breakpoints.down("sm")]: {
       height: "16rem",
@@ -110,12 +113,11 @@ const useStyle = makeStyles({
   friendSection: {
     padding: "1rem",
     marginBottom: "2rem",
-    [theme.breakpoints.down("md")]: {
-      maxWidth: "100%",
-      minHeight: "17rem",
-      width: "100%",
-      marginTop: "2.5rem",
-    },
+    [theme.breakpoints.down("md")]: {},
+  },
+  rightSection: {
+    paddingLeft: "1rem",
+    height: "60rem",
   },
 });
 export default useStyle;

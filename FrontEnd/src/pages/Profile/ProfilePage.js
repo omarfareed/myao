@@ -3,10 +3,11 @@ import useStyle from "./ProfileStyle";
 import { HiUserAdd } from "react-icons/hi";
 import { MdOutlineReport } from "react-icons/md";
 import LeftSection from "./LeftSection";
-import Post from "../../components/Post/Post";
-
+import GetPosts from "../GlobalForAll/GetPosts";
+import { useParams } from "react-router-dom";
 const ProfilePage = () => {
   const classes = useStyle();
+  const params = useParams();
   return (
     <Grid container className={classes.page} direction="column">
       <Paper className={classes.imageSection} elevation={3}>
@@ -45,7 +46,12 @@ const ProfilePage = () => {
       </Paper>
       <Grid container>
         <LeftSection />
-        <Grid container style={{ paddingLeft: "1rem" }} item xs={8}></Grid>
+        <Grid container className={classes.rightSection} item lg={7}>
+          <GetPosts
+            classes={classes}
+            linkOfFetching={`/api/v1/surfer/${params.id}/post`}
+          />
+        </Grid>
       </Grid>
     </Grid>
   );

@@ -42,7 +42,7 @@ const FriendCard = ({ name, imageLink = undefined }) => {
   return (
     <Grid container direction="column">
       <div className={classes.card}>
-        <div item className={classes.imageCont}></div>
+        <div className={classes.imageCont}></div>
         <Avatar
           src={imageLink}
           sx={{ height: "width" }}
