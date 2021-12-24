@@ -15,7 +15,6 @@ const likeRouter = require("./routes/likeRouter");
 const userRouter = require("./routes/userRouter");
 const friendRouter = require("./routes/friendRouter");
 const reportRouter = require("./routes/reportRouter");
-
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/v1/user", userRouter);
@@ -30,7 +29,6 @@ app.use("/api/v1/share", shareRouter);
 app.use("/api/v1/like", likeRouter);
 app.use("/api/v1/friend", friendRouter);
 app.use("/api/v1/report", reportRouter);
-
 app.all("*", (req, res, next) => {
   next(new appError(`can't find ${req.originalUrl} on this server`, 404));
 });

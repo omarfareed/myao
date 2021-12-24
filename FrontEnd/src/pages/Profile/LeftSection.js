@@ -1,4 +1,8 @@
 import { Grid, Paper, Typography } from "@mui/material";
+import { AiFillHome } from "react-icons/ai";
+import { IoMdSchool } from "react-icons/io";
+import { MdWork } from "react-icons/md";
+
 import useStyle from "./ProfileStyle";
 import FriendCard from "./FriendCard";
 import { useState } from "react";
@@ -12,10 +16,19 @@ const LeftSection = () => {
     "ahmed assad",
     "ahmed lotfy",
   ]);
+  const infoKeys = {
+    education: { convertTo: "studied at", icon: <IoMdSchool /> },
+    address: { convertTo: "Lives in", icon: <AiFillHome /> },
+    interests: { convertTo: "interests in", icon: <AiFillHome /> },
+    job: { convertTo: "works as", icon: <MdWork /> },
+    birth_date: { convertTo: "was born at", icon: <MdWork /> },
+  };
   const [about] = useState({
-    "Lives in": "Egypt,Cairo",
-    "Studied at": "faculty of engineering cairo univeristy",
-    "Born in": "9/9/2001",
+    address: "Egypt,Cairo",
+    education: "faculty of engineering cairo univeristy",
+    birth_date: "9/9/2001",
+    interests: "football, programming, chess, basketball",
+    job: "programmer",
   });
 
   return (
@@ -41,16 +54,31 @@ const LeftSection = () => {
             {Object.keys(about).map((el) => (
               <Grid
                 item
+                container
                 key={el}
                 style={{
-                  marginLeft: "1.2rem",
+                  marginLeft: "0.6rem",
                   marginTop: "2rem",
                   fontSize: ".8rem",
                 }}
+                columnSpacing={1}
               >
-                <Typography variant="h2">
-                  {el} {about[el]}
-                </Typography>
+                <Grid
+                  item
+                  xs={2}
+                  style={{
+                    fontSize: "1.1rem",
+                    color: "#aaa",
+                    paddingTop: ".1rem",
+                  }}
+                >
+                  {infoKeys[el].icon}
+                </Grid>
+                <Grid item xs={10}>
+                  <Typography variant="h2" style={{ fontWeight: "normal" }}>
+                    {infoKeys[el].convertTo} {about[el]}
+                  </Typography>
+                </Grid>
               </Grid>
             ))}
           </Grid>

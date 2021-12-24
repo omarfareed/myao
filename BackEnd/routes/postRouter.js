@@ -15,7 +15,7 @@ const likeRouter = require("./likeRouter");
 router.get("/timeline", protect, postController.getTimeLine);
 router
   .route("/")
-  .get(transferParamsToBody, postController.getPosts)
+  .get(transferParamsToBody, postController.getAllPosts)
   .post(transferParamsToBody, protect, restriction, postController.createPost);
 router.get(
   "/myPosts",

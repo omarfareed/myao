@@ -13,7 +13,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(productController.getProducts)
+  .get(productController.getAllProducts)
   .post(protect, restriction, productController.createProduct);
 router
   .route("/:id")

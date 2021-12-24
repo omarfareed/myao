@@ -3,7 +3,7 @@ import useStyle from "./ProfileStyle";
 import { HiUserAdd } from "react-icons/hi";
 import { MdOutlineReport } from "react-icons/md";
 import LeftSection from "./LeftSection";
-import Post from "../../components/Post/Post";
+import Post from "../../components/Post/post";
 
 const ProfilePage = () => {
   const classes = useStyle();

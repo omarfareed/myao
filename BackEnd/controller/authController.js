@@ -55,8 +55,7 @@ exports.logout = (req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
   if (!role) return next(new appError("no specific role determined"));
-
-  req.body = filterObjTo(req.body, columns[role]);
+  // req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
   const data = await query(`INSERT INTO ${role} SET ?`, req.body);
@@ -84,43 +83,7 @@ exports.login = catchAsync(async (req, res, next) => {
       return createSendToken({ ...users[i][0], role: userType }, 200, req, res);
     }
   });
-  next(new appError("unexpected error happens while login"));
-});
-
-exports.getInfo = catchAsync(async (req, res, next) => {
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) {
-    return res.status(401).json({
-      status: "notAuth",
-    });
-  }
-
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // 3) Check if user still exists
-  const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
-  );
-
-  if (!currentUser) {
-    return res.status(401).json({
-      status: "notAuth",
-    });
-  }
-
-  return res.status(200).json({
-    status: "success",
-    data: currentUser[0],
-  });
+  next(new appError("wrong email or password"));
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -174,7 +137,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   const { role, id } = req.auth;
-  req.body = filterObjFrom(filterObjTo(req.body, columns[role]), [
+  req.body = filterObjFrom(req.body, [
     "id",
     "created_date",
     "email",
@@ -212,3 +175,38 @@ exports.changeAuthTo = (newName) => (req, res, next) => {
   req.body[newName] = req.auth.id;
   next();
 };
+exports.getInfo = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token) {
+    return res.status(401).json({
+      status: "notAuth",
+    });
+  }
+
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // 3) Check if user still exists
+  const currentUser = await query(
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+  );
+
+  if (!currentUser) {
+    return res.status(401).json({
+      status: "notAuth",
+    });
+  }
+
+  return res.status(200).json({
+    status: "success",
+    data: currentUser[0],
+  });
+});
