@@ -48,7 +48,7 @@ const ProfilePage = () => {
         <LeftSection />
         <Grid container className={classes.rightSection} item lg={7}>
           <GetPosts
-            classes={classes}
+            className={classes.post}
             linkOfFetching={`/api/v1/surfer/${params.id}/post`}
           />
         </Grid>

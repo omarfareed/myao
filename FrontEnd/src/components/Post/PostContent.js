@@ -7,22 +7,18 @@ import { CardContent } from "@mui/material";
 import ShowMoreText from "react-show-more-text";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
-const PostContent = () => {
+const PostContent = ({ text }) => {
   return (
-    <CardContent sx={{ padding: "0px" }}>
+    <CardContent sx={{ padding: "1rem", minHeight: "2rem" }}>
       <ShowMoreText
-        lines={1}
+        lines={3}
         more={<MdExpandMore title="Show More" />}
         less={<MdExpandLess title="Show Less" />}
         className="content-css"
         anchorClass="my-anchor-css-class"
         expanded={false}
       >
-        <Typography>
-          {" "}
-          this some text so if tou of;dlfjd jfl;djf jkjkfjk fjkjfkj
-          fkjdjfkdfjdjfklj{" "}
-        </Typography>
+        <Typography>{text}</Typography>
       </ShowMoreText>
     </CardContent>
   );

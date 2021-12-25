@@ -66,4 +66,10 @@ theme.typography.subtitle2 = {
   letterSpacing: "1.5px",
   wordSpacing: ".3px",
 };
+theme.typography.body2 = {
+  fontWeight: "400",
+  color: "#777",
+  fontSize: ".9rem",
+};
+
 export default theme;

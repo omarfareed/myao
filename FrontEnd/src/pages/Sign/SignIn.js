@@ -55,7 +55,7 @@ function SignIn() {
       const user = await axios.post("/api/v1/user/login", data);
       dispatch(UserActions.AddUser(user.data.data));
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
   };
   ///////////////////////////////////////////////////

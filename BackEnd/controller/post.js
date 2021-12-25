@@ -65,7 +65,7 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
 });
 
 exports.getPosts = catchAsync(async (req, res, next) => {
-  console.log(req.query);
+  // console.log(req.query);
   const posts = await query(
     addWhereCondition(
       `SELECT * FROM post`,

@@ -50,6 +50,7 @@ const Header = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
+      <div style={{ height: "4rem" }}></div>
       <AppBar position="static" className={classes.appBar}>
         <Toolbar>
           <Typography

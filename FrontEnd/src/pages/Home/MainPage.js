@@ -1,14 +1,20 @@
-// import { useSelector } from "react-redux";
-// import { useHistory } from "react-router-dom";
-// import PopPost from "../../components/PopUp/PopPost";
+import { Grid } from "@mui/material";
+import LeftSection from "./leftSection";
 import MediumSection from "./MediumSection";
-
-// import CreatePost from "../../components/PopUp/CreatePost";
+import PopPost from "../../components/PopUp/PopPost";
 const MainPage = () => {
   return (
     <>
-      <MediumSection />
-      {/* <PopPost /> */}
+      <Grid container>
+        <Grid item lg={4}>
+          <LeftSection />
+        </Grid>
+        <Grid item lg={4}>
+          <MediumSection />
+        </Grid>
+        <Grid item lg={4}></Grid>
+      </Grid>
+      <PopPost />
     </>
   );
 };

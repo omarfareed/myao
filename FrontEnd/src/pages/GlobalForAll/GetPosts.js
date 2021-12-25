@@ -2,7 +2,7 @@ import Post from "../../components/Post/Post";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const GetPosts = ({ linkOfFetching }) => {
+const GetPosts = ({ linkOfFetching, className }) => {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState([]);
   const [finished, setFinished] = useState(false);
@@ -31,7 +31,7 @@ const GetPosts = ({ linkOfFetching }) => {
         setFetching(false);
       }
     }
-    console.log(posts.length);
+    // console.log(posts.length);
   };
 
   useEffect(() => {
@@ -46,7 +46,12 @@ const GetPosts = ({ linkOfFetching }) => {
   return (
     <>
       {posts.map((el, index) => (
-        <Post id={`post_id_${index}`} key={index} />
+        <Post
+          id={`post_id_${index}`}
+          data={el}
+          key={index}
+          className={className}
+        />
       ))}
     </>
   );

@@ -6,9 +6,8 @@ import CardHeader from "@mui/material/CardHeader";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { Checkbox, Menu, MenuItem, Paper, Stack } from "@mui/material";
-import { BsFillShareFill } from "react-icons/bs";
-// import img from "../IMG_20200124_165226.jpg"
+import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
+import { RiShareForwardLine } from "react-icons/ri";
 import ReportPost from "./ReportPost";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaRegComment } from "react-icons/fa";
@@ -16,12 +15,15 @@ import { MdOutlineFavoriteBorder, MdOutlineFavorite } from "react-icons/md";
 import Comments from "./Comments";
 import PostContent from "./PostContent";
 import PostImgs from "./imgGallary";
-
-const Post = ({ id }) => {
+const formatDate = (created_date) => {
+  let date = new Date(created_date);
+  return date.toUTCString().slice(0, 16);
+};
+const Post = ({ id, data, className }) => {
   const LikesCounter = 1250;
-  const CommentCounter = 170;
-  const lenth_of_imgs = 1;
-  const media = lenth_of_imgs > 0 ? <PostImgs /> : <></>;
+  const CommentCounter = data.comment_counter;
+  const lenth_of_imgs = data.media.length;
+  const media = lenth_of_imgs > 0 ? <PostImgs media={data.media} /> : <></>;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -37,13 +39,31 @@ const Post = ({ id }) => {
     setOpenComment(!openComment);
   };
 
+  // const line = (
+  //   <div
+  //     style={{
+  //       width: "80%",
+  //       margin: ".2rem auto 0",
+  //       height: "2px",
+  //       borderTop: "2px solid #eee",
+  //     }}
+  //   ></div>
+  // );
+
   return (
-    <>
-      <Card id={id} sx={{ width: "100%", height: "fit-content" }}>
+    <Paper
+      style={{ width: "100%", height: "fit-content" }}
+      className={className}
+    >
+      <Card id={id}>
         <CardHeader
           avatar={<Avatar color="primary" aria-label="recipe" />}
           title="Name"
-          subheader="Create Data"
+          subheader={
+            <span style={{ fontSize: ".85rem" }}>
+              {formatDate(data.created_date)}
+            </span>
+          }
           action={
             <div>
               <IconButton
@@ -86,20 +106,27 @@ const Post = ({ id }) => {
           }
         />
 
-        <PostContent />
+        <PostContent text={data.post_text} />
 
         {media}
         <Stack
           direction="row"
-          justifyContent="space-evenly"
+          justifyContent="space-between"
           alignItems="center"
-          spacing={8}
         >
-          <Typography color="primary">♥ {LikesCounter}</Typography>
-          <Typography></Typography>
-          <Typography color="primary">Comments:{CommentCounter} </Typography>
+          <Typography variant="body2" marginLeft="1rem">
+            {`${LikesCounter} Reaction`}
+          </Typography>
+          <Grid container width="fit-content">
+            <Typography variant="body2" marginRight=".5rem">
+              {CommentCounter == 0 ? null : `${CommentCounter} Comments`}
+            </Typography>
+            <Typography variant="body2" marginRight="1rem">
+              {CommentCounter == 0 ? null : `${CommentCounter} Shares`}
+            </Typography>
+          </Grid>
         </Stack>
-
+        {/* {line} */}
         <Stack
           direction="row"
           justifyContent="space-evenly"
@@ -111,18 +138,17 @@ const Post = ({ id }) => {
             icon={<MdOutlineFavoriteBorder size={25} />}
             checkedIcon={<MdOutlineFavorite size={25} />}
           />
-
           <IconButton aria-label="share" onClick={handleCommentClick}>
             <FaRegComment />
           </IconButton>
 
           <IconButton aria-label="share">
-            <BsFillShareFill />
+            <RiShareForwardLine />
           </IconButton>
         </Stack>
         <Comments open={openComment} />
       </Card>
-    </>
+    </Paper>
   );
 };
 

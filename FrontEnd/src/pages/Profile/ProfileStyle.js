@@ -119,5 +119,10 @@ const useStyle = makeStyles({
     paddingLeft: "1rem",
     height: "60rem",
   },
+  post: {
+    "&.MuiPaper-root": {
+      marginBottom: "1rem",
+    },
+  },
 });
 export default useStyle;
