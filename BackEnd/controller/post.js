@@ -31,13 +31,6 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
     .sort()
     .paginate().query;
   const posts = await query(queryStr);
-  // const posts = await query(
-  //   addWhereCondition(
-  //     `SELECT * FROM post`,
-  //     // filterObjTo(req.body, columns["post"])
-  //     req.body
-  //   )
-  // );
   if (posts.length === 0)
     return res.json({
       status: "success",
@@ -47,6 +40,60 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
   posts.forEach((post) => {
     postsHashed[post.id] = { ...post, media: [] };
   });
+  const reducedCondition = posts.reduce(
+    (prev, cur, index) =>
+      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
+    ""
+  );
+  const posts_media = await query(
+    `SELECT * FROM post_media WHERE post_id IN (${reducedCondition})`
+  );
+  posts_media.forEach(({ post_id, link }) =>
+    postsHashed[post_id].media.push(link)
+  );
+  res.json({
+    status: "success",
+    data: Object.values(postsHashed),
+  });
+});
+
+exports.getPostsWithPersonInfo = catchAsync(async (req, res, next) => {
+  // if (req.body.surfer_id) req.query.surfer_id = req.body.surfer_id;
+  const queryStr = new APIFeatures("post", req.query)
+    .filter()
+    .sort()
+    .paginate().query;
+  const posts = await query(queryStr);
+  if (posts.length === 0)
+    return res.json({
+      status: "success",
+      data: posts,
+    });
+  let postsHashed = {};
+  await Promise.all(
+    posts.map(async (post) => {
+      console.log(Date.now());
+      const [surfer_info, like_counter, if_liked] = await Promise.all([
+        query(
+          `select fname , lname , photo from surfer where id="${post.surfer_id}"`
+        ),
+        query(
+          `select count(*) as like_counter from \`like\` where post_id="${post.id}"`
+        ),
+        query(
+          `select * from \`like\` where post_id="${post.id}" and surfer_id="${req.auth?.id}"`
+        ),
+      ]);
+      postsHashed[post.id] = {
+        ...post,
+        media: [],
+        surfer_info: surfer_info[0],
+        like_counter: like_counter[0].like_counter,
+        liked: if_liked.length > 0,
+      };
+    })
+  );
+  // return res.json({ posts, postsHashed });
   const reducedCondition = posts.reduce(
     (prev, cur, index) =>
       `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
@@ -159,3 +206,6 @@ exports.getTimeLine = catchAsync(async (req, res, next) => {
     data,
   });
 });
+
+// get posts with person information
+// if liked , count

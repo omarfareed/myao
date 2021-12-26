@@ -4,6 +4,7 @@ const {
   transferParamsToBody,
   protect,
   restrictTo,
+  getLogin,
 } = require("../controller/authController");
 const restriction = restrictTo("surfer");
 const postController = require("../controller/post");
@@ -13,6 +14,7 @@ const commentRouter = require("./commentRouter");
 const shareRouter = require("./shareRouter.js");
 const likeRouter = require("./likeRouter");
 router.get("/timeline", protect, postController.getTimeLine);
+router.get("/detailedPosts", getLogin, postController.getPostsWithPersonInfo);
 router
   .route("/")
   .get(transferParamsToBody, postController.getAllPosts)

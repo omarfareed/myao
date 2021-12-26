@@ -5,6 +5,7 @@ const {
   protect,
   transferParamsToBody,
   restrictTo,
+  getLogin,
 } = require("../controller/authController");
 const surferController = require("../controller/surfer");
 const router = express.Router();
@@ -18,7 +19,7 @@ router
   .route("/")
   .get(surferController.getSurfers)
   .post(protect, restrictTo("admin"), surferController.createSurfer);
-router.route("/search").get(surferController.searchSurfer);
+router.route("/search").get(getLogin, surferController.searchSurfer);
 router
   .route("/:id")
   .get(transferParamsToBody, surferController.getSurfers)
