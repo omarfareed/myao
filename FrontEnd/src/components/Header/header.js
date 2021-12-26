@@ -25,14 +25,29 @@ const Header = () => {
   const { user } = useSelector((state) => state.reducer);
   const [SettingIcon, setSettingIcon] = React.useState(false);
   const classes = useStyle();
+  const { id } = useSelector((state) => state.reducer.user);
+  const ref = React.useRef();
   const history = useHistory();
   const location = useLocation();
   React.useEffect(() => {
     if (location.pathname === "/") setValue(0);
-    else if (location.pathname.includes("profile")) setValue(1);
+    else if (
+      location.pathname.includes("profile") &&
+      id === location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
+    )
+      setValue(1);
     else if (location.pathname === "/fav") setValue(2);
     else setValue(3);
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    ref.current.addEventListener("keyup", function (e) {
+      if (e.keyCode === 13) {
+        history.push(`/search/${e.target.value}`);
+        e.target.value = "";
+      }
+    });
+  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -65,6 +80,7 @@ const Header = () => {
               <BiSearch />
             </SearchIconWrapper>
             <StyledInputBase
+              ref={ref}
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
             />

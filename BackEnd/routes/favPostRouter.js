@@ -9,7 +9,6 @@ const favPostController = require("../controller/fav_post");
 const router = express.Router({ mergeParams: true });
 const restriction = restrictTo("surfer", "admin");
 router.get("/", transferParamsToBody, favPostController.getFavPost);
-
 router
   .route("/:post_id")
   .get(transferParamsToBody, favPostController.getFavPost)

@@ -53,7 +53,7 @@ class APIFeatures {
     const limit = +this.options.limit || 100;
     const skip = (page - 1) * limit;
     this.query = `${this.query} LIMIT ${limit} OFFSET ${skip}`;
-    // console.log(this.query);
+    console.log(this.query);
     return this;
   }
 }

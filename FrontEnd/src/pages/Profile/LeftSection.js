@@ -34,8 +34,17 @@ const LeftSection = () => {
   });
 
   return (
-    <Grid container item direction="column" sm={12} lg={5}>
-      <Paper className={classes.friendSection}>
+    <Grid
+      container
+      direction="column"
+      height="fit-content"
+      id="leftSectionProfile"
+      className={classes.scrollFunc}
+    >
+      <Paper
+        // style={{ backgroundColor: "red" }}
+        className={classes.friendSection}
+      >
         <Grid container justifyContent="space-between">
           <Grid container style={{ margin: "0 0 0 1rem" }}>
             <Typography variant="h2">Friends</Typography>

@@ -55,6 +55,7 @@ exports.logout = (req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
   if (!role) return next(new appError("no specific role determined"));
+  req.body = filterObjFrom(req.body, ["role"]);
   // req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
@@ -86,6 +87,43 @@ exports.login = catchAsync(async (req, res, next) => {
   next(new appError("wrong email or password"));
 });
 
+exports.getLogin = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token) return next();
+
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // 3) Check if user still exists
+  const currentUser = await query(
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+  );
+  if (!currentUser) {
+    return next();
+  }
+
+  // 4) Check if user changed password after the token was issued
+  // if (
+  //   security.passwordChangedAfter(decoded.iat, currentUser.passwordChangedAt)
+  // ) {
+  //   return next(
+  //     new AppError("User recently changed password! Please log in again.", 401)
+  //   );
+  // }
+
+  // GRANT ACCESS TO PROTECTED ROUTE
+  req.body[`${decoded.role}_id`] = currentUser[0].id;
+  req.auth = { role: decoded.role, id: decoded.id };
+  next();
+});
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;

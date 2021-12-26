@@ -115,8 +115,17 @@ const useStyle = makeStyles({
     marginBottom: "2rem",
     [theme.breakpoints.down("md")]: {},
   },
+  scrollFunc: {
+    "&.MuiGrid-root": {
+      [theme.breakpoints.up("lg")]: {
+        width: "29.2rem",
+      },
+    },
+  },
   rightSection: {
-    paddingLeft: "1rem",
+    [theme.breakpoints.up("lg")]: {
+      paddingLeft: "1rem",
+    },
     height: "60rem",
   },
   post: {

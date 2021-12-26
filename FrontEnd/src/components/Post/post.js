@@ -19,12 +19,11 @@ const formatDate = (created_date) => {
   let date = new Date(created_date);
   return date.toUTCString().slice(0, 16);
 };
-const Post = ({ id, data, className }) => {
-  const LikesCounter = 1250;
+const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
+  const LikesCounter = data.like_counter;
   const CommentCounter = data.comment_counter;
   const lenth_of_imgs = data.media.length;
   const media = lenth_of_imgs > 0 ? <PostImgs media={data.media} /> : <></>;
-
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -38,29 +37,21 @@ const Post = ({ id, data, className }) => {
   const handleCommentClick = () => {
     setOpenComment(!openComment);
   };
-
-  // const line = (
-  //   <div
-  //     style={{
-  //       width: "80%",
-  //       margin: ".2rem auto 0",
-  //       height: "2px",
-  //       borderTop: "2px solid #eee",
-  //     }}
-  //   ></div>
-  // );
-
   return (
     <Paper
-      style={{ width: "100%", height: "fit-content" }}
+      style={{ width: "100%", height: "fit-content", ...style }}
       className={className}
     >
       <Card id={id}>
         <CardHeader
           avatar={<Avatar color="primary" aria-label="recipe" />}
-          title="Name"
+          title={
+            <span style={{ color: "#222" }}>
+              {surfer_info.fname + " " + surfer_info.lname}
+            </span>
+          }
           subheader={
-            <span style={{ fontSize: ".85rem" }}>
+            <span style={{ fontSize: ".75rem" }}>
               {formatDate(data.created_date)}
             </span>
           }
@@ -114,15 +105,15 @@ const Post = ({ id, data, className }) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="body2" marginLeft="1rem">
-            {`${LikesCounter} Reaction`}
+          <Typography variant="body2" marginLeft="1rem" marginRight="auto">
+            {!LikesCounter ? null : `${LikesCounter} Reaction`}
           </Typography>
-          <Grid container width="fit-content">
+          <Grid container width="fit-content" marginLeft="auto">
             <Typography variant="body2" marginRight=".5rem">
-              {CommentCounter == 0 ? null : `${CommentCounter} Comments`}
+              {!CommentCounter ? null : `${CommentCounter} Comments`}
             </Typography>
             <Typography variant="body2" marginRight="1rem">
-              {CommentCounter == 0 ? null : `${CommentCounter} Shares`}
+              {!CommentCounter ? null : `${CommentCounter} Shares`}
             </Typography>
           </Grid>
         </Stack>
@@ -146,7 +137,7 @@ const Post = ({ id, data, className }) => {
             <RiShareForwardLine />
           </IconButton>
         </Stack>
-        <Comments open={openComment} />
+        <Comments open={openComment} post_id={data.id} />
       </Card>
     </Paper>
   );

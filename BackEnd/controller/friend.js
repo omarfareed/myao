@@ -48,7 +48,7 @@ exports.getSentRequests = catchAsync(async (req, res, next) => {
 
 exports.makeRequest = controller.create("friend", [], false);
 exports.acceptRequest = catchAsync(async (req, res, next) => {
-  // console.log(req.auth.id, req.body.source_id, req.body.friendship_time);
+  console.log(req.auth.id, req.body.source_id, req.body.friendship_time);
   const request = await query(
     `UPDATE friend SET friendship_time="${req.body.friendship_time}" 
     WHERE target_id="${req.auth.id}"
