@@ -28,7 +28,7 @@ const PopPost = () => {
     <>
       <SpeedDial
         ariaLabel="SpeedDial uncontrolled open example"
-        sx={{ position: "absolute", bottom: 50, right: 30 }}
+        sx={{ position: "fixed", bottom: 50, right: 30 }}
         icon={<SpeedDialIcon />}
         onClick={handleOpen}
         open={open}

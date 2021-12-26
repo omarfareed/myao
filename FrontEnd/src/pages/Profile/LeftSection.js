@@ -16,6 +16,7 @@ const LeftSection = () => {
     "ahmed assad",
     "ahmed lotfy",
   ]);
+
   const infoKeys = {
     education: { convertTo: "studied at", icon: <IoMdSchool /> },
     address: { convertTo: "Lives in", icon: <AiFillHome /> },
@@ -23,6 +24,7 @@ const LeftSection = () => {
     job: { convertTo: "works as", icon: <MdWork /> },
     birth_date: { convertTo: "was born at", icon: <MdWork /> },
   };
+
   const [about] = useState({
     address: "Egypt,Cairo",
     education: "faculty of engineering cairo univeristy",
@@ -32,8 +34,17 @@ const LeftSection = () => {
   });
 
   return (
-    <Grid container item direction="column" xs={4}>
-      <Paper className={classes.friendSection}>
+    <Grid
+      container
+      direction="column"
+      height="fit-content"
+      id="leftSectionProfile"
+      className={classes.scrollFunc}
+    >
+      <Paper
+        // style={{ backgroundColor: "red" }}
+        className={classes.friendSection}
+      >
         <Grid container justifyContent="space-between">
           <Grid container style={{ margin: "0 0 0 1rem" }}>
             <Typography variant="h2">Friends</Typography>
@@ -47,9 +58,11 @@ const LeftSection = () => {
           </Grid>
         </Grid>
       </Paper>
+
       <Paper className={classes.friendSection}>
-        <Grid container style={{ margin: "1rem 0 0 0" }}>
+        <Grid container style={{ margin: "1rem 0", paddingRight: ".5rem" }}>
           <Typography variant="h2">About</Typography>
+
           <Grid container direction="column">
             {Object.keys(about).map((el) => (
               <Grid
@@ -57,17 +70,16 @@ const LeftSection = () => {
                 container
                 key={el}
                 style={{
-                  marginLeft: "0.6rem",
-                  marginTop: "2rem",
+                  marginLeft: "0.5rem",
+                  marginTop: "1.3rem",
                   fontSize: ".8rem",
                 }}
                 columnSpacing={1}
               >
                 <Grid
                   item
-                  xs={2}
                   style={{
-                    fontSize: "1.1rem",
+                    marginRight: ".5rem",
                     color: "#aaa",
                     paddingTop: ".1rem",
                   }}
@@ -75,7 +87,7 @@ const LeftSection = () => {
                   {infoKeys[el].icon}
                 </Grid>
                 <Grid item xs={10}>
-                  <Typography variant="h2" style={{ fontWeight: "normal" }}>
+                  <Typography variant="h5" style={{ fontWeight: "normal" }}>
                     {infoKeys[el].convertTo} {about[el]}
                   </Typography>
                 </Grid>

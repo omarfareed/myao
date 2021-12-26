@@ -1,12 +1,39 @@
-import { Avatar, Button, Grid, Paper, Typography } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Grid,
+  Paper,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import useStyle from "./ProfileStyle";
 import { HiUserAdd } from "react-icons/hi";
 import { MdOutlineReport } from "react-icons/md";
 import LeftSection from "./LeftSection";
-import Post from "../../components/Post/post";
-
+import GetPosts from "../GlobalForAll/GetPosts";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 const ProfilePage = () => {
   const classes = useStyle();
+  const { user } = useSelector((state) => state.reducer);
+  const params = useParams();
+  const Theme = useTheme();
+  useEffect(() => {
+    let leftSectionElement = document.getElementById("leftSectionProfile");
+
+    document.addEventListener("scroll", () => {
+      if (window.innerWidth >= Theme.breakpoints.values.lg) {
+        if (window.scrollY > 806.4000244140625) {
+          leftSectionElement.style.position = "fixed";
+          leftSectionElement.style.bottom = "0";
+        } else if (window.scrollY < 806.4000244140625) {
+          leftSectionElement.style.position = "relative";
+        }
+      }
+    });
+  }, []);
+
   return (
     <Grid container className={classes.page} direction="column">
       <Paper className={classes.imageSection} elevation={3}>
@@ -44,8 +71,17 @@ const ProfilePage = () => {
         </Button>
       </Paper>
       <Grid container>
-        <LeftSection />
-        <Grid container style={{ paddingLeft: "1rem" }} item xs={8}></Grid>
+        <Grid item sm={12} lg={5} style={{ height: "fit-content" }}>
+          <LeftSection />
+        </Grid>
+        <Grid container className={classes.rightSection} item lg={7}>
+          <GetPosts
+            className={classes.post}
+            linkOfFetching={`/api/v1/surfer/${params.id}/post`}
+            surfer_info_ready={user.id === params.id ? user : null}
+          />
+          <div style={{ height: "1rem", width: "100%" }}></div>
+        </Grid>
       </Grid>
     </Grid>
   );

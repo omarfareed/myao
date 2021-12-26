@@ -1,42 +1,31 @@
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
+// import CardMedia from "@mui/material/CardMedia";
+// import CardContent from "@mui/material/CardContent";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { red } from "@mui/material/colors";
+import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
 import { RiShareForwardLine } from "react-icons/ri";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Menu,
-  MenuItem,
-  Paper,
-  Stack,
-  TextField,
-} from "@mui/material";
-// import {MoreVertIcon} from 'react-icons/MoreVert';
-// import FavoriteBorder from 'react-icons/FavoriteBorder';
-// import Favorite from 'react-icons/Favorite';
-
-import ListItemText from "@mui/material/ListItemText";
-import { BiCommentDetail as CommentIcon } from "react-icons/bi";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import { BsFillArrowRightCircleFill } from "react-icons/bs";
-// import ReportPost from "./ReportPost";
-
-const Post = () => {
-  const LikesCounter = 1250;
-  const CommentCounter = 170;
-
-  const [reportOpen, setreportOpen] = React.useState(0);
-
+import ReportPost from "./ReportPost";
+import { FiMoreVertical } from "react-icons/fi";
+import { FaRegComment } from "react-icons/fa";
+import { MdOutlineFavoriteBorder, MdOutlineFavorite } from "react-icons/md";
+import Comments from "./Comments";
+import PostContent from "./PostContent";
+import PostImgs from "./imgGallary";
+const formatDate = (created_date) => {
+  let date = new Date(created_date);
+  return date.toUTCString().slice(0, 16);
+};
+const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
+  const LikesCounter = data.like_counter;
+  const CommentCounter = data.comment_counter;
+  const lenth_of_imgs = data.media.length;
+  const media = lenth_of_imgs > 0 ? <PostImgs media={data.media} /> : <></>;
   const [anchorEl, setAnchorEl] = React.useState(null);
+
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -44,17 +33,28 @@ const Post = () => {
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
   const [openComment, setOpenComment] = React.useState(0);
+
   const handleCommentClick = () => {
     setOpenComment(!openComment);
   };
-
   return (
-    <Paper style={{ height: "fit-content" }}>
-      <Card sx={{ maxWidth: 345 }}>
+    <Paper
+      style={{ width: "100%", height: "fit-content", ...style }}
+      className={className}
+    >
+      <Card id={id}>
         <CardHeader
-          avatar={<Avatar sx={{ bgcolor: red[500] }} aria-label="recipe" />}
-          title="Name"
-          subheader="Create Data"
+          avatar={<Avatar color="primary" aria-label="recipe" />}
+          title={
+            <span style={{ color: "#222" }}>
+              {surfer_info.fname + " " + surfer_info.lname}
+            </span>
+          }
+          subheader={
+            <span style={{ fontSize: ".75rem" }}>
+              {formatDate(data.created_date)}
+            </span>
+          }
           action={
             <div>
               <IconButton
@@ -65,8 +65,7 @@ const Post = () => {
                 onClick={handleMenu}
                 color="inherit"
               >
-                <RiShareForwardLine />
-                {/* <MoreVertIcon /> */}
+                <FiMoreVertical />
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -92,30 +91,33 @@ const Post = () => {
                 >
                   Add To favourite
                 </MenuItem>
-                {/* <ReportPost /> */}
+                <ReportPost />
               </Menu>
             </div>
           }
         />
 
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            post content
-          </Typography>
-        </CardContent>
+        <PostContent text={data.post_text} />
 
-        <CardMedia component="img" height="200" alt="img" gutterBottom />
+        {media}
         <Stack
           direction="row"
-          justifyContent="space-evenly"
+          justifyContent="space-between"
           alignItems="center"
-          spacing={8}
         >
-          <Typography color="primary">♥ {LikesCounter}</Typography>
-          <Typography></Typography>
-          <Typography color="primary">Comments:{CommentCounter} </Typography>
+          <Typography variant="body2" marginLeft="1rem" marginRight="auto">
+            {!LikesCounter ? null : `${LikesCounter} Reaction`}
+          </Typography>
+          <Grid container width="fit-content" marginLeft="auto">
+            <Typography variant="body2" marginRight=".5rem">
+              {!CommentCounter ? null : `${CommentCounter} Comments`}
+            </Typography>
+            <Typography variant="body2" marginRight="1rem">
+              {!CommentCounter ? null : `${CommentCounter} Shares`}
+            </Typography>
+          </Grid>
         </Stack>
-
+        {/* {line} */}
         <Stack
           direction="row"
           justifyContent="space-evenly"
@@ -124,78 +126,18 @@ const Post = () => {
         >
           <Checkbox
             {...label}
-            // icon={<FavoriteBorder />}
-            icon={<RiShareForwardLine />}
-            // checkedIcon={<Favorite />}
-            checkedIcon={<RiShareForwardLine />}
+            icon={<MdOutlineFavoriteBorder size={25} />}
+            checkedIcon={<MdOutlineFavorite size={25} />}
           />
-
-          <IconButton aria-label="share">
-            <CommentIcon onClick={handleCommentClick} />
+          <IconButton aria-label="share" onClick={handleCommentClick}>
+            <FaRegComment />
           </IconButton>
 
           <IconButton aria-label="share">
-            {/* <ShareIcon /> */}
             <RiShareForwardLine />
           </IconButton>
         </Stack>
-
-        <Collapse in={openComment} timeout="auto" unmountOnExit>
-          <List
-            sx={{ width: "100%", maxWidth: 345, bgcolor: "background.paper" }}
-          >
-            <ListItem alignItems="flex-start">
-              <ListItemAvatar>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                primary="name?"
-                secondary={
-                  <React.Fragment>
-                    <Typography
-                      sx={{ display: "inline" }}
-                      component="span"
-                      variant="body2"
-                      color="text.primary"
-                    >
-                      Ali Connors
-                    </Typography>
-                    {" — I'll be in your neighborhood doing errands this…"}
-                  </React.Fragment>
-                }
-              />
-            </ListItem>
-
-            <ListItem alignItems="flex-start">
-              <ListItemAvatar>
-                <Avatar alt="Name" />
-              </ListItemAvatar>
-              <ListItemText
-                secondary={
-                  <Stack
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    spacing={1}
-                  >
-                    <TextField
-                      label="Comment"
-                      placeholder="give your comment"
-                      multiline
-                      variant="standard"
-                    />
-                    <Button
-                      variant="text"
-                      centerRipple
-                      size="small"
-                      startIcon={<BsFillArrowRightCircleFill />}
-                    />
-                  </Stack>
-                }
-              />
-            </ListItem>
-          </List>
-        </Collapse>
+        <Comments open={openComment} post_id={data.id} />
       </Card>
     </Paper>
   );

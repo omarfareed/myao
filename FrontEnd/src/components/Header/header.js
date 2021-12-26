@@ -17,21 +17,37 @@ import { AiFillHome } from "react-icons/ai";
 import { IoPersonCircle, IoSettingsSharp } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { useHistory, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [value, setValue] = React.useState(0);
-
+  const { user } = useSelector((state) => state.reducer);
   const [SettingIcon, setSettingIcon] = React.useState(false);
   const classes = useStyle();
+  const { id } = useSelector((state) => state.reducer.user);
+  const ref = React.useRef();
   const history = useHistory();
   const location = useLocation();
   React.useEffect(() => {
     if (location.pathname === "/") setValue(0);
-    else if (location.pathname === "/profile") setValue(1);
+    else if (
+      location.pathname.includes("profile") &&
+      id === location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
+    )
+      setValue(1);
     else if (location.pathname === "/fav") setValue(2);
     else setValue(3);
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    ref.current.addEventListener("keyup", function (e) {
+      if (e.keyCode === 13) {
+        history.push(`/search/${e.target.value}`);
+        e.target.value = "";
+      }
+    });
+  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -49,6 +65,7 @@ const Header = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
+      <div style={{ height: "4rem" }}></div>
       <AppBar position="static" className={classes.appBar}>
         <Toolbar>
           <Typography
@@ -63,6 +80,7 @@ const Header = () => {
               <BiSearch />
             </SearchIconWrapper>
             <StyledInputBase
+              ref={ref}
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
             />
@@ -90,7 +108,7 @@ const Header = () => {
                   />
                 }
                 aria-label="person"
-                onClick={() => history.push("/profile")}
+                onClick={() => history.push(`/profile/${user.id}`)}
               />
               <Tab
                 disableRipple

@@ -19,7 +19,7 @@ router
   .route("/")
   .get(surferController.getSurfers)
   .post(protect, restrictTo("admin"), surferController.createSurfer);
-router.route("/search").get(getLogin, surferController.searchSurfer);
+router.route("/search").post(getLogin, surferController.searchSurfer);
 router
   .route("/:id")
   .get(transferParamsToBody, surferController.getSurfers)

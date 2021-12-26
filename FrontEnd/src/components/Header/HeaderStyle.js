@@ -59,7 +59,10 @@ export const useStyle = makeStyles({
   },
   appBar: {
     "&.MuiAppBar-root": {
-      backgroundColor: "#eee",
+      backgroundColor: "#f3f3f3",
+      position: "fixed",
+      top: "0",
+      zIndex: "10000",
     },
   },
   color: {

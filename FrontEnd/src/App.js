@@ -10,6 +10,7 @@ import getMe from "./Store/Thunk/getMe";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useEffect } from "react";
+import SearchPage from "./pages/SearchPage/SearchPage";
 function App() {
   const dispatch = useDispatch();
   const loadingUser = useSelector((state) => state.reducer.loadingUser);
@@ -42,7 +43,10 @@ function App() {
             <Route path="/profile/marketer">
               <MarketerPage />
             </Route>
-            <Route path="/profile">
+            <Route path="/search/:search">
+              <SearchPage />
+            </Route>
+            <Route path="/profile/:id">
               <ProfilePage />
             </Route>
           </Switch>
