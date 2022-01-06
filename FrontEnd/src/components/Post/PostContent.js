@@ -4,9 +4,9 @@ import { CardContent } from "@mui/material";
 import ShowMoreText from "react-show-more-text";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
-const PostContent = ({ text }) => {
+const PostContent = ({ text, style = {} }) => {
   return (
-    <CardContent sx={{ padding: "1rem 1rem 0", minHeight: "2rem" }}>
+    <CardContent sx={{ padding: "1rem 1rem 0", minHeight: "2rem", ...style }}>
       <ShowMoreText
         lines={3}
         more={<MdExpandMore title="Show More" />}

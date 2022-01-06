@@ -37,12 +37,16 @@ const useStyle = makeStyles({
     textAlign: "center",
   },
 });
-const SurferCard = ({ user = {}, newThings = null, id_given = undefined }) => {
+const MarketerCard = ({
+  user = {},
+  newThings = null,
+  id_given = undefined,
+}) => {
   const classes = useStyle();
   const history = useHistory();
   function goProfile() {
     const id = id_given === undefined ? user.id : id_given;
-    history.push("/profile/" + id);
+    history.push("/marketer/" + id);
   }
   return (
     <Paper style={{ width: "100%" }}>
@@ -70,4 +74,4 @@ const SurferCard = ({ user = {}, newThings = null, id_given = undefined }) => {
     </Paper>
   );
 };
-export default SurferCard;
+export default MarketerCard;

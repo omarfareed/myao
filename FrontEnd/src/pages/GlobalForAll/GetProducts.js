@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 const GetProducts = ({
   linkOfFetching,
   className,
+  body = {},
   //   surfer_info_ready = null,
 }) => {
   const [page, setPage] = useState(1);
@@ -17,7 +18,10 @@ const GetProducts = ({
     try {
       if (!finished && !fetching) {
         let data;
-        data = await axios.get(`${linkOfFetching}?limit=8&page=${page}`);
+        data = await axios.patch(
+          `${linkOfFetching}?limit=8&page=${page}`,
+          body
+        );
         data = data.data;
         console.log(data.data);
         if (data.data.length === 0) {

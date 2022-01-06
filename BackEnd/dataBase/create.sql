@@ -453,109 +453,86 @@ drop table if exists `sur_rep_mar`;
 /*!50503 set character_set_client = utf8mb4 */
 ;
 
-create table `sur_rep_mar`
-(
-  `sur_id` varchar
-(12) not null,
-  `mar_id` varchar
-(12) not null,
-  `report_option` smallint not null,
-  key `fk_sur_rep_mar_marketer`
-(`mar_id`),
-  key `fk_sur_rep_mar_surfer`
-(`sur_id`),
-  constraint `fk_sur_rep_mar_marketer` foreign key
-(`mar_id`) references `marketer`
-(`id`) on
-delete cascade,
-  constraint `fk_sur_rep_mar_surfer` foreign key
-(`sur_id`) references `surfer`
-(`id`)
-);
-
-drop table if exists `sur_rep_pos`;
-
-/*!40101 set @saved_cs_client     = @@character_set_client */
-;
-
-/*!50503 set character_set_client = utf8mb4 */
-;
-
-create table `sur_rep_pos`
-(
-  `sur_id` varchar
-(12) not null,
-  `post_id` varchar
-(12) not null,
-  `report_option` smallint not null,
-  primary key
-(`sur_id`, `post_id`),
-  key `fk_sur_rep_post_post`
-(`post_id`),
-  constraint `fk_sur_rep_post_post` foreign key
-(`post_id`) references `post`
-(`id`) on
-delete cascade,
-  constraint `fk_sur_rep_post_surfer` foreign key
-(`sur_id`) references `surfer`
-(`id`)
-);
-
-drop table if exists `sur_rep_pro`;
-
-/*!40101 set @saved_cs_client     = @@character_set_client */
-;
-
-/*!50503 set character_set_client = utf8mb4 */
-;
-
-create table `sur_rep_pro`
-(
-  `sur_id` varchar
-(12) not null,
-  `pro_id` varchar
-(12) not null,
-  `report_option` smallint not null,
-  primary key
-(`sur_id`, `pro_id`),
-  key `fk_sur_rep_pro_product`
-(`pro_id`),
-  constraint `fk_sur_rep_pro_product` foreign key
-(`pro_id`) references `product`
-(`id`) on
-delete cascade,
-  constraint `fk_sur_rep_pro_surfer` foreign key
-(`sur_id`) references `surfer`
-(`id`)
-);
-
-drop table if exists `sur_rep_sur`;
-
-/*!40101 set @saved_cs_client     = @@character_set_client */
-;
-
-/*!50503 set character_set_client = utf8mb4 */
-;
-
-create table `sur_rep_sur`
+CREATE TABLE `sur_rep_mar`
 (
   `reporter_id` varchar
-(12) not null,
+(12) NOT NULL,
   `reported_id` varchar
-(12) not null,
-  `report_option` smallint not null,
-  primary key
-(`reporter_id`, `reported_id`),
-  key `fk_sur_rep_sur_surfer1`
+(12) NOT NULL,
+  `report_option` smallint NOT NULL,
+  KEY `fk_sur_rep_mar_marketer`
 (`reported_id`),
-  constraint `fk_sur_rep_sur_surfer` foreign key
-(`reporter_id`) references `surfer`
+  KEY `fk_sur_rep_mar_surfer`
+(`reporter_id`),
+  CONSTRAINT `fk_sur_rep_mar_marketer` FOREIGN KEY
+(`reported_id`) REFERENCES `marketer`
+(`id`) ON
+DELETE CASCADE,
+  CONSTRAINT `fk_sur_rep_mar_surfer` FOREIGN KEY
+(`reporter_id`) REFERENCES `surfer`
+(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `sur_rep_pos`
+(
+  `reporter_id` varchar
+(12) NOT NULL,
+  `reported_id` varchar
+(12) NOT NULL,
+  `report_option` smallint NOT NULL,
+  PRIMARY KEY
+(`reporter_id`,`reported_id`),
+  KEY `fk_sur_rep_post_post`
+(`reported_id`),
+  CONSTRAINT `fk_sur_rep_post_post` FOREIGN KEY
+(`reported_id`) REFERENCES `post`
+(`id`) ON
+DELETE CASCADE,
+  CONSTRAINT `fk_sur_rep_post_surfer` FOREIGN KEY
+(`reporter_id`) REFERENCES `surfer`
+(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `sur_rep_pro`
+(
+  `reporter_id` varchar
+(12) NOT NULL,
+  `reported_id` varchar
+(12) NOT NULL,
+  `report_option` smallint NOT NULL,
+  PRIMARY KEY
+(`reporter_id`,`reported_id`),
+  KEY `fk_sur_rep_pro_product`
+(`reported_id`),
+  CONSTRAINT `fk_sur_rep_pro_product` FOREIGN KEY
+(`reported_id`) REFERENCES `product`
+(`id`) ON
+DELETE CASCADE,
+  CONSTRAINT `fk_sur_rep_pro_surfer` FOREIGN KEY
+(`reporter_id`) REFERENCES `surfer`
+(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `sur_rep_sur`
+(
+  `reporter_id` varchar
+(12) NOT NULL,
+  `reported_id` varchar
+(12) NOT NULL,
+  `report_option` smallint NOT NULL,
+  PRIMARY KEY
+(`reporter_id`,`reported_id`),
+  KEY `fk_sur_rep_sur_surfer1`
+(`reported_id`),
+  CONSTRAINT `fk_sur_rep_sur_surfer` FOREIGN KEY
+(`reporter_id`) REFERENCES `surfer`
 (`id`),
-  constraint `fk_sur_rep_sur_surfer1` foreign key
-(`reported_id`) references `surfer`
-(`id`) on
-delete cascade
-);
+  CONSTRAINT `fk_sur_rep_sur_surfer1` FOREIGN KEY
+(`reported_id`) REFERENCES `surfer`
+(`id`) ON
+DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE
   myao.admin

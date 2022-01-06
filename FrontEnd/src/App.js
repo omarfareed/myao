@@ -14,6 +14,9 @@ import SearchPage from "./pages/SearchPage/SearchPage";
 import FriendRequestPage from "./pages/FriendRequests/FriendRequestPage";
 import FavPosts from "./pages/favPosts/favPosts";
 import ReportedSurf from "./pages/ReportedSurf/ReportedSurf";
+import ReportedMar from "./pages/ReportedSurf/ReportedMark";
+import ReportedPost from "./pages/ReportedSurf/ReportedPosts";
+import ReportedProduct from "./pages/ReportedSurf/ReportedProduct";
 function App() {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -68,7 +71,7 @@ function App() {
             <Route path="/setting">
               <SettingPage />
             </Route>
-            <Route path="/marketer">
+            <Route path="/marketer/:id">
               <MarketerPage />
             </Route>
             <Route path="/search/:search">
@@ -85,6 +88,15 @@ function App() {
             </Route>
             <Route path="/admin/surfers">
               <ReportedSurf />
+            </Route>
+            <Route path="/admin/marketers">
+              <ReportedMar />
+            </Route>
+            <Route path="/admin/posts">
+              <ReportedPost />
+            </Route>
+            <Route path="/admin/products">
+              <ReportedProduct />
             </Route>
           </Switch>
         </>

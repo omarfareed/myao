@@ -1,4 +1,13 @@
-import { Avatar, Grid, Paper, Typography, useTheme } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { SiAdblock } from "react-icons/si";
 import useStyle from "./ProfileStyle";
 import LeftSection from "./LeftSection";
 import GetPosts from "../GlobalForAll/GetPosts";
@@ -42,6 +51,11 @@ const ProfilePage = () => {
   //   });
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
+  const handleBlock = async () => {
+    await axios.patch(`/api/v1/surfer/${params.id}`, {
+      is_active: 0,
+    });
+  };
   return (
     <Grid container className={classes.page} direction="column">
       <Paper className={classes.imageSection} elevation={3}>
@@ -57,7 +71,12 @@ const ProfilePage = () => {
         </Grid>
 
         <Typography variant="h2" className={classes.personName}>
-          {`${profileUser.fname} ${profileUser.lname}`}
+          {`${profileUser.fname} ${profileUser.lname}`}{" "}
+          {user.role === "admin" && (
+            <IconButton size="large">
+              <SiAdblock style={{ fontSize: "2rem" }} onClick={handleBlock} />
+            </IconButton>
+          )}
         </Typography>
         <Typography variant="subtitle1" className={classes.role}>
           {profileUser.jop && `${profileUser.jop}`}

@@ -63,7 +63,7 @@ exports.getReportsForTables = catchAsync(async (req, res, next) => {
 });
 exports.getMarketerReports = catchAsync(async (req, res, next) => {
   const data = await query(
-    `select * from sur_rep_mar JOIN marketer ON mar_id = id`
+    `select * from sur_rep_mar JOIN marketer ON reported_id = id`
   );
   res.json({
     status: "success",
@@ -143,17 +143,23 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
 });
 exports.getPostReports = catchAsync(async (req, res, next) => {
   const q = await query(`select * from sur_rep_pos`);
+  if (q.length === 0)
+    return res.json({
+      status: "success",
+      data: [],
+      reports: [],
+    });
   const reducedCondition = q
     .map(({ reported_id }) => reported_id)
     .reduce((prev, cur, i) => `${prev}${i == 0 ? "" : ","}"${cur}"`, "");
   const posts = await query(
     `select * from post where id IN (${reducedCondition})`
   );
-  console.log(posts);
   const data = await detailedPosts(posts, undefined);
   res.json({
     status: "success",
     data,
+    reports: q,
   });
 });
 
@@ -206,9 +212,16 @@ const detailedProducts = async (products, userId) => {
 };
 exports.getProductReports = catchAsync(async (req, res, next) => {
   const q = await query(`select * from sur_rep_pro`);
+  if (q.length === 0)
+    return res.json({
+      status: "success",
+      data: [],
+      reports: [],
+    });
   const reducedCondition = q
     .map(({ reported_id }) => reported_id)
     .reduce((prev, cur, i) => `${prev}${i == 0 ? "" : ","}"${cur}"`, "");
+
   const products = await query(
     `select * from product where id IN (${reducedCondition})`
   );
@@ -216,6 +229,7 @@ exports.getProductReports = catchAsync(async (req, res, next) => {
   res.json({
     status: "success",
     data,
+    reports: q,
   });
 });
 exports.makeReport = catchAsync(async (req, res, next) => {
@@ -227,6 +241,7 @@ exports.makeReport = catchAsync(async (req, res, next) => {
     )}_rep_${req.body.reported_id.substr(0, 3)} SET ?`,
     req.body
   );
+
   res.json({
     status: "success",
     data,
@@ -240,6 +255,45 @@ exports.deleteReport = catchAsync(async (req, res, next) => {
       3
     )} WHERE reporter_id="${reporter_id}" AND reported_id="${reported_id}"`
   );
+  res.json({
+    status: "success",
+    data,
+  });
+});
+
+exports.deactivate = catchAsync(async (req, res, next) => {
+  const { reported_id, removed, reporter_id } = req.body;
+  let q1 = undefined;
+  if (removed)
+    switch (reported_id.substr(0, 3)) {
+      case "pos":
+        q1 = query(`delete from post where id = "${reported_id}"`);
+        break;
+      case "pro":
+        q1 = query(`delete from product where id ="${reported_id}"`);
+        break;
+      case "sur":
+        q1 = query(
+          `update surfer set is_active = 0 where id = "${reported_id}"`
+        );
+        break;
+      case "mar":
+        q1 = query(
+          `update marketer set is_active = 0 where id = "${reported_id}"`
+        );
+        break;
+      default:
+        break;
+    }
+  const data = await Promise.all([
+    q1,
+    query(
+      `delete from sur_rep_${reported_id.substr(
+        0,
+        3
+      )} where reported_id = "${reported_id}" AND reporter_id = "${reporter_id}"`
+    ),
+  ]);
   res.json({
     status: "success",
     data,

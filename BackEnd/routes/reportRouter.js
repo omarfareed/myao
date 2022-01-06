@@ -15,6 +15,7 @@ const {
   getMarketerReports,
   getSurferReports,
   getProductReports,
+  deactivate,
 } = require("../controller/report");
 router
   .route("/")
@@ -29,5 +30,7 @@ router.get("/product", protect, restrictTo("admin"), getProductReports);
 router
   .route("/:reporter_id")
   .get(transferParamsToBody, protect, restrictTo("admin"), getReportedReports);
-
+router
+  .route("/block")
+  .post(transferParamsToBody, protect, restrictTo("admin"), deactivate);
 module.exports = router;

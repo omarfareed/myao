@@ -45,6 +45,14 @@ const useStyle = makeStyles({
       transform: "translate(1.5rem,-65%)",
     },
   },
+  cover_marketer: {
+    top: "100%",
+    left: "50%",
+    transform: "translate(-50%,-65%)",
+    [theme.breakpoints.down("sm")]: {
+      transform: "translate(-50%,-65%)",
+    },
+  },
   personName: {
     "&.MuiTypography-root": {
       margin: "4.5rem 0 .25rem",

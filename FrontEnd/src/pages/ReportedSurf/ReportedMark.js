@@ -1,17 +1,17 @@
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import SurferCard from "../../components/surferCard/surferCard";
+import MarketerCard from "../../components/surferCard/marketerCard";
 import Wrapper from "../../components/Wrapper/Wrapper";
 import useStyle from "./reportStyle";
-const ReportedSurf = () => {
-  const [rep_sur, set_rep_sur] = useState([]);
+const ReportedMar = () => {
+  const [rep_mar, set_rep_mar] = useState([]);
   const classes = useStyle();
   useEffect(() => {
     const asyFun = async () => {
-      const { data } = await axios.get("/api/v1/report/surfer");
-      set_rep_sur([...data.data]);
-      //   axios.patch("/api/v1/surfer", {});
+      const { data } = await axios.get("/api/v1/report/marketer");
+      // console.log(data);
+      set_rep_mar([...data.data]);
     };
     asyFun();
   }, []);
@@ -23,8 +23,8 @@ const ReportedSurf = () => {
         reporter_id: element.reporter_id,
         removed,
       });
-      rep_sur.splice(ind, 1);
-      set_rep_sur([...rep_sur]);
+      rep_mar.splice(ind, 1);
+      set_rep_mar([...rep_mar]);
     } catch (err) {
       alert(err.message);
     }
@@ -33,9 +33,9 @@ const ReportedSurf = () => {
   return (
     <Wrapper>
       <Grid container item xs={11} lg={7} md={8} spacing={3}>
-        {rep_sur.map((el, ind) => (
+        {rep_mar.map((el, ind) => (
           <Grid item sm={4} xs={6} key={el.id}>
-            <SurferCard
+            <MarketerCard
               user={el}
               id_given={el.reported_id}
               newThings={
@@ -70,4 +70,4 @@ const ReportedSurf = () => {
     </Wrapper>
   );
 };
-export default ReportedSurf;
+export default ReportedMar;

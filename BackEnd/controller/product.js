@@ -120,14 +120,14 @@ exports.getMyProducts = catchAsync(async (req, res, next) => {
   });
 });
 exports.getUserProducts = catchAsync(async (req, res, next) => {
-  if (req.body.marketer_id) req.query.marketer_id = req.body.surfer_id;
+  if (req.body.marketer_id) req.query.marketer_id = req.body.marketer_id;
   else return next(new appError("marketer_id must be given"));
   const queryStr = new APIFeatures("product", req.query)
     .filter()
     .sort()
     .paginate().query;
   const products = await query(queryStr);
-  const data = await detailedPosts(products, req.auth?.id);
+  const data = await detailedProducts(products, req.auth?.id);
   res.json({
     status: "success",
     data,

@@ -4,7 +4,7 @@ import theme from "../../Utilities/Theme";
 const useStyleMarketer = makeStyles({
   marketerTitle: {
     "&.MuiTypography-root": {
-      margin: "2rem auto 0",
+      margin: "3.5rem auto 0",
       fontSize: "3rem",
       color: "#444",
       [theme.breakpoints.down("sm")]: {

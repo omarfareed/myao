@@ -14,7 +14,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(transferParamsToBody, getLogin, productController.getUserProducts)
+  .patch(transferParamsToBody, getLogin, productController.getUserProducts)
   .post(
     transferParamsToBody,
     protect,
