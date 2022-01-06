@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import SearchPage from "./pages/SearchPage/SearchPage";
 import FriendRequestPage from "./pages/FriendRequests/FriendRequestPage";
 import FavPosts from "./pages/favPosts/favPosts";
+import ReportedSurf from "./pages/ReportedSurf/ReportedSurf";
 function App() {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -30,6 +31,7 @@ function App() {
         (locationPath.includes("/login") || locationPath.includes("/signup"))
       ) {
         if (user.role === "marketer") history.push("/marketer");
+        else if (user.role === "admin") history.push("/admin/surfers");
         else history.push("/");
       } else if (
         !isAuth &&
@@ -38,8 +40,14 @@ function App() {
       )
         history.push("/login");
       else {
-        if (user.role === "marketer" && locationPath === "/")
+        if (
+          user.role === "marketer" &&
+          (locationPath === "/" || locationPath.includes("admin"))
+        )
           history.push("/marketer");
+        else if (user.role === "surfer" && locationPath.includes("admin"))
+          history.push("/");
+        // else if (user.role === "admin") history.push("/admin/surfer");
       }
   }, [history, isAuth, loadingUser, location.pathname]);
   return (
@@ -75,7 +83,9 @@ function App() {
             <Route path="/requests">
               <FriendRequestPage />
             </Route>
-            <Route path="/admin"></Route>
+            <Route path="/admin/surfers">
+              <ReportedSurf />
+            </Route>
           </Switch>
         </>
       )}

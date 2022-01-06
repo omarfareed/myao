@@ -159,7 +159,7 @@ exports.getPostReports = catchAsync(async (req, res, next) => {
 
 exports.getSurferReports = catchAsync(async (req, res, next) => {
   const data = await query(
-    `select fname , lname , photo , reporter_id , reported_id from sur_rep_sur JOIN surfer ON reported_id = surfer.id`
+    `select fname , lname , photo , reporter_id , reported_id , report_option from sur_rep_sur JOIN surfer ON reported_id = surfer.id`
   );
   res.json({
     status: "success",
