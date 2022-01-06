@@ -6,15 +6,15 @@ import { MdWork } from "react-icons/md";
 import useStyle from "./ProfileStyle";
 import FriendCard from "./FriendCard";
 import { useState } from "react";
-const LeftSection = () => {
+const LeftSection = ({ user }) => {
   const classes = useStyle();
-  const [arr] = useState([
+  const [Friends] = useState([
     "ahmed mostafa",
     "omar fareed",
     "moaz hassan",
-    "yousef waer",
-    "ahmed assad",
-    "ahmed lotfy",
+    "ahmed mostafa",
+    "omar fareed",
+    "moaz hassan",
   ]);
 
   const infoKeys = {
@@ -25,14 +25,13 @@ const LeftSection = () => {
     birth_date: { convertTo: "was born at", icon: <MdWork /> },
   };
 
-  const [about] = useState({
-    address: "Egypt,Cairo",
-    education: "faculty of engineering cairo univeristy",
-    birth_date: "9/9/2001",
-    interests: "football, programming, chess, basketball",
-    job: "programmer",
-  });
-
+  const about = {
+    address: user.address,
+    education: user.education,
+    birth_date: !user.birth_date ? undefined : user.birth_date.slice(0, 10),
+    interests: user.interests,
+    job: user.jop,
+  };
   return (
     <Grid
       container
@@ -50,7 +49,7 @@ const LeftSection = () => {
             <Typography variant="h2">Friends</Typography>
           </Grid>
           <Grid container spacing={1.5}>
-            {arr.map((el, i) => (
+            {Friends.map((el, i) => (
               <Grid item xs={4} key={el}>
                 <FriendCard key={i} name={el}></FriendCard>
               </Grid>
@@ -64,35 +63,39 @@ const LeftSection = () => {
           <Typography variant="h2">About</Typography>
 
           <Grid container direction="column">
-            {Object.keys(about).map((el) => (
-              <Grid
-                item
-                container
-                key={el}
-                style={{
-                  marginLeft: "0.5rem",
-                  marginTop: "1.3rem",
-                  fontSize: ".8rem",
-                }}
-                columnSpacing={1}
-              >
-                <Grid
-                  item
-                  style={{
-                    marginRight: ".5rem",
-                    color: "#aaa",
-                    paddingTop: ".1rem",
-                  }}
-                >
-                  {infoKeys[el].icon}
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography variant="h5" style={{ fontWeight: "normal" }}>
-                    {infoKeys[el].convertTo} {about[el]}
-                  </Typography>
-                </Grid>
-              </Grid>
-            ))}
+            {Object.keys(about).map((el) => {
+              return (
+                about[el] && (
+                  <Grid
+                    item
+                    container
+                    key={el}
+                    style={{
+                      marginLeft: "0.5rem",
+                      marginTop: "1.3rem",
+                      fontSize: ".8rem",
+                    }}
+                    columnSpacing={1}
+                  >
+                    <Grid
+                      item
+                      style={{
+                        marginRight: ".5rem",
+                        color: "#aaa",
+                        paddingTop: ".1rem",
+                      }}
+                    >
+                      {infoKeys[el].icon}
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography variant="h5" style={{ fontWeight: "normal" }}>
+                        {infoKeys[el].convertTo} {about[el]}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                )
+              );
+            })}
           </Grid>
         </Grid>
       </Paper>

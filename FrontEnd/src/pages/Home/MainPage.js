@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import LeftSection from "./leftSection";
 import MediumSection from "./MediumSection";
-import PopPost from "../../components/PopUp/PopPost";
+// import PopPost from "../../components/PopUp/PopPost";
 const MainPage = () => {
   return (
     <>
@@ -14,7 +14,7 @@ const MainPage = () => {
         </Grid>
         <Grid item lg={4}></Grid>
       </Grid>
-      <PopPost />
+      {/* <PopPost /> */}
     </>
   );
 };

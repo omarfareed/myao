@@ -1,17 +1,12 @@
-const crypto = require("crypto");
+// const crypto = require("crypto");
 const catchAsync = require("../utilities/catchAsync");
 const jwt = require("jsonwebtoken");
 const connection = require("../connection");
 const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
-const security = require("../utilities/security");
+// const security = require("../utilities/security");
 const appError = require("../utilities/appError");
-const {
-  uniqueIdGenerator,
-  filterObjFrom,
-  filterObjTo,
-  addWhereCondition,
-} = require("../utilities/control");
+const { uniqueIdGenerator, filterObjFrom } = require("../utilities/control");
 const columns = require("../utilities/tableColumns");
 exports.transferParamsToBody = (req, res, next) => {
   for (const [key, val] of Object.entries(req.params)) {
@@ -71,7 +66,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password)
     return next(new appError("you must enter email and password"));
-  const userTypes = ["surfer", "marketer"];
+  const userTypes = ["surfer", "marketer", "admin"];
   const users = await Promise.all(
     userTypes.map((table) =>
       query(
@@ -120,7 +115,7 @@ exports.getLogin = catchAsync(async (req, res, next) => {
   // }
 
   // GRANT ACCESS TO PROTECTED ROUTE
-  req.body[`${decoded.role}_id`] = currentUser[0].id;
+  // req.body[`${decoded.role}_id`] = currentUser[0].id;
   req.auth = { role: decoded.role, id: decoded.id };
   next();
 });
@@ -168,7 +163,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // }
 
   // GRANT ACCESS TO PROTECTED ROUTE
-  req.body[`${decoded.role}_id`] = currentUser[0].id;
+  // req.body[`${decoded.role}_id`] = currentUser[0].id;
   req.auth = { role: decoded.role, id: decoded.id };
   next();
 });

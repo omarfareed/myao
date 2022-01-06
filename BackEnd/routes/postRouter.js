@@ -14,21 +14,20 @@ const commentRouter = require("./commentRouter");
 const shareRouter = require("./shareRouter.js");
 const likeRouter = require("./likeRouter");
 router.get("/timeline", protect, postController.getTimeLine);
-router.get("/detailedPosts", getLogin, postController.getPostsWithPersonInfo);
 router
   .route("/")
-  .get(transferParamsToBody, postController.getAllPosts)
+  .get(transferParamsToBody, getLogin, postController.getUserPosts)
   .post(transferParamsToBody, protect, restriction, postController.createPost);
 router.get(
   "/myPosts",
   transferParamsToBody,
   protect,
   restrictTo("surfer"),
-  postController.getPosts
+  postController.getMyPosts
 );
 router
   .route("/:id")
-  .get(transferParamsToBody, postController.getPost)
+  .get(transferParamsToBody, postController.getSinglePost)
   .patch(transferParamsToBody, protect, restriction, postController.updatePost)
   .delete(
     transferParamsToBody,

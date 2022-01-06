@@ -14,14 +14,10 @@ const useStyle = makeStyles({
     },
   },
   imageSection: {
-    height: "35rem",
     marginBottom: "4rem",
+    paddingBottom: "2rem",
     [theme.breakpoints.down("lg")]: {
-      height: "30rem",
       marginBottom: "2rem",
-    },
-    [theme.breakpoints.down("sm")]: {
-      height: "30rem",
     },
   },
   secondImage: {
@@ -32,7 +28,7 @@ const useStyle = makeStyles({
       height: "15rem",
     },
     [theme.breakpoints.down("sm")]: {
-      height: "16rem",
+      height: "13rem",
     },
   },
   cover: {
@@ -82,6 +78,7 @@ const useStyle = makeStyles({
   },
   AddButton: {
     "&.MuiButton-root": {
+      textTransform: "none",
       borderRadius: "1000rem",
       marginLeft: leftMargin,
       marginTop: "1.5rem",
@@ -113,7 +110,6 @@ const useStyle = makeStyles({
   friendSection: {
     padding: "1rem",
     marginBottom: "2rem",
-    [theme.breakpoints.down("md")]: {},
   },
   scrollFunc: {
     "&.MuiGrid-root": {
@@ -124,9 +120,9 @@ const useStyle = makeStyles({
   },
   rightSection: {
     [theme.breakpoints.up("lg")]: {
+      // height: "52.5rem",
       paddingLeft: "1rem",
     },
-    height: "60rem",
   },
   post: {
     "&.MuiPaper-root": {

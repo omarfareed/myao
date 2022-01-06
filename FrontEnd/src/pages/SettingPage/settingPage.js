@@ -1,10 +1,12 @@
 import { Button, Grid } from "@mui/material";
+import { useSelector } from "react-redux";
 import AvatarImage from "../../components/AvatarImage/AvatarImage";
 import InputFieldSimple from "../../components/InputField.js/InputField";
 import useStyle from "./settingStyle";
 
 const SettingPage = () => {
   const classes = useStyle();
+  const { user } = useSelector((state) => state.reducer);
   return (
     <Grid
       container
@@ -15,8 +17,12 @@ const SettingPage = () => {
       <AvatarImage />
       <Grid container direction="column" className={classes.container1}>
         {/* information just for showing */}
-        <InputFieldSimple label="Email" disable={true} value="dummy mail" />
-        <InputFieldSimple label="Email" disable={true} value="dummy mail" />
+        <InputFieldSimple label="Email" disable={true} value={user.email} />
+        <InputFieldSimple
+          label="Name"
+          disable={true}
+          value={`${user.fname} ${user.lname}`}
+        />
         <Button
           variant="contained"
           className={classes.changePass}

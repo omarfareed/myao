@@ -39,5 +39,9 @@ const useStyle = makeStyles({
       marginTop: "-.2rem",
     },
   },
+  loginButton: {
+    color: theme.palette.secondary.main,
+    cursor: "pointer",
+  },
 });
 export default useStyle;

@@ -28,7 +28,7 @@ function SignUp() {
   }, [history, isAuth]);
 
   const [Gender, setGender] = useState(null);
-  const [Role, setRole] = useState(null);
+  const [Role, setRole] = useState("surfer");
   const [DateV, setDateV] = useState(null);
 
   const dispatch = useDispatch();
@@ -91,21 +91,36 @@ function SignUp() {
   ///////////////////////////////////////////////////
 
   const handleSubmit = async () => {
-    const NOW = parseDateF(Date.now());
-    const data = {
-      email: Mail,
-      password: Password,
-      fname: FName,
-      lname: LName,
-      created_date: NOW,
-      last_login: NOW,
-      gender: Gender === "male" ? 1 : 0,
-      birth_date: parseDateF(DateV),
-      role: Role,
-    };
-    const POST = await axios.post("/api/v1/user/signup", data);
-
-    dispatch(UserActions.AddUser(POST.data.data));
+    try {
+      const NOW = parseDateF(Date.now());
+      let data;
+      if (Role === "marketer") {
+        data = {
+          email: Mail,
+          password: Password,
+          fname: FName,
+          lname: LName,
+          founded_at: parseDateF(DateV),
+          is_active: true,
+          role: Role,
+        };
+      } else
+        data = {
+          email: Mail,
+          password: Password,
+          fname: FName,
+          lname: LName,
+          created_date: NOW,
+          last_login: NOW,
+          gender: Gender === "male" ? 1 : 0,
+          birth_date: parseDateF(DateV),
+          role: Role,
+        };
+      const POST = await axios.post("/api/v1/user/signup", data);
+      dispatch(UserActions.AddUser(POST.data.data.user));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   ////////////////////////////////////////
@@ -114,7 +129,7 @@ function SignUp() {
       container
       alignItems="center"
       justifyContent="center"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "100vh", paddingBottom: "1rem" }}
     >
       <Grid container direction="column" className={classes.SignCard}>
         <img src={MainLogo} alt="LOGO" className={classes.logo} />
@@ -156,11 +171,13 @@ function SignUp() {
                   value="female"
                   control={<Radio />}
                   label="Female"
+                  disabled={Role !== "surfer"}
                 />
                 <FormControlLabel
                   value="male"
                   control={<Radio />}
                   label="Male"
+                  disabled={Role !== "surfer"}
                 />
               </RadioGroup>
             </Grid>
@@ -191,7 +208,7 @@ function SignUp() {
         {/* //////////////////////////////////////////////// */}
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            label="Basic example"
+            label={Role === "surfer" ? "Birth Date" : "Founded At"}
             value={DateV}
             onChange={(newValue) => {
               setDateV(newValue);
@@ -234,7 +251,15 @@ function SignUp() {
             Create New Account
           </Button>
         </Grid>
-        {/* <Typography variant="body1">Have an account ? Login</Typography> */}
+        <Typography variant="subtitle1" style={{ margin: "1rem auto 0" }}>
+          Have an account ?{" "}
+          <span
+            className={classes.loginButton}
+            onClick={() => history.push("/login")}
+          >
+            login
+          </span>
+        </Typography>
       </Grid>
     </Grid>
   );

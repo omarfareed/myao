@@ -43,11 +43,7 @@ const FriendCard = ({ name, imageLink = undefined }) => {
     <Grid container direction="column">
       <div className={classes.card}>
         <div className={classes.imageCont}></div>
-        <Avatar
-          src={imageLink}
-          sx={{ height: "width" }}
-          className={classes.image}
-        ></Avatar>
+        <Avatar src={imageLink} className={classes.image}></Avatar>
       </div>
       <Typography variant="h5" className={classes.name}>
         {name}

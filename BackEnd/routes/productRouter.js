@@ -4,6 +4,7 @@ const {
   protect,
   restrictTo,
   transferParamsToBody,
+  getLogin,
 } = require("../controller/authController");
 const restriction = restrictTo("marketer");
 const productController = require("../controller/product");
@@ -13,11 +14,24 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(productController.getAllProducts)
-  .post(protect, restriction, productController.createProduct);
+  .get(transferParamsToBody, getLogin, productController.getUserProducts)
+  .post(
+    transferParamsToBody,
+    protect,
+    restriction,
+    productController.createProduct
+  );
+router.get(
+  "/myProducts",
+  transferParamsToBody,
+  protect,
+  restrictTo("marketer"),
+  productController.getMyProducts
+);
+
 router
   .route("/:id")
-  .get(transferParamsToBody, productController.getProducts)
+  .get(transferParamsToBody, productController.getSingleProduct)
   .patch(protect, restriction, productController.updateProduct)
   .delete(
     protect,

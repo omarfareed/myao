@@ -2,12 +2,15 @@ import { Button, Grid, Paper, Typography } from "@mui/material";
 import useStyle from "../Profile/ProfileStyle";
 import { BsFillArrowDownCircleFill } from "react-icons/bs";
 import useStyleMarketer from "./marketerStyle";
-
+import { useSelector } from "react-redux";
+import GetProducts from "../GlobalForAll/GetProducts";
+// import { useParams } from "react-router-dom";
 const MarketerPage = () => {
   const classes = useStyle();
   const classesMar = useStyleMarketer();
-  //   const isProfile = useState(false);
-
+  const { user } = useSelector((state) => state.reducer);
+  // const params = useParams();
+  // const isProfile = useState(false);
   return (
     <Grid container className={classes.page} direction="column">
       <Paper className={classesMar.MarketerImageSection} elevation={3}>
@@ -17,7 +20,7 @@ const MarketerPage = () => {
             variant="h4"
             className={`${classes.personName} ${classesMar.marketerTitle}`}
           >
-            Blaza Market
+            {`${user.fname} ${user.lname}`}
           </Typography>
           <Button
             variant="contained"
@@ -31,6 +34,9 @@ const MarketerPage = () => {
           </Button>
         </Grid>
       </Paper>
+      <Grid container sx={{ margin: "2rem auto 5rem", width: "50%" }}>
+        {<GetProducts linkOfFetching={`/api/v1/product`} />}
+      </Grid>
     </Grid>
   );
 };

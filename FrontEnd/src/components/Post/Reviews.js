@@ -6,6 +6,7 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Rating,
   Stack,
   TextField,
   Typography,
@@ -13,28 +14,28 @@ import {
 import React, { useEffect, useState } from "react";
 import { BsFillArrowRightCircleFill } from "react-icons/bs";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
-const Comments = ({ open, post_id }) => {
+
+const Reviews = ({ open, product_id }) => {
   const [info, setInfo] = useState([]);
   const [loading, setLoading] = useState(false);
   const [noComment, setNoComments] = useState(false);
   const [value, setValue] = useState("");
-  const history = useHistory();
   const fetching = async () => {
     setLoading(true);
-    const { data } = await axios.patch("/api/v1/comment", { post_id });
+    const { data } = await axios.patch("/api/v1/comment", { product_id });
     setInfo([...info, ...data.data]);
     setLoading(false);
     setNoComments(true);
   };
-  const createComment = async () => {
+
+  const createReview = async () => {
     if (value.length > 0) {
       try {
         const date = new Date().toISOString();
         const dataToSend = {
           content: value,
           created_time: (0, date.slice(0, date.indexOf("T"))),
-          post_id,
+          product_id,
         };
         console.log(dataToSend);
         await axios.post("/api/v1/comment", dataToSend);
@@ -52,29 +53,16 @@ const Comments = ({ open, post_id }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-  const goProfile = (el) => {
-    history.push(`/profile/${el.surfer_id}`);
-  };
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         {info.map((el) => (
-          <ListItem alignItems="flex-start" key={el.post_id}>
+          <ListItem alignItems="flex-start" key={el.product_id}>
             <ListItemAvatar>
-              <Avatar
-                alt="Remy Sharp"
-                style={{ cursor: "pointer" }}
-                src={el.photo}
-                onClick={() => goProfile(el)}
-              />
+              <Avatar alt={el.marherter_name} src={el.photo} />
             </ListItemAvatar>
             <ListItemText
-              primary={
-                <span
-                  onClick={goProfile}
-                  style={{ cursor: "pointer" }}
-                >{`${el.fname} ${el.lname}`}</span>
-              }
+              primary={`${el.fname} ${el.lname}`}
               secondary={
                 <React.Fragment>
                   <Typography
@@ -104,22 +92,35 @@ const Comments = ({ open, post_id }) => {
                 spacing={1}
               >
                 <TextField
-                  sx={{ width: "85%" }}
-                  label="Comment"
-                  placeholder="give your comment"
+                  label="Review"
+                  placeholder="give your Review"
                   multiline
-                  variant="standard"
                   value={value}
+                  sx={{ width: "85%" }}
                   onChange={(e) => setValue(e.target.value)}
                 />
-                <Button
-                  onClick={createComment}
-                  variant="text"
-                  centerRipple
-                  size="small"
-                  disabled={value.length === 0}
-                  startIcon={<BsFillArrowRightCircleFill />}
-                />
+                <Stack
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  spacing={1}
+                >
+                  <Rating
+                    defaultValue="2"
+                    precision=".1"
+                    size="small"
+                    name="read-only"
+                    sx={{ marginRight: "auto" }}
+                  />
+                  <Button
+                    onClick={createReview}
+                    variant="text"
+                    centerRipple
+                    size="small"
+                    disabled={value.length === 0}
+                    startIcon={<BsFillArrowRightCircleFill />}
+                  />
+                </Stack>
               </Stack>
             }
           />
@@ -129,4 +130,4 @@ const Comments = ({ open, post_id }) => {
   );
 };
 
-export default Comments;
+export default Reviews;

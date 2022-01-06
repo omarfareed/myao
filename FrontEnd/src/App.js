@@ -1,5 +1,5 @@
 import SignIn from "./pages/Sign/SignIn";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import SignUp from "./pages/Sign/SignUp";
 import MainPage from "./pages/Home/MainPage";
 import SettingPage from "./pages/SettingPage/settingPage";
@@ -11,14 +11,37 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { useEffect } from "react";
 import SearchPage from "./pages/SearchPage/SearchPage";
+import FriendRequestPage from "./pages/FriendRequests/FriendRequestPage";
+import FavPosts from "./pages/favPosts/favPosts";
 function App() {
   const dispatch = useDispatch();
+  const history = useHistory();
+  const location = useLocation();
   const loadingUser = useSelector((state) => state.reducer.loadingUser);
-
+  const { isAuth, user } = useSelector((state) => state.reducer);
   useEffect(() => {
     dispatch(getMe());
   }, [dispatch]);
-
+  useEffect(() => {
+    const locationPath = location.pathname;
+    if (!loadingUser)
+      if (
+        isAuth &&
+        (locationPath.includes("/login") || locationPath.includes("/signup"))
+      ) {
+        if (user.role === "marketer") history.push("/marketer");
+        else history.push("/");
+      } else if (
+        !isAuth &&
+        !locationPath.includes("/login") &&
+        !locationPath.includes("/signup")
+      )
+        history.push("/login");
+      else {
+        if (user.role === "marketer" && locationPath === "/")
+          history.push("/marketer");
+      }
+  }, [history, isAuth, loadingUser, location.pathname]);
   return (
     <>
       {loadingUser ? null : (
@@ -26,9 +49,6 @@ function App() {
           <Header />
           <Switch>
             <Route path="/" exact>
-              <MainPage />
-            </Route>
-            <Route path="/marketer">
               <MainPage />
             </Route>
             <Route path="/login">
@@ -40,7 +60,7 @@ function App() {
             <Route path="/setting">
               <SettingPage />
             </Route>
-            <Route path="/profile/marketer">
+            <Route path="/marketer">
               <MarketerPage />
             </Route>
             <Route path="/search/:search">
@@ -49,6 +69,13 @@ function App() {
             <Route path="/profile/:id">
               <ProfilePage />
             </Route>
+            <Route path="/fav">
+              <FavPosts />
+            </Route>
+            <Route path="/requests">
+              <FriendRequestPage />
+            </Route>
+            <Route path="/admin"></Route>
           </Switch>
         </>
       )}

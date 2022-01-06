@@ -1,24 +1,29 @@
-import Post from "../../components/Post/post";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Product from "../../components/Post/Product";
+import { useSelector } from "react-redux";
 
-const GetPosts = ({ linkOfFetching, className, surfer_info_ready = null }) => {
+const GetProducts = ({
+  linkOfFetching,
+  className,
+  //   surfer_info_ready = null,
+}) => {
   const [page, setPage] = useState(1);
-  const [posts, setPosts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [finished, setFinished] = useState(false);
   const [fetching, setFetching] = useState(false);
-
+  const { user } = useSelector((s) => s.reducer);
   const asyncFunc = async () => {
     try {
       if (!finished && !fetching) {
         let data;
         data = await axios.get(`${linkOfFetching}?limit=8&page=${page}`);
         data = data.data;
-        // console.log(data.data);
+        console.log(data.data);
         if (data.data.length === 0) {
           setFinished(true);
         } else {
-          setPosts([...posts, ...data.data]);
+          setProducts([...products, ...data.data]);
           setPage((p) => p + 1);
         }
       }
@@ -28,11 +33,11 @@ const GetPosts = ({ linkOfFetching, className, surfer_info_ready = null }) => {
   };
 
   const scrollFunc = async () => {
-    if (posts.length !== 0 && !finished && !fetching) {
+    if (products.length !== 0 && !finished && !fetching) {
       if (
-        document.getElementById(`post_id_${posts.length - 1}`) &&
+        document.getElementById(`product_id_${products.length - 1}`) &&
         document
-          .getElementById(`post_id_${posts.length - 1}`)
+          .getElementById(`product_id_${products.length - 1}`)
           .getClientRects()[0].top < 2000
       ) {
         try {
@@ -59,20 +64,20 @@ const GetPosts = ({ linkOfFetching, className, surfer_info_ready = null }) => {
   useEffect(() => {
     document.onscroll = scrollFunc;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts.length, fetching, finished]);
+  }, [products.length, fetching, finished]);
 
   return (
     <>
-      {posts.map((el, index) => (
-        <Post
-          id={`post_id_${index}`}
+      {products.map((el, index) => (
+        <Product
+          id={`product_id_${index}`}
           data={el}
           key={index}
           className={className}
-          surfer_info={el.surfer_info}
+          marketer_info={user}
         />
       ))}
     </>
   );
 };
-export default GetPosts;
+export default GetProducts;

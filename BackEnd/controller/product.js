@@ -23,6 +23,46 @@ exports.getProduct = catchAsync(async (req, res, next) => {
     data: product,
   });
 });
+
+const detailedProducts = async (products, userId) => {
+  if (products.length === 0) return [];
+  let productsHashed = {};
+  await Promise.all(
+    products.map(async (product) => {
+      const r = await Promise.all([
+        query(
+          `select fname , lname , photo from marketer where id="${product.marketer_id}"`
+        ),
+        query(
+          `select COUNT(*) as reviews_counter , AVG(rating) as avg_rating from review where product_id="${product.id}"`
+        ),
+      ]);
+      const [[marketer_info], [{ reviews_counter, avg_rating }]] = r;
+      console.log(r);
+      productsHashed[product.id] = {
+        ...product,
+        media: [],
+        marketer_info,
+        reviews_counter,
+        avg_rating: avg_rating || 0,
+      };
+    })
+  );
+  // return res.json({ products, postsHashed });
+  const reducedCondition = products.reduce(
+    (prev, cur, index) =>
+      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
+    ""
+  );
+  const products_media = await query(
+    `SELECT * FROM product_media WHERE product_id IN (${reducedCondition})`
+  );
+  products_media.forEach(({ product_id, link }) =>
+    productsHashed[product_id].media.push(link)
+  );
+  return Object.values(productsHashed);
+};
+
 exports.getAllProducts = catchAsync(async (req, res, next) => {
   if (req.body.marketer_id) req.query.marketer_id = req.body.marketer_id;
   const queryStr = new APIFeatures("product", req.query)
@@ -53,6 +93,44 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   res.json({
     status: "success",
     data: Object.values(productsHashed),
+  });
+});
+exports.getSingleProduct = catchAsync(async (req, res, next) => {
+  const products = await query(
+    `select * from product where id = "${req.params.id}"`
+  );
+  const data = await detailedProducts(products, req.auth.id);
+  res.json({
+    status: "success",
+    data,
+  });
+});
+exports.getMyProducts = catchAsync(async (req, res, next) => {
+  req.query.marketer_id = req.auth?.id;
+  if (!req.query.marketer_id) return next(new appError("unexpected error"));
+  const queryStr = new APIFeatures("product", req.query)
+    .filter()
+    .sort()
+    .paginate().query;
+  const products = await query(queryStr);
+  const data = await detailedProducts(products, req.auth.id);
+  res.json({
+    status: "success",
+    data,
+  });
+});
+exports.getUserProducts = catchAsync(async (req, res, next) => {
+  if (req.body.marketer_id) req.query.marketer_id = req.body.surfer_id;
+  else return next(new appError("marketer_id must be given"));
+  const queryStr = new APIFeatures("product", req.query)
+    .filter()
+    .sort()
+    .paginate().query;
+  const products = await query(queryStr);
+  const data = await detailedPosts(products, req.auth?.id);
+  res.json({
+    status: "success",
+    data,
   });
 });
 exports.getProducts = catchAsync(async (req, res, next) => {
@@ -91,6 +169,7 @@ exports.getProducts = catchAsync(async (req, res, next) => {
 
 exports.createProduct = catchAsync(async (req, res, next) => {
   const id = uniqueIdGenerator("product");
+  if (req.auth.id) req.body.marketer_id = req.auth.id;
   req.body["id"] = id;
   req.body["avg_rating"] = 0;
   const product = await query(

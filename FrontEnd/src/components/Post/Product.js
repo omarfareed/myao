@@ -1,47 +1,46 @@
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-// import CardMedia from "@mui/material/CardMedia";
-// import CardContent from "@mui/material/CardContent";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
-import { RiShareForwardLine } from "react-icons/ri";
-import ReportPost from "./ReportPost";
-import { FiMoreVertical } from "react-icons/fi";
-import { FaRegComment } from "react-icons/fa";
-import { MdOutlineFavoriteBorder, MdOutlineFavorite } from "react-icons/md";
-import Comments from "./Comments";
+import { Grid, Menu, Paper, Stack } from "@mui/material";
+import Rating from "@mui/material/Rating";
+import ReportProduct from "./ReportProduct";
 import PostContent from "./PostContent";
 import PostImgs from "./imgGallary";
-import { useHistory } from "react-router-dom";
+import { MdOutlineRateReview } from "react-icons/md";
+import { FiMoreVertical as MoreVertIcon } from "react-icons/fi";
+import Reviews from "./Reviews";
+
 const formatDate = (created_date) => {
   let date = new Date(created_date);
   return date.toUTCString().slice(0, 16);
 };
-const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
+
+const Product = ({ id, marketer_info = {}, data, className, style = {} }) => {
   const LikesCounter = data.like_counter;
-  const history = useHistory();
-  const CommentCounter = data.comment_counter;
+  const ReviewCounter = data.Review_counter;
   const media =
     data.media.length > 0 ? <PostImgs photos={data.media} /> : <></>;
+
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [RatingValue, setRatingValue] = React.useState(data.avg_rating);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
   const [openComment, setOpenComment] = React.useState(0);
-
   const handleCommentClick = () => {
     setOpenComment(!openComment);
   };
-  const openProfile = () => {
-    history.push(`/profile/${data.surfer_id}`);
-  };
+
   return (
     <Paper
       style={{ width: "100%", height: "fit-content", ...style }}
@@ -49,17 +48,10 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
     >
       <Card id={id}>
         <CardHeader
-          avatar={
-            <Avatar
-              color="primary"
-              aria-label="recipe"
-              onClick={openProfile}
-              sx={{ cursor: "pointer" }}
-            />
-          }
+          avatar={<Avatar color="primary" aria-label="recipe" />}
           title={
             <span style={{ color: "#222" }}>
-              {surfer_info.fname + " " + surfer_info.lname}
+              {marketer_info.fname + " " + marketer_info.lname}
             </span>
           }
           subheader={
@@ -77,7 +69,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
                 onClick={handleMenu}
                 color="inherit"
               >
-                <FiMoreVertical />
+                <MoreVertIcon />
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -92,29 +84,18 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
                   horizontal: "right",
                 }}
                 open={Boolean(anchorEl)}
-                onClose={() => {
-                  setAnchorEl(null);
-                }}
+                onClose={handleClose}
               >
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add To favourite
-                </MenuItem>
-                <ReportPost />
+                <ReportProduct />
               </Menu>
             </div>
           }
         />
-
-        <PostContent text={data.post_text} />
-
+        <PostContent text={data.product_text} />
         {media}
         <Stack
           direction="row"
-          justifyContent="space-between"
+          justifyContent="space-evenly"
           alignItems="center"
         >
           <Typography variant="body2" marginLeft="1rem" marginRight="auto">
@@ -122,37 +103,36 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
           </Typography>
           <Grid container width="fit-content" marginLeft="auto">
             <Typography variant="body2" marginRight=".5rem">
-              {!CommentCounter ? null : `${CommentCounter} Comments`}
+              {!ReviewCounter ? null : `${ReviewCounter} Comments`}
             </Typography>
             <Typography variant="body2" marginRight="1rem">
-              {!CommentCounter ? null : `${CommentCounter} Shares`}
+              {!ReviewCounter ? null : `${ReviewCounter} Shares`}
             </Typography>
           </Grid>
         </Stack>
-        {/* {line} */}
+
         <Stack
           direction="row"
           justifyContent="space-evenly"
           alignItems="center"
-          spacing={3}
+          spacing={5}
         >
-          <Checkbox
-            {...label}
-            icon={<MdOutlineFavoriteBorder size={25} />}
-            checkedIcon={<MdOutlineFavorite size={25} />}
+          <Rating
+            defaultValue="1"
+            precision=".1"
+            size="medium"
+            name="read-only"
+            value={RatingValue}
+            readOnly
           />
-          <IconButton aria-label="share" onClick={handleCommentClick}>
-            <FaRegComment />
-          </IconButton>
-
-          <IconButton aria-label="share">
-            <RiShareForwardLine />
+          <IconButton onClick={handleCommentClick}>
+            <MdOutlineRateReview />
           </IconButton>
         </Stack>
-        <Comments open={openComment} post_id={data.id} />
+        <Reviews open={openComment} product_id={data.id} />
       </Card>
     </Paper>
   );
 };
 
-export default Post;
+export default Product;
