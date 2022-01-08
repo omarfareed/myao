@@ -7,6 +7,7 @@ function getMe() {
     try {
       if (document.cookie.includes("jwt") && document.cookie.length > 10) {
         const me = await axios.get("/api/v1/user/me");
+        console.log(me);
         dispatch(UserActions.AddUser(me.data.data));
       } else dispatch(UserActions.setAuth(false));
     } catch (err) {

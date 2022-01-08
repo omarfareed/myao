@@ -1,10 +1,12 @@
-import { Button } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { HiUserAdd, HiUserRemove } from "react-icons/hi";
 import { MdOutlineReport } from "react-icons/md";
 import { FaUserCheck } from "react-icons/fa";
 import useStyle from "./ProfileStyle";
+import ReportPost from "../../components/Post/ReportPost";
+import parseDateF from "../../Utilities/ParsingDate";
 const FriendSectionButton = ({ source_id, target_id }) => {
   const classes = useStyle();
   const [condition, setCondition] = useState(0);
@@ -28,7 +30,7 @@ const FriendSectionButton = ({ source_id, target_id }) => {
   const acceptRequest = async () => {
     try {
       await axios.post("/api/v1/friend/accept", {
-        friendship_time: "2021-12-29",
+        friendship_time: parseDateF(Date.now()),
         source_id: target_id,
       });
       setCondition(2);
@@ -75,14 +77,19 @@ const FriendSectionButton = ({ source_id, target_id }) => {
           Friend
         </Button>
       )}
-      <Button
-        variant="outlined"
-        className={`${classes.AddButton} ${classes.reportButton}`}
-        // disableRipple
-      >
-        <MdOutlineReport style={{ marginRight: "6px", fontSize: "1.3rem" }} />
-        Report
-      </Button>
+      <ReportPost
+        is_post={0}
+        reported_id={target_id}
+        myButton={
+          <Button
+            variant="outlined"
+            className={`${classes.AddButton} ${classes.reportButton}`}
+          >
+            <MdOutlineReport style={{ fontSize: "1.3rem" }} />
+            Report
+          </Button>
+        }
+      ></ReportPost>
     </>
   );
 };

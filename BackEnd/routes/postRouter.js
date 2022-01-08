@@ -17,7 +17,14 @@ router.get("/timeline", protect, postController.getTimeLine);
 router
   .route("/")
   .get(transferParamsToBody, getLogin, postController.getUserPosts)
-  .post(transferParamsToBody, protect, restriction, postController.createPost);
+  .post(
+    transferParamsToBody,
+    protect,
+    restriction,
+    postController.uploadPostPhotos,
+    postController.resizePostPhotos,
+    postController.createPost
+  );
 router.get(
   "/myPosts",
   transferParamsToBody,
@@ -27,8 +34,15 @@ router.get(
 );
 router
   .route("/:id")
-  .get(transferParamsToBody, postController.getSinglePost)
-  .patch(transferParamsToBody, protect, restriction, postController.updatePost)
+  .get(transferParamsToBody, getLogin, postController.getSinglePost)
+  .patch(
+    transferParamsToBody,
+    protect,
+    restriction,
+    postController.uploadPostPhotos,
+    postController.resizePostPhotos,
+    postController.updatePost
+  )
   .delete(
     transferParamsToBody,
     protect,

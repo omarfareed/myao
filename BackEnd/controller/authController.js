@@ -4,9 +4,17 @@ const jwt = require("jsonwebtoken");
 const connection = require("../connection");
 const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
-// const security = require("../utilities/security");
+const {
+  correctPassword,
+  hashPassword,
+  passwordChangedAfter,
+} = require("../utilities/security");
 const appError = require("../utilities/appError");
-const { uniqueIdGenerator, filterObjFrom } = require("../utilities/control");
+const {
+  uniqueIdGenerator,
+  filterObjFrom,
+  filterObjTo,
+} = require("../utilities/control");
 const columns = require("../utilities/tableColumns");
 exports.transferParamsToBody = (req, res, next) => {
   for (const [key, val] of Object.entries(req.params)) {
@@ -19,6 +27,47 @@ const signToken = (id, role) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
+const sharp = require("sharp");
+const multer = require("multer");
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) cb(null, true);
+  else cb(new appError("not an image! please provide an image"));
+};
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadUserPhoto = upload.single("photo");
+exports.uploadUserPhoto = upload.fields([
+  { name: "photo", maxCount: 1 },
+  { name: "cover_photo", maxCount: 1 },
+]);
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.files?.cover_photo && !req.files?.photo) return next();
+
+  if (req.files.cover_photo) {
+    req.body.cover_photo = `user-cover-${req.auth.id}.jpeg`;
+    await sharp(req.files.cover_photo[0].buffer)
+      .resize(2500, 1000)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`../FrontEnd/public/img/users/${req.body.cover_photo}`);
+    req.body.cover_photo = `/img/users/${req.body.cover_photo}`;
+  }
+  if (req.files.photo) {
+    req.body.photo = `user-photo-${req.auth.id}.jpeg`;
+    await sharp(req.files.photo[0].buffer)
+      .resize(500, 500)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`../FrontEnd/public/img/users/${req.body.photo}`);
+    req.body.photo = `/img/users/${req.body.photo}`;
+  }
+  next();
+});
 
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user.id, user.role);
@@ -49,13 +98,21 @@ exports.logout = (req, res) => {
 };
 exports.signup = catchAsync(async (req, res, next) => {
   const { role } = req.body;
+  if (role === "admin")
+    return res.json({
+      status: "failed",
+      error: "LOL",
+    });
   if (!role) return next(new appError("no specific role determined"));
   req.body = filterObjFrom(req.body, ["role"]);
   // req.body = filterObjTo(req.body, columns[role]);
   const id = uniqueIdGenerator(role);
   req.body[columns[role][0]] = id;
+  req.body.password = await hashPassword(req.body.password);
   const data = await query(`INSERT INTO ${role} SET ?`, req.body);
   req.body.role = role;
+
+  console.log(req.body.password);
   // const url = `${req.protocol}://${req.get("host")}/me`;
   // // console.log(url);
   // await new Email(newUser, url).sendWelcome();
@@ -69,16 +126,24 @@ exports.login = catchAsync(async (req, res, next) => {
   const userTypes = ["surfer", "marketer", "admin"];
   const users = await Promise.all(
     userTypes.map((table) =>
-      query(
-        `SELECT * FROM ${table} WHERE email="${email}" AND password="${password}"`
-      )
+      query(`SELECT * FROM ${table} WHERE email="${email}"`)
     )
   );
-  userTypes.forEach((userType, i) => {
-    if (users[i] && users[i].length !== 0) {
-      return createSendToken({ ...users[i][0], role: userType }, 200, req, res);
+  for (let i = 0; i < 3; i++)
+    if (
+      users[i]?.length !== 0 &&
+      (await correctPassword(password, users[i][0].password))
+    ) {
+      users[i][0].password = undefined;
+      if ((users[i][0].is_active = 0))
+        return next(new appError("this account is closed"));
+      return createSendToken(
+        { ...users[i][0], role: userTypes[i] },
+        200,
+        req,
+        res
+      );
     }
-  });
   next(new appError("wrong email or password"));
 });
 
@@ -99,7 +164,7 @@ exports.getLogin = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // 3) Check if user still exists
   const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id} AND is_active = 1"`
   );
   if (!currentUser) {
     return next();
@@ -141,7 +206,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // 3) Check if user still exists
   const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id} AND is_active = 1"`
   );
   console.log(currentUser);
   if (!currentUser) {
@@ -229,7 +294,7 @@ exports.getInfo = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // 3) Check if user still exists
   const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}" AND is_active = 1`
   );
 
   if (!currentUser) {
@@ -237,9 +302,21 @@ exports.getInfo = catchAsync(async (req, res, next) => {
       status: "notAuth",
     });
   }
-
   return res.status(200).json({
     status: "success",
     data: currentUser[0],
+  });
+});
+
+exports.changeUserRole = catchAsync(async (req, res, next) => {
+  const { oldRole, newRole, user_id, newData } = req.body;
+  const oldUser = (
+    await query(`select * from ${oldRole} where id = "${user_id}"`)
+  )[0];
+  const newUserData = filterObjTo({ ...oldUser, ...newData }, columns[newRole]);
+  const data = await query(`insert into ${newRole} set ?`, newUserData);
+  res.json({
+    status: "success",
+    data,
   });
 });

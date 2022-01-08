@@ -19,6 +19,8 @@ router
     transferParamsToBody,
     protect,
     restriction,
+    productController.uploadPostPhotos,
+    productController.resizePostPhotos,
     productController.createProduct
   );
 router.get(
@@ -32,7 +34,13 @@ router.get(
 router
   .route("/:id")
   .get(transferParamsToBody, productController.getSingleProduct)
-  .patch(protect, restriction, productController.updateProduct)
+  .patch(
+    protect,
+    restriction,
+    productController.uploadPostPhotos,
+    productController.resizePostPhotos,
+    productController.updateProduct
+  )
   .delete(
     protect,
     restrictTo("marketer", "admin"),

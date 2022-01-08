@@ -14,12 +14,14 @@ import React, { useEffect, useState } from "react";
 import { BsFillArrowRightCircleFill } from "react-icons/bs";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 const Comments = ({ open, post_id }) => {
   const [info, setInfo] = useState([]);
   const [loading, setLoading] = useState(false);
   const [noComment, setNoComments] = useState(false);
   const [value, setValue] = useState("");
   const history = useHistory();
+  const user = useSelector((state) => state.reducer.user);
   const fetching = async () => {
     setLoading(true);
     const { data } = await axios.patch("/api/v1/comment", { post_id });
@@ -31,13 +33,13 @@ const Comments = ({ open, post_id }) => {
     if (value.length > 0) {
       try {
         const date = new Date().toISOString();
-        const dataToSend = {
+        let dataToSend = {
           content: value,
           created_time: (0, date.slice(0, date.indexOf("T"))),
           post_id,
         };
-        console.log(dataToSend);
         await axios.post("/api/v1/comment", dataToSend);
+        dataToSend = { ...dataToSend, ...user };
         setInfo([...info, dataToSend]);
         setValue("");
       } catch (err) {
@@ -93,7 +95,7 @@ const Comments = ({ open, post_id }) => {
         ))}
         <ListItem alignItems="flex-start">
           <ListItemAvatar>
-            <Avatar alt="Name" />
+            <Avatar alt="Name" /> {/*revise*/}
           </ListItemAvatar>
           <ListItemText
             secondary={

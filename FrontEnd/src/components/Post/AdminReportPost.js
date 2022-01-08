@@ -33,7 +33,13 @@ const AdminReportPost = ({
     >
       <Card>
         <CardHeader
-          avatar={<Avatar color="primary" aria-label="recipe" />}
+          avatar={
+            <Avatar
+              color="primary"
+              aria-label="recipe"
+              src={surfer_info.photo} // revise
+            />
+          }
           title={
             <span style={{ color: "#222" }}>
               {surfer_info.fname + " " + surfer_info.lname}

@@ -5,11 +5,10 @@ const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
 exports.getComments = catchAsync(async (req, res, next) => {
   let data = await query(
-    `select * from comment where post_id="${req.body.post_id}"`
+    `select * from comment JOIN surfer ON 
+    comment.surfer_id = surfer.id 
+    where comment.post_id="${req.body.post_id}"`
   );
-  data = data.map((d) => {
-    return { ...d, fname: "omar", lname: "fareed", photo: null };
-  });
   res.json({
     status: "success",
     data,

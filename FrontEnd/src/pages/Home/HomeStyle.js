@@ -3,13 +3,15 @@ import { makeStyles } from "@mui/styles";
 const useStyle = makeStyles({
   post: {
     "&.MuiPaper-root": {
-      margin: "2rem 0",
+      margin: "1rem 0",
     },
   },
   LeftSection: {
-    margin: "2rem 1rem 0 0",
-    width: "15rem",
-    position: "fixed",
+    "&.MuiGrid-root": {
+      margin: "2rem 1rem 0 0",
+      width: "15rem",
+      position: "fixed",
+    },
   },
   avatarleft: {
     "&.MuiAvatar-root": {
@@ -23,9 +25,8 @@ const useStyle = makeStyles({
   },
   margin: {
     "&.MuiTypography-root": {
-      marginLeft: "1rem",
-      marginRight: "1rem",
-      marginBottom: "1rem",
+      margin: "-.5rem 1rem 1rem",
+      fontSize: "1.1rem",
     },
     textAlign: "center",
   },

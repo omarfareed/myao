@@ -8,16 +8,15 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
+import { GoReport } from "react-icons/go";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { BsFillArrowRightCircleFill } from "react-icons/bs";
+import axios from "axios";
 
-const ReportPost = () => {
-  const [value, setValue] = React.useState("Controlled");
+const ReportPost = ({ reported_id, is_post = true, myButton }) => {
   const [openReport, setopenReport] = React.useState(0);
-
+  const [value, setValue] = React.useState(-1);
   const stylerep = {
     position: "absolute",
     top: "50%",
@@ -33,16 +32,49 @@ const ReportPost = () => {
       md: "40%",
     },
   };
+  const reasons = [
+    "Supporting or promoting a hate or terror group",
+    "Speech that belittles or stereotypes a group of people",
+    "Racism, sexism, homophobia or other discrimination",
+    "Supporting or promoting a hate group",
+    "Violation of someone's privacy",
+  ];
+
+  const createReport = async () => {
+    try {
+      await axios.post("/api/v1/report", {
+        reported_id,
+        report_option: value,
+      });
+      setopenReport(0);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <React.Fragment>
-      <MenuItem
-        onClick={() => {
-          setopenReport(1);
-        }}
-      >
-        report
-      </MenuItem>
+      {is_post ? (
+        <MenuItem
+          onClick={() => {
+            setopenReport(1);
+          }}
+        >
+          report
+        </MenuItem>
+      ) : (
+        <span
+          style={{
+            height: "fit-content",
+            width: "fit-content",
+          }}
+          onClick={() => {
+            setopenReport(1);
+          }}
+        >
+          {myButton}
+        </span>
+      )}
       <Modal
         open={openReport}
         onClose={() => {
@@ -52,8 +84,7 @@ const ReportPost = () => {
         <Paper sx={stylerep}>
           <Box sx={{ p: 2, borderTop: "3px solid blue", borderRadius: "16px" }}>
             <Typography align="left" variant="h6">
-              {" "}
-              Report Post{" "}
+              Report Post
             </Typography>
           </Box>
           <Typography
@@ -61,7 +92,6 @@ const ReportPost = () => {
             variant="caption"
             sx={{ display: { xs: "block", md: "none" } }}
           >
-            {" "}
             Please Choice what is the type of report{" "}
           </Typography>
           <Typography
@@ -80,32 +110,19 @@ const ReportPost = () => {
             spacing={2}
             sx={{ p: 2, borderBottom: "3px solid blue", borderRadius: "16px" }}
           >
-            <RadioGroup name="use-radio-group" defaultValue="first">
-              <FormControlLabel
-                value="first"
-                label="first reason"
-                control={<Radio />}
-              />
-              <FormControlLabel
-                value="second"
-                label="Second reason"
-                control={<Radio />}
-              />
-              <FormControlLabel
-                value="third"
-                label="third reason"
-                control={<Radio />}
-              />
-              <FormControlLabel
-                value="Forth"
-                label="forth reason"
-                control={<Radio />}
-              />
-              <FormControlLabel
-                value="Fifth"
-                label="Fifth reason"
-                control={<Radio />}
-              />
+            <RadioGroup
+              name="use-radio-group"
+              onChange={(v) => {
+                setValue(v.target.value);
+              }}
+            >
+              {reasons.map((element, index) => (
+                <FormControlLabel
+                  value={index}
+                  label={element}
+                  control={<Radio />}
+                />
+              ))}
             </RadioGroup>
 
             <Stack
@@ -114,18 +131,15 @@ const ReportPost = () => {
               alignItems="left"
               spacing={1}
             >
-              <TextField
-                label="Report"
-                placeholder="Explain your report"
-                multiline
-                variant="standard"
-              />
               <Button
-                variant="text"
-                centerRipple
-                size="medium"
-                startIcon={<BsFillArrowRightCircleFill />}
-              />
+                variant="contained"
+                sx={{ color: "white" }}
+                onClick={createReport}
+                disabled={value === -1}
+              >
+                make A Report
+                <GoReport style={{ fontSize: "1.2rem", marginLeft: ".7rem" }} />
+              </Button>
             </Stack>
           </Stack>
         </Paper>

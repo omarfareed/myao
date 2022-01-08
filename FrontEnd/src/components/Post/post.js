@@ -4,6 +4,7 @@ import CardHeader from "@mui/material/CardHeader";
 // import CardMedia from "@mui/material/CardMedia";
 // import CardContent from "@mui/material/CardContent";
 import Avatar from "@mui/material/Avatar";
+import axios from "axios";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
@@ -16,6 +17,7 @@ import Comments from "./Comments";
 import PostContent from "./PostContent";
 import PostImgs from "./imgGallary";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 const formatDate = (created_date) => {
   let date = new Date(created_date);
   return date.toUTCString().slice(0, 16);
@@ -24,6 +26,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
   const LikesCounter = data.like_counter;
   const history = useHistory();
   const CommentCounter = data.comment_counter;
+  const user = useSelector((state) => state.reducer.user);
   const media =
     data.media.length > 0 ? <PostImgs photos={data.media} /> : <></>;
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -39,6 +42,15 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
   const handleCommentClick = () => {
     setOpenComment(!openComment);
   };
+  const addToFav = async () => {
+    // console.log(data.post_id);
+    try {
+      await axios.post(`/api/v1/favpost/${data.post_id}`);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const openProfile = () => {
     history.push(`/profile/${data.surfer_id}`);
   };
@@ -53,6 +65,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
             <Avatar
               color="primary"
               aria-label="recipe"
+              src={surfer_info.photo}
               onClick={openProfile}
               sx={{ cursor: "pointer" }}
             />
@@ -98,12 +111,15 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
               >
                 <MenuItem
                   onClick={() => {
+                    addToFav();
                     setAnchorEl(null);
                   }}
                 >
                   Add To favourite
                 </MenuItem>
-                <ReportPost />
+                {user.id !== data.surfer_id && (
+                  <ReportPost reported_id={data.post_id} />
+                )}
               </Menu>
             </div>
           }
@@ -149,7 +165,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
             <RiShareForwardLine />
           </IconButton>
         </Stack>
-        <Comments open={openComment} post_id={data.id} />
+        <Comments open={openComment} post_id={data.post_id} />
       </Card>
     </Paper>
   );

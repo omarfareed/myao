@@ -33,7 +33,7 @@ function App() {
         isAuth &&
         (locationPath.includes("/login") || locationPath.includes("/signup"))
       ) {
-        if (user.role === "marketer") history.push("/marketer");
+        if (user.role === "marketer") history.push(`/marketer/${user.id}`);
         else if (user.role === "admin") history.push("/admin/surfers");
         else history.push("/");
       } else if (
@@ -47,7 +47,7 @@ function App() {
           user.role === "marketer" &&
           (locationPath === "/" || locationPath.includes("admin"))
         )
-          history.push("/marketer");
+          history.push(`/marketer/${user.id}`);
         else if (user.role === "surfer" && locationPath.includes("admin"))
           history.push("/");
         // else if (user.role === "admin") history.push("/admin/surfer");

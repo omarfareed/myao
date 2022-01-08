@@ -14,7 +14,6 @@ const GetPosts = ({ linkOfFetching, className, surfer_info_ready = null }) => {
         let data;
         data = await axios.get(`${linkOfFetching}?limit=8&page=${page}`);
         data = data.data;
-        // console.log(data.data);
         if (data.data.length === 0) {
           setFinished(true);
         } else {

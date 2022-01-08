@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { protect, restrictTo } = require("../controller/authController");
+const {
+  protect,
+  restrictTo,
+  uploadUserPhoto,
+  resizeUserPhoto,
+} = require("../controller/authController");
 const {
   login,
   logout,
@@ -15,6 +20,6 @@ router.post("/logout", protect, logout);
 router
   .route("/me")
   .get(getInfo)
-  .patch(protect, updateMe)
+  .patch(protect, uploadUserPhoto, resizeUserPhoto, updateMe)
   .delete(protect, deleteMe);
 module.exports = router;

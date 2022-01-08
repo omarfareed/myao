@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Button,
   Grid,
   IconButton,
   Paper,
@@ -60,13 +59,23 @@ const ProfilePage = () => {
     <Grid container className={classes.page} direction="column">
       <Paper className={classes.imageSection} elevation={3}>
         <Grid container className={classes.secondImage}>
+          {profileUser.cover_photo && (
+            <img
+              alt="coverimage"
+              src={profileUser.cover_photo}
+              style={{ width: "100%", height: "100%" }}
+            />
+          )}
           <Grid
             container
             className={classes.cover}
             justifyContent="center"
             alignItems="center"
           >
-            <Avatar sx={{ width: "95%", height: "95%" }}></Avatar>
+            <Avatar
+              sx={{ width: "95%", height: "95%" }}
+              src={profileUser.photo}
+            ></Avatar>
           </Grid>
         </Grid>
 

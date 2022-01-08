@@ -1,4 +1,6 @@
+const { paginate } = require("../utilities/postUtilities");
 const { promisify } = require("util");
+const unlink = promisify(require("fs").unlink);
 const connection = require("../connection");
 const appError = require("../utilities/appError");
 const query = promisify(connection.query).bind(connection);
@@ -23,6 +25,104 @@ exports.getProduct = catchAsync(async (req, res, next) => {
     data: product,
   });
 });
+
+const sharp = require("sharp");
+const multer = require("multer");
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) cb(null, true);
+  else cb(new appError("not an image! please provide an image"));
+};
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadPostPhotos = upload.fields([{ name: "media", maxCount: 30 }]);
+exports.resizePostPhotos = catchAsync(async (req, res, next) => {
+  if (!req.files?.media?.length) return next();
+  console.log(req.files.media.length);
+  req.body.media = [];
+  await Promise.all(
+    req.files.media.map(async ({ buffer }, i) => {
+      const fileName = `product-img-${i}-${req.auth.id}-${Date.now()}.jpeg`;
+      await sharp(buffer)
+        .resize(1000, 800)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`../frontend/public/img/products/${fileName}`);
+      req.body.media.push({ link: `/img/products/${fileName}`, type: 0 });
+    })
+  );
+  next();
+});
+
+const getMarketerProducts = async (
+  userId,
+  additionalJoin = "",
+  additionalCondition = "",
+  queryObj
+) => {
+  const { page, limit } = queryObj;
+  const [products, reviews_info, products_media] = await Promise.all([
+    query(
+      paginate(
+        `
+   select product.id as product_id , product.marketer_id as marketer_id ,
+  product_text , product.created_date as created_date ,
+  reviews_counter , avg_rating , product_name , price , fname , lname , photo
+  from product JOIN marketer
+  ON marketer.id = product.marketer_id
+  ${additionalJoin}
+  ${additionalCondition === "" ? "" : "where " + additionalCondition}
+  `,
+        page,
+        limit
+      )
+    ),
+    query(
+      `select COUNT(*) as review_counter , avg(rating) as avg_rating , product.id as product_id
+      from product JOIN review 
+      ON product.id = review.product_id 
+      ${additionalJoin}
+      ${additionalCondition === "" ? "" : "where " + additionalCondition}
+      group by product.id`
+    ),
+    query(
+      `select product.id as product_id , link 
+      from product JOIN product_media 
+      ON product_media.product_id = product.id 
+      ${additionalJoin}
+      ${additionalCondition === "" ? "" : "where " + additionalCondition}
+      `
+    ),
+  ]);
+  let productHashed = {};
+  products.forEach((product) => {
+    const { fname, lname, photo, marketer_id, product_id } = product;
+    productHashed[product_id] = {
+      ...product,
+      marketer_info: {
+        fname,
+        lname,
+        photo,
+        marketer_id,
+      },
+      media: [],
+    };
+  });
+  reviews_info.forEach(({ reviews_counter, avg_rating, product_id }) => {
+    if (productHashed.hasOwnProperty(product_id)) {
+      productHashed[product_id].reviews_counter = reviews_counter;
+      productHashed[product_id].avg_rating = avg_rating;
+    }
+  });
+  products_media.forEach(({ link, product_id }) => {
+    if (productHashed.hasOwnProperty(product_id))
+      productHashed[product_id].media.push(link);
+  });
+  return Object.values(productHashed);
+};
 
 const detailedProducts = async (products, userId) => {
   if (products.length === 0) return [];
@@ -105,6 +205,18 @@ exports.getSingleProduct = catchAsync(async (req, res, next) => {
     data,
   });
 });
+exports.getSingleProduct = catchAsync(async (req, res, next) => {
+  const data = await getMarketerProducts(
+    req.auth?.id,
+    "",
+    `product.id = "${req.body.id}"`,
+    req.query
+  );
+  res.json({
+    status: "success",
+    data,
+  });
+});
 exports.getMyProducts = catchAsync(async (req, res, next) => {
   req.query.marketer_id = req.auth?.id;
   if (!req.query.marketer_id) return next(new appError("unexpected error"));
@@ -119,6 +231,18 @@ exports.getMyProducts = catchAsync(async (req, res, next) => {
     data,
   });
 });
+exports.getMyProducts = catchAsync(async (req, res, next) => {
+  const data = await getMarketerProducts(
+    req.auth?.id,
+    "",
+    `product.marketer_id = "${req.auth.id}"`,
+    req.query
+  );
+  res.json({
+    status: "success",
+    data,
+  });
+});
 exports.getUserProducts = catchAsync(async (req, res, next) => {
   if (req.body.marketer_id) req.query.marketer_id = req.body.marketer_id;
   else return next(new appError("marketer_id must be given"));
@@ -127,7 +251,19 @@ exports.getUserProducts = catchAsync(async (req, res, next) => {
     .sort()
     .paginate().query;
   const products = await query(queryStr);
-  const data = await detailedProducts(products, req.auth?.id);
+  const data = await detailedPosts(products, req.auth?.id);
+  res.json({
+    status: "success",
+    data,
+  });
+});
+exports.getUserProducts = catchAsync(async (req, res, next) => {
+  const data = await getMarketerProducts(
+    req.auth?.id,
+    "",
+    `product.marketer_id = "${req.body.marketer_id}"`,
+    req.query
+  );
   res.json({
     status: "success",
     data,
@@ -168,26 +304,42 @@ exports.getProducts = catchAsync(async (req, res, next) => {
 });
 
 exports.createProduct = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator("product");
-  if (req.auth.id) req.body.marketer_id = req.auth.id;
-  req.body["id"] = id;
-  req.body["avg_rating"] = 0;
-  const product = await query(
-    `INSERT INTO product set ? `,
-    // filterObjTo(req.body, columns["product"])
-    req.body
-  );
-  if (!req.body.media || !req.body.media.length)
-    return res.json({
-      status: "success",
-      data: product,
-    });
-  const media = req.body.media.map(({ link, type }) => [type, id, link]);
-  const product_media = await query(
-    "INSERT INTO product_media (type , product_id , link) VALUES ?",
-    [media]
-  );
-  return res.json({ status: "success", data: { product, product_media } });
+  const { media } = req.body;
+  try {
+    const id = uniqueIdGenerator("product");
+    if (req.auth.id) req.body.marketer_id = req.auth.id;
+    req.body["id"] = id;
+    req.body["avg_rating"] = 0;
+    delete req.body.media;
+    const product = await query(
+      `INSERT INTO product set ? `,
+      // filterObjTo(req.body, columns["product"])
+      req.body
+    );
+    if (!media?.length)
+      return res.json({
+        status: "success",
+        data: product,
+      });
+    const productMedia = media.map(({ link, type }) => [
+      uniqueIdGenerator("PrMe"),
+      type,
+      id,
+      link,
+    ]);
+    console.log(media);
+    const product_media = await query(
+      "INSERT INTO product_media (id , type , product_id , link) VALUES ?",
+      [productMedia]
+    );
+    return res.json({ status: "success", data: { product, product_media } });
+  } catch (err) {
+    media?.length &&
+      (await Promise.all(
+        media.map(({ link }) => unlink(`../FrontEnd/public${link}`))
+      ));
+    throw err;
+  }
 });
 exports.deleteProduct = controller.delete("product");
 exports.updateProduct = catchAsync(async (req, res, next) => {

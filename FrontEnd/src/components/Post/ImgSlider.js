@@ -1,13 +1,17 @@
-import { Box, ImageListItem } from '@mui/material';
-import React, { useState } from 'react';
-import { FaArrowAltCircleRight, FaArrowAltCircleLeft } from 'react-icons/fa';
-import {slider,image,right_arrow,left_arrow,slide as s,slide_active} from "./imgSliderStyles.js"
+import { Box, ImageListItem } from "@mui/material";
+import React, { useState } from "react";
+import { FaArrowAltCircleRight, FaArrowAltCircleLeft } from "react-icons/fa";
+import {
+  slider,
+  image,
+  right_arrow,
+  left_arrow,
+  slide_active,
+} from "./imgSliderStyles.js";
 
 const ImageSlider = ({ SliderData, currentimg }) => {
-
   const [current, setCurrent] = useState(currentimg);
   const length = SliderData.length;
-
   const nextSlide = () => {
     setCurrent(current === length - 1 ? 0 : current + 1);
   };
@@ -21,23 +25,18 @@ const ImageSlider = ({ SliderData, currentimg }) => {
   }
 
   return (
-    <Box sx={slider} >
-      <Box sx={left_arrow}><FaArrowAltCircleLeft  onClick={prevSlide} /></Box>
-      <Box sx={right_arrow} ><FaArrowAltCircleRight  onClick={nextSlide} /></Box>
-      {SliderData.map((slide, index) => {
-        return (
-          <Box
-            sx={index === current ? slide_active : s}
-            key={index}
-          >
-            {index === current && (
-                <ImageListItem sx={image} >
-              <img src={slide.img} alt='travel image'   />
-              </ImageListItem>
-            )}
-          </Box>
-        );
-      })}
+    <Box sx={slider}>
+      <Box sx={left_arrow}>
+        <FaArrowAltCircleLeft onClick={prevSlide} />
+      </Box>
+      <Box sx={right_arrow}>
+        <FaArrowAltCircleRight onClick={nextSlide} />
+      </Box>
+      <Box sx={slide_active}>
+        <ImageListItem sx={image}>
+          <img alt="post_photo" src={SliderData[current]} />
+        </ImageListItem>
+      </Box>
     </Box>
   );
 };

@@ -39,25 +39,31 @@ exports.getReceivedRequests = catchAsync(async (req, res, next) => {
   const sources_id = await query(
     `SELECT source_id FROM \`friend\` WHERE target_id="${req.auth.id}" AND friendship_time IS NULL`
   );
-  const data = await Promise.all(
-    sources_id.map((source_id) =>
-      query(`select * from surfer where id = "${source_id}"`)
+  const data = (
+    await Promise.all(
+      sources_id.map(({ source_id }) =>
+        query(`select * from surfer where id = "${source_id}"`)
+      )
     )
-  );
+  ).map((el) => el[0]);
   res.json({
     status: "success",
     data,
   });
 });
+
 exports.getSentRequests = catchAsync(async (req, res, next) => {
   const targets_id = await query(
     `SELECT target_id FROM \`friend\` WHERE source_id="${req.auth.id}" AND friendship_time IS NULL`
   );
-  const data = await Promise.all(
-    targets_id.map((target_id) =>
-      query(`select * from surfer where id = "${target_id}"`)
+  const data = (
+    await Promise.all(
+      targets_id.map(({ target_id }) =>
+        query(`select * from surfer where id = "${target_id}"`)
+      )
     )
-  );
+  ).map((el) => el[0]);
+
   res.json({
     status: "success",
     data,

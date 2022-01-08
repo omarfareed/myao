@@ -44,24 +44,88 @@ const detailedPosts = async (posts, userId) => {
   return Object.values(postsHashed);
 };
 exports.getMyFavPosts = catchAsync(async (req, res, next) => {
-  const { post_id, surfer_id } = req.body;
-  const favPosts = await query(
-    `select post_id from favpost where surfer_id="${surfer_id}"`
-  );
-  if (favPosts.length === 0) return res.json({ status: "success", data: [] });
-  const reducedCondition =
-    favPosts.reduce(
-      (prev, { post_id: post }, i) => `${prev}${i === 0 ? "" : ","}"${post}"`,
-      "IN("
-    ) + ")";
-  console.log(reducedCondition);
-  const posts = await query(`select * from post where id ${reducedCondition}`);
-  const data = await detailedPosts(posts, req.auth.id);
+  // post information posts , owner surfer
+  const [posts, likes_counter, isLikes, posts_media] = await Promise.all([
+    query(`
+  select post.id as post_id , post.surfer_id as surfer_id ,
+  post_text , post.created_date as created_date ,
+  comment_counter , fname , lname , photo
+  from favpost
+    JOIN post
+      ON favpost.post_id = post.id
+    JOIN surfer
+      ON surfer.id = favpost.surfer_id
+    where surfer.id = "${req.auth.id}"
+  `),
+    query(
+      `select COUNT(*) as like_counter , favpost.post_id as post_id
+      from favpost JOIN \`like\` 
+      ON favpost.post_id = \`like\`.post_id 
+      where favpost.surfer_id = "${req.auth.id}" 
+      group by favpost.post_id`
+    ),
+    query(
+      `select favpost.post_id as post_id from \`like\` JOIN favpost ON \`like\`.post_id = favpost.post_id
+    where \`like\`.surfer_id = "${req.auth.id}"`
+    ),
+    query(
+      `select favpost.post_id as post_id , link from favpost JOIN post_media ON post_media.post_id = favpost.post_id
+      AND favpost.surfer_id = "${req.auth.id}"
+      `
+    ),
+  ]);
+  let postHashed = {};
+  posts.forEach((post) => {
+    const { fname, lname, photo, surfer_id, post_id } = post;
+    postHashed[post_id] = {
+      ...post,
+      surfer_info: {
+        fname,
+        lname,
+        photo,
+        surfer_id,
+      },
+      liked: false,
+      like_counter: 0,
+      media: [],
+    };
+  });
+  likes_counter.forEach(({ like_counter, post_id }) => {
+    if (postHashed.hasOwnProperty(post_id))
+      postHashed[post_id].like_counter = like_counter;
+  });
+  isLikes.forEach(({ post_id }) => {
+    if (postHashed.hasOwnProperty(post_id)) postHashed[post_id].liked = true;
+  });
+  posts_media.forEach(({ link, post_id }) => {
+    if (postHashed.hasOwnProperty(post_id))
+      postHashed[post_id].media.push(link);
+  });
+  console.log(req.auth.id);
   res.json({
     status: "success",
-    data,
+    data: Object.values(postHashed),
   });
 });
+// exports.getMyFavPosts = catchAsync(async (req, res, next) => {
+//   const { post_id, surfer_id } = req.body;
+//   const favPosts = await query(
+//     `select post_id from favpost where surfer_id="${surfer_id}"`
+//   );
+//   if (favPosts.length === 0) return res.json({ status: "success", data: [] });
+//   const reducedCondition =
+//     favPosts.reduce(
+//       (prev, { post_id: post }, i) => `${prev}${i === 0 ? "" : ","}"${post}"`,
+//       "IN("
+//     ) + ")";
+//   console.log(reducedCondition);
+//   const posts = await query(`select * from post where id ${reducedCondition}`);
+//   const data = await detailedPosts(posts, req.auth.id);
+//   res.json({
+//     status: "success",
+//     data,
+//   });
+// });
 // exports.createFavPost = controller.create("favpost", [], false);
 exports.createFavPost = catchAsync(async (req, res, next) => {
   const data = await query(`INSERT INTO favpost SET ?`, {

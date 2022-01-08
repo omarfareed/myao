@@ -38,6 +38,7 @@ const AdminReportProduct = ({
             <Avatar
               color="primary"
               aria-label="recipe"
+              src={marketer_info.photo} // revise
               style={{ cursor: "pointer" }}
               onClick={() => {
                 history.push(`/marketer/${data.marketer_id}`);

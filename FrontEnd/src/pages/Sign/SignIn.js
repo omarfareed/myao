@@ -56,7 +56,7 @@ function SignIn() {
       dispatch(UserActions.AddUser(user.data.data.user));
       history.push("/");
     } catch (err) {
-      alert(err.message);
+      alert(err);
     }
   };
   ///////////////////////////////////////////////////
