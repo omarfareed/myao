@@ -59,7 +59,7 @@ module.exports = {
     "comment_counter",
   ],
   comment: ["id", "post_id", "surfer_id", "content", "created_time"],
-  favpost: ["post_id", "surfer_id"],
+  fav_post: ["post_id", "surfer_id"],
   friend: ["source_id", "target_id", "friendship_time", "blocked"],
   like: ["type", "post_id", "surfer_id", "like_time"],
   share: ["post_id", "surfer_id", "share_time"],

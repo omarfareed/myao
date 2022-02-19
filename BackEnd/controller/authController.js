@@ -1,16 +1,20 @@
-const crypto = require("crypto");
+// const crypto = require("crypto");
 const catchAsync = require("../utilities/catchAsync");
 const jwt = require("jsonwebtoken");
 const connection = require("../connection");
 const { promisify } = require("util");
 const query = promisify(connection.query).bind(connection);
-const security = require("../utilities/security");
+const {
+  correctPassword,
+  hashPassword,
+  passwordChangedAfter,
+  createPasswordResetToken,
+} = require("../utilities/security");
 const appError = require("../utilities/appError");
 const {
   uniqueIdGenerator,
   filterObjFrom,
   filterObjTo,
-  addWhereCondition,
 } = require("../utilities/control");
 const columns = require("../utilities/tableColumns");
 exports.transferParamsToBody = (req, res, next) => {
@@ -25,19 +29,55 @@ const signToken = (id, role) => {
   });
 };
 
+const sharp = require("sharp");
+const multer = require("multer");
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) cb(null, true);
+  else cb(new appError("not an image! please provide an image"));
+};
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadUserPhoto = upload.single("photo");
+exports.uploadUserPhoto = upload.fields([
+  { name: "photo", maxCount: 1 },
+  { name: "cover_photo", maxCount: 1 },
+]);
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.files?.cover_photo && !req.files?.photo) return next();
+
+  if (req.files.cover_photo) {
+    req.body.cover_photo = `user-cover-${req.auth.id}.jpeg`;
+    await sharp(req.files.cover_photo[0].buffer)
+      .resize(2500, 1000)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`../FrontEnd/public/img/users/${req.body.cover_photo}`);
+    req.body.cover_photo = `/img/users/${req.body.cover_photo}`;
+  }
+  if (req.files.photo) {
+    req.body.photo = `user-photo-${req.auth.id}.jpeg`;
+    await sharp(req.files.photo[0].buffer)
+      .resize(500, 500)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`../FrontEnd/public/img/users/${req.body.photo}`);
+    req.body.photo = `/img/users/${req.body.photo}`;
+  }
+  next();
+});
+
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user.id, user.role);
-
   res.cookie("jwt", token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
   });
-
-  // Remove password from output
-  user.password = undefined;
-
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     status: "success",
     token,
     data: {
@@ -50,127 +90,94 @@ exports.logout = (req, res) => {
     expires: new Date(Date.now() + 1000),
     httpOnly: true,
   });
-  res.status(200).json({ status: "success" });
+  return res.status(200).json({ status: "success" });
+};
+const prepareSignupBody = async (req) => {
+  req.body.id = uniqueIdGenerator();
+  req.body.role = "user";
+  req.body.password && (req.body.password = await hashPassword(body.password));
 };
 exports.signup = catchAsync(async (req, res, next) => {
-  const { role } = req.body;
-  if (!role) return next(new appError("no specific role determined"));
-  req.body = filterObjFrom(req.body, ["role"]);
-  // req.body = filterObjTo(req.body, columns[role]);
-  const id = uniqueIdGenerator(role);
-  req.body[columns[role][0]] = id;
-  const data = await query(`INSERT INTO ${role} SET ?`, req.body);
-  req.body.role = role;
-  // const url = `${req.protocol}://${req.get("host")}/me`;
-  // // console.log(url);
-  // await new Email(newUser, url).sendWelcome();
-
+  await prepareSignupBody(req.body);
+  await query(`INSERT INTO user SET ?`, req.body);
   createSendToken(req.body, 201, req, res);
 });
-exports.login = catchAsync(async (req, res, next) => {
+const sendErrorMessage = (next, message) => {
+  next(new appError(message));
+  return null;
+};
+const searchForUser = async (email, password, role) => {
+  const [user] = await query(`select * from ${role} where email="${email}"`);
+  if (!user || !(await correctPassword(password, data[0].password)))
+    return null;
+  user.role = role;
+  return user;
+};
+const getUserLogin = async (req, next) => {
   const { email, password } = req.body;
   if (!email || !password)
-    return next(new appError("you must enter email and password"));
-  const userTypes = ["surfer", "marketer"];
-  const users = await Promise.all(
-    userTypes.map((table) =>
-      query(
-        `SELECT * FROM ${table} WHERE email="${email}" AND password="${password}"`
-      )
-    )
-  );
-  userTypes.forEach((userType, i) => {
-    if (users[i] && users[i].length !== 0) {
-      return createSendToken({ ...users[i][0], role: userType }, 200, req, res);
-    }
-  });
-  next(new appError("wrong email or password"));
+    return sendErrorMessage(next, "you must enter email and password");
+  const user =
+    (await searchForUser(email, password, "user")) ||
+    (await searchForUse(email, password, "admin"));
+  if (!user) return sendErrorMessage(next, "wrong email or password");
+  return user;
+};
+exports.login = catchAsync(async (req, res, next) => {
+  const user = await getUserLogin(req, next);
+  if (!user) return;
+  if (user.role === "user" && user.is_active === 0)
+    return sendErrorMessage(next, "this account has been closed");
+  createSendToken(user, 200, req, res);
 });
 
+const findAuthorizationToken = (req) => {
+  if (req.headers?.authorization?.startsWith("Bearer"))
+    return req.headers.authorization.split(" ")[1];
+  return req.cookies.jwt;
+};
+const getCurrentUser = async () => {
+  const token = findAuthorizationToken();
+  if (!token) return null;
+  const { id, role } = await promisify(jwt.verify)(
+    token,
+    process.env.JWT_SECRET
+  );
+  const currentUser = await query(
+    `select * from ${role} where id="${id}" ${
+      role === "user" ? "and is_active=1" : ""
+    }`
+  );
+  return currentUser;
+};
 exports.getLogin = catchAsync(async (req, res, next) => {
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) return next();
-
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // 3) Check if user still exists
-  const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
-  );
-  if (!currentUser) {
-    return next();
-  }
-
-  // 4) Check if user changed password after the token was issued
-  // if (
-  //   security.passwordChangedAfter(decoded.iat, currentUser.passwordChangedAt)
-  // ) {
-  //   return next(
-  //     new AppError("User recently changed password! Please log in again.", 401)
-  //   );
-  // }
-
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.body[`${decoded.role}_id`] = currentUser[0].id;
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return next();
   req.auth = { role: decoded.role, id: decoded.id };
   next();
 });
+
 exports.protect = catchAsync(async (req, res, next) => {
-  // 1) Getting token and check of it's there
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) {
+  const currentUser = getCurrentUser();
+  if (!currentUser)
     return next(
-      new appError("You are not logged in! Please log in to get access.", 401)
+      new appError("You are not logged in! Please log in to get access."),
+      401
     );
-  }
-
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // 3) Check if user still exists
-  const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
-  );
-  console.log(currentUser);
-  if (!currentUser) {
-    return next(
-      new AppError(
-        "The user belonging to this token does no longer exist.",
-        401
-      )
-    );
-  }
-
-  // 4) Check if user changed password after the token was issued
-  // if (
-  //   security.passwordChangedAfter(decoded.iat, currentUser.passwordChangedAt)
-  // ) {
-  //   return next(
-  //     new AppError("User recently changed password! Please log in again.", 401)
-  //   );
-  // }
-
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.body[`${decoded.role}_id`] = currentUser[0].id;
   req.auth = { role: decoded.role, id: decoded.id };
   next();
+});
+exports.getInfo = catchAsync(async (req, res, next) => {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    return res.status(401).json({
+      status: "notAuth",
+    });
+  }
+  return res.status(200).json({
+    status: "success",
+    data: currentUser[0],
+  });
 });
 
 exports.updateMe = catchAsync(async (req, res, next) => {
@@ -188,6 +195,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     "last_published",
     "founded_at",
   ]);
+  if (req.file?.filename) req.body.photo = req.file.filename;
   const data = await query(`UPDATE ${role} SET ? WHERE id="${id}"`, req.body);
   res.json({
     status: "success",
@@ -213,38 +221,50 @@ exports.changeAuthTo = (newName) => (req, res, next) => {
   req.body[newName] = req.auth.id;
   next();
 };
-exports.getInfo = catchAsync(async (req, res, next) => {
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
 
-  if (!token) {
-    return res.status(401).json({
-      status: "notAuth",
-    });
-  }
-
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // 3) Check if user still exists
-  const currentUser = await query(
-    `SELECT * FROM ${decoded.role} WHERE id="${decoded.id}"`
+// TODO:
+exports.changeUserRole = catchAsync(async (req, res, next) => {
+  const { oldRole, newRole, user_id, newData } = req.body;
+  const oldUser = (
+    await query(`select * from ${oldRole} where id = "${user_id}"`)
+  )[0];
+  await query(`delete from user where id = "${req.body.user_id}"`);
+  const newUserData = filterObjTo(
+    { ...oldUser, ...newData, id: uniqueIdGenerator() },
+    columns[newRole]
   );
-
-  if (!currentUser) {
-    return res.status(401).json({
-      status: "notAuth",
-    });
-  }
-
-  return res.status(200).json({
+  const data = await query(`insert into ${newRole} set ?`, newUserData);
+  res.json({
     status: "success",
-    data: currentUser[0],
+    data,
+  });
+});
+
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await query(`select * from surfer where email = "${email}"`);
+  if (!user) return next(new appError("no user with such email"));
+  const { resetToken, passwordResetExpires, passwordResetToken } =
+    createPasswordResetToken();
+});
+// TODO:
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, newPasswordConfirm, role } = req.body;
+  if (newPassword !== newPasswordConfirm)
+    return next(new appError(`password doesn't equal password confirm`));
+  const [{ password: hashedPass }] = await query(
+    `select password from ${role} where id = "${req.auth.id}" AND is_active = 1`
+  );
+  console.log(req.auth.id);
+  if (!hashedPass) next(new appError("account is deleted"));
+  if (!(await correctPassword(currentPassword, hashedPass)))
+    next(new appError("wrong password"));
+  const newPasswordHashed = await hashPassword(newPassword);
+  const data = await query(
+    `update ${role} set password = "${newPasswordHashed}" where id = "${req.auth.id}"`
+  );
+  res.json({
+    status: "success",
+    data,
   });
 });

@@ -14,22 +14,35 @@ const commentRouter = require("./commentRouter");
 const shareRouter = require("./shareRouter.js");
 const likeRouter = require("./likeRouter");
 router.get("/timeline", protect, postController.getTimeLine);
-router.get("/detailedPosts", getLogin, postController.getPostsWithPersonInfo);
 router
   .route("/")
-  .get(transferParamsToBody, postController.getAllPosts)
-  .post(transferParamsToBody, protect, restriction, postController.createPost);
+  .get(transferParamsToBody, getLogin, postController.getUserPosts)
+  .post(
+    transferParamsToBody,
+    protect,
+    restriction,
+    postController.uploadPostPhotos,
+    postController.resizePostPhotos,
+    postController.createPost
+  );
 router.get(
   "/myPosts",
   transferParamsToBody,
   protect,
   restrictTo("surfer"),
-  postController.getPosts
+  postController.getMyPosts
 );
 router
   .route("/:id")
-  .get(transferParamsToBody, postController.getPost)
-  .patch(transferParamsToBody, protect, restriction, postController.updatePost)
+  .get(transferParamsToBody, getLogin, postController.getSinglePost)
+  .patch(
+    transferParamsToBody,
+    protect,
+    restriction,
+    postController.uploadPostPhotos,
+    postController.resizePostPhotos,
+    postController.updatePost
+  )
   .delete(
     transferParamsToBody,
     protect,

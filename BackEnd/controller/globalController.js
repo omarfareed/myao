@@ -23,7 +23,13 @@ exports.select = (table) =>
     );
     res.json({
       status: "success",
-      data,
+      data: data.map((el) => ({
+        ...el,
+        password: undefined,
+        passwordChangedAt: undefined,
+        passwordResetToken: undefined,
+        passwordResetExpires: undefined,
+      })),
     });
   });
 // INSERT INTO TABLE SET ? ==> get values from filtered req.body
@@ -58,7 +64,7 @@ exports.delete = (table) =>
     res.json({
       status: "success",
       data,
-      id,
+      // id,
     });
   });
 

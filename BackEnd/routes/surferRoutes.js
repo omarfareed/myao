@@ -7,39 +7,49 @@ const {
   restrictTo,
   getLogin,
 } = require("../controller/authController");
-const surferController = require("../controller/surfer");
+const userController = require("../controller/user");
 const router = express.Router();
 const postRouter = require("./postRouter");
-const favPostRouter = require("./favPostRouter");
+const fav_postRouter = require("./fav_postRouter");
 const commentRouter = require("./commentRouter");
-const reviewRouter = require("./reviewRouter");
-const locationRouter = require("./locationRouter");
 
 router
   .route("/")
-  .get(surferController.getSurfers)
-  .post(protect, restrictTo("admin"), surferController.createSurfer);
-router.route("/search").post(getLogin, surferController.searchSurfer);
+  .get((req, res, next) => {
+    req.body.is_active = 1;
+    next();
+  }, userController.getUsers)
+  .post(protect, restrictTo("admin"), userController.createUser);
+router.route("/search").post(getLogin, userController.searchUser);
 router
   .route("/:id")
-  .get(transferParamsToBody, surferController.getSurfers)
+  .get(
+    transferParamsToBody,
+    (req, res, next) => {
+      req.body.is_active = 1;
+      next();
+    },
+    userController.getUsers
+  )
   .patch(
     transferParamsToBody,
     protect,
     restrictTo("admin"),
-    surferController.updateSurfer
+    userController.updateUser
   )
   .delete(
     transferParamsToBody,
     protect,
     restrictTo("admin"),
-    surferController.deleteSurfer,
-    surferController.updateSurfer
+    userController.deleteUser,
+    userController.updateUser
   );
 
-router.use("/:surfer_id/post", postRouter);
-router.use("/:surfer_id/fav_post", favPostRouter);
-router.use("/:surfer_id/comment", commentRouter);
-router.use("/:surfer_id/review", reviewRouter);
-router.use("/:surfer_id/location", locationRouter);
+router.use("/:user_id/post", postRouter);
+router.use("/:user_id/fav_post", fav_postRouter);
+router.use("/:user_id/comment", commentRouter);
 module.exports = router;
+/*
+1- change put => params
+2- solve problems  
+*/ 

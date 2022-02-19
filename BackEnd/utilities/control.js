@@ -1,7 +1,5 @@
-exports.uniqueIdGenerator = (table = "") =>
-  `${table.substring(0, 3)}${Date.now()
-    .toString(36)
-    .substring(0, 7)}${Math.floor(Math.random() * 100)}`;
+exports.uniqueIdGenerator = () =>
+  `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
 exports.addWhereCondition = (query, Obj) =>
   Object.keys(Obj).reduce(
     (prev, cur, i) =>
@@ -22,4 +20,9 @@ exports.filterObjTo = (Obj, fil = []) => {
     if (val in Obj) newObj[val] = Obj[val];
   });
   return newObj;
+};
+
+exports.convertAuthTo = (authTo) => (req, res, next) => {
+  req.body[authTo] = req.auth?.id;
+  next();
 };

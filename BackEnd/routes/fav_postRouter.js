@@ -1,28 +1,34 @@
 const express = require("express");
-
+const { convertAuthTo } = require("../utilities/control");
 const {
   transferParamsToBody,
   protect,
   restrictTo,
 } = require("../controller/authController");
-const favPostController = require("../controller/fav_post");
+const fav_postController = require("../controller/fav_post");
 const router = express.Router({ mergeParams: true });
 const restriction = restrictTo("surfer", "admin");
-router.get("/", transferParamsToBody, favPostController.getFavPost);
+// router.get("/", transferParamsToBody, , fav_postController.getfav_post);
+router.get(
+  "/myfav_posts",
+  protect,
+  restrictTo("surfer"),
+  convertAuthTo("surfer_id"),
+  fav_postController.getMyfav_posts
+);
 router
   .route("/:post_id")
-  .get(transferParamsToBody, favPostController.getFavPost)
   .post(
     transferParamsToBody,
     protect,
     restriction,
-    favPostController.createFavPost
+    fav_postController.createfav_post
   )
   .delete(
     transferParamsToBody,
     protect,
     restriction,
-    favPostController.deleteFavPost
+    fav_postController.deletefav_post
   );
 
 module.exports = router;

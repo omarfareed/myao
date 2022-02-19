@@ -15,6 +15,10 @@ router
     transferParamsToBody,
     protect,
     restriction,
+    (req, res, next) => {
+      req.body.surfer_id = req.auth.id;
+      next();
+    },
     commentController.createComment
   );
 router
