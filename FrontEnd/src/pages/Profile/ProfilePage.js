@@ -108,13 +108,13 @@ const ProfilePage = () => {
         <Typography variant="subtitle1" className={classes.address}>
           {profileUser.address && `${profileUser.address}`}
         </Typography>
-        {params.id !== user.id && user.role === "user" && (
-          <FriendSectionButton source_id={user.id} target_id={params.id} />
-        )}
+        {/* {params.id !== user.id && user.role === "user" && (
+          // <FriendSectionButton source_id={user.id} target_id={params.id} />
+        )} */}
       </Paper>
       <Grid container>
         <Grid item sm={12} lg={5} style={{ height: "fit-content" }}>
-          <LeftSection user={user} />
+          {/* <LeftSection user={user} /> */}
         </Grid>
         <Grid container className={classes.rightSection} item lg={7}>
           <Grid container style={{ height: "fit-content" }}>

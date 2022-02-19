@@ -3,7 +3,7 @@ import SignUp from "./pages/Sign/SignUp";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import MainPage from "./pages/Home/MainPage";
 // import SettingPage from "./pages/SettingPage/settingPage";
-// import ProfilePage from "./pages/Profile/ProfilePage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import Header from "./components/Header/header";
 import getMe from "./Store/Thunk/getMe";
 import { useDispatch, useSelector } from "react-redux";
@@ -60,7 +60,9 @@ function App() {
             <Route path="/signup">
               <SignUp />
             </Route>
-            <Route path="/profile/:id">{/* <ProfilePage /> */}</Route>
+            <Route path="/profile/:id">
+              <ProfilePage />
+            </Route>
             {/*
             <Route path="/setting">
               <SettingPage />
