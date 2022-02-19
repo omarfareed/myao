@@ -241,12 +241,15 @@ exports.getMyPosts = catchAsync(async (req, res, next) => {
   });
 });
 exports.getMyPosts = catchAsync(async (req, res, next) => {
-  const data = await getUserPosts(
-    req.auth.id,
-    "",
-    `post.user_id = "${req.auth.id}"`,
-    req.query
-  );
+  const postQuery = new APIFeatures("post", {
+    fields: "post.*,first_name,last_name,photo",
+    conditions: ["user.id = post.user_id", `post.user_id="${req.auth.id}"`],
+    joins: [{ table: "user", condition: "post.user_id = user.id" }],
+    ...req.params,
+  })
+    .filter()
+    .paginate().query;
+  const data = await query(postQuery);
   res.json({
     status: "success",
     data,
