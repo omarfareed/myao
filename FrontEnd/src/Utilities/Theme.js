@@ -29,6 +29,8 @@ theme.typography.h2 = {
 theme.typography.h3 = {
   fontFamily: "Roboto",
   fontWeight: "600",
+  color: "#555",
+  fontSize: "1.5rem",
 };
 theme.typography.h4 = {
   fontFamily: "Roboto",
@@ -63,8 +65,8 @@ theme.typography.subtitle2 = {
   fontWeight: "500",
   color: GreyColor,
   fontSize: ".75rem",
-  letterSpacing: "1.5px",
-  wordSpacing: ".3px",
+  // letterSpacing: "1.5px",
+  // wordSpacing: ".3px",
 };
 theme.typography.body2 = {
   fontWeight: "400",

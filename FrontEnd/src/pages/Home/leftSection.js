@@ -1,13 +1,24 @@
 import { Avatar, Grid, Paper, Typography } from "@mui/material";
 import useStyle from "./HomeStyle";
 import { useSelector } from "react-redux";
+import SurferCard from "../../components/surferCard/surferCard";
 const LeftSection = () => {
   const classes = useStyle();
   const { user } = useSelector((state) => state.reducer);
   return (
     <>
       <Grid container justifyContent="flex-end">
-        <Paper className={classes.LeftSection}>
+        <Grid item className={classes.LeftSection}>
+          <SurferCard
+            user={user}
+            newThings={
+              <Typography variant="subtitle1" className={classes.margin}>
+                {user.job ? user.job : "NO RULE SPECIFIED"}
+              </Typography>
+            }
+          />
+        </Grid>
+        {/* <Paper className={classes.LeftSection}>
           <Grid container direction="column" alignItems="center">
             <Grid
               container
@@ -26,7 +37,7 @@ const LeftSection = () => {
               {user.job ? user.job : "NO RULE SPECIFIED"}
             </Typography>
           </Grid>
-        </Paper>
+        </Paper> */}
       </Grid>
     </>
   );

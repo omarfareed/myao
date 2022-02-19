@@ -7,6 +7,7 @@ function getMe() {
     try {
       if (document.cookie.includes("jwt") && document.cookie.length > 10) {
         const me = await axios.get("/api/v1/user/me");
+        me.data.data.role = "surfer";
         dispatch(UserActions.AddUser(me.data.data));
       } else dispatch(UserActions.setAuth(false));
     } catch (err) {

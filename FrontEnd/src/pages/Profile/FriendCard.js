@@ -1,6 +1,7 @@
 import { Avatar, Grid, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import theme from "../../Utilities/Theme";
 
 const useStyle = makeStyles({
@@ -34,20 +35,16 @@ const useStyle = makeStyles({
     width: "100%",
   },
 });
-const FriendCard = ({ name, imageLink = undefined }) => {
+const FriendCard = ({ name, imageLink = undefined, photo ,id}) => {
   const classes = useStyle();
-
+  const history = useHistory();
   useEffect(() => {}, []);
 
   return (
     <Grid container direction="column">
-      <div className={classes.card}>
+      <div className={classes.card} >
         <div className={classes.imageCont}></div>
-        <Avatar
-          src={imageLink}
-          sx={{ height: "width" }}
-          className={classes.image}
-        ></Avatar>
+        <Avatar src={imageLink} className={classes.image}></Avatar>
       </div>
       <Typography variant="h5" className={classes.name}>
         {name}

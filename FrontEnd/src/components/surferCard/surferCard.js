@@ -36,12 +36,18 @@ const useStyle = makeStyles({
     },
     textAlign: "center",
   },
+  cover_photo: {
+    width: "100%",
+    height: "100%",
+    borderRadius: "5px 5px 0 0",
+  },
 });
-const SurferCard = ({ user = {}, newThings = null }) => {
+const SurferCard = ({ user = {}, newThings = null, id_given = undefined }) => {
   const classes = useStyle();
   const history = useHistory();
   function goProfile() {
-    history.push("/profile/" + user.id);
+    const id = id_given === undefined ? user.id : id_given;
+    history.push("/profile/" + id);
   }
   return (
     <Paper style={{ width: "100%" }}>
@@ -52,6 +58,13 @@ const SurferCard = ({ user = {}, newThings = null }) => {
           className={classes.avatarContainer}
           onClick={goProfile}
         >
+          {user.cover_photo && (
+            <img
+              alt="cover"
+              src={user.cover_photo}
+              className={classes.cover_photo}
+            />
+          )}
           <Avatar src={user.photo} className={classes.avatarleft} />
         </Grid>
         <Typography

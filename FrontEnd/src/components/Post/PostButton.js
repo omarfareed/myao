@@ -1,27 +1,29 @@
-import * as React from 'react';
-import LoadingButton from '@mui/lab/LoadingButton';
-import SendIcon from '@mui/icons-material/Send';
+import * as React from "react";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { IoSend } from "react-icons/io5";
 
-const PostButton = () => {
+const PostButton = ({ createPost = () => {}, label = "Post" }) => {
   const [loading, setLoading] = React.useState(false);
-  function handleClick() {
+  const handleClick = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(0);
-    }, 2000);
-  }
+    await createPost();
+    // setTimeout(() => {
+    setLoading(0);
+    // }, 2000);
+  };
 
   return (
-      <LoadingButton
-        onClick={handleClick}
-        endIcon={<SendIcon />}
-        loading={loading}
-        loadingPosition="end"
-        variant="contained"
-      >
-        Post
-      </LoadingButton>
+    <LoadingButton
+      onClick={handleClick}
+      endIcon={<IoSend />}
+      loading={loading}
+      loadingPosition="end"
+      variant="contained"
+      sx={{ color: "#fff" }}
+    >
+      {label}
+    </LoadingButton>
   );
-}
+};
 
 export default PostButton;

@@ -2,27 +2,32 @@ import { Grid } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Post from "../../components/Post/Post";
+import Post from "../../components/Post/post";
+import Product from "../../components/Post/Product";
 import SurferCard from "../../components/surferCard/surferCard";
-import useStyle from "./SearchPageStyle";
+import Wrapper from "../../components/Wrapper/Wrapper";
 
 const SearchPage = () => {
   const params = useParams();
-  const classes = useStyle();
-  const [usersPosts, setUsersPosts] = useState({ posts: [], surfers: [] });
+  const [usersPosts, setUsersPosts] = useState({
+    posts: [],
+    surfers: [],
+    products: [],
+  });
   const fetchingFunc = async () => {
     const { data } = await axios.post("/api/v1/surfer/search", {
       search: params.search,
     });
-    console.log(data.data.surfers);
+    console.log(data.data);
     setUsersPosts(data.data);
   };
 
   useEffect(() => {
     fetchingFunc();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
   return (
-    <Grid container justifyContent="center" className={classes.page}>
+    <Wrapper>
       <Grid container item xs={11} lg={7} md={8} spacing={3}>
         {usersPosts.surfers.map((e) => (
           <Grid item sm={4} xs={6} key={e.id}>
@@ -40,7 +45,7 @@ const SearchPage = () => {
           />
         ))}
       </Grid>
-    </Grid>
+    </Wrapper>
   );
 };
 

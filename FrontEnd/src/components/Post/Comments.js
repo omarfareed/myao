@@ -10,14 +10,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsFillArrowRightCircleFill } from "react-icons/bs";
 import axios from "axios";
+import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 const Comments = ({ open, post_id }) => {
   const [info, setInfo] = useState([]);
   const [loading, setLoading] = useState(false);
   const [noComment, setNoComments] = useState(false);
   const [value, setValue] = useState("");
+  const history = useHistory();
+  const user = useSelector((state) => state.reducer.user);
   const fetching = async () => {
     setLoading(true);
     const { data } = await axios.patch("/api/v1/comment", { post_id });
@@ -29,13 +33,13 @@ const Comments = ({ open, post_id }) => {
     if (value.length > 0) {
       try {
         const date = new Date().toISOString();
-        const dataToSend = {
+        let dataToSend = {
           content: value,
           created_time: (0, date.slice(0, date.indexOf("T"))),
           post_id,
         };
-        console.log(dataToSend);
         await axios.post("/api/v1/comment", dataToSend);
+        dataToSend = { ...dataToSend, ...user };
         setInfo([...info, dataToSend]);
         setValue("");
       } catch (err) {
@@ -48,26 +52,40 @@ const Comments = ({ open, post_id }) => {
     if (open && info.length === 0 && !loading && !noComment) {
       fetching();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+  const goProfile = (el) => {
+    history.push(`/profile/${el.surfer_id}`);
+  };
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         {info.map((el) => (
           <ListItem alignItems="flex-start" key={el.post_id}>
             <ListItemAvatar>
-              <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+              <Avatar
+                alt="Remy Sharp"
+                style={{ cursor: "pointer" }}
+                src={el.photo}
+                onClick={() => goProfile(el)}
+              />
             </ListItemAvatar>
             <ListItemText
-              primary="name?"
+              primary={
+                <span
+                  onClick={goProfile}
+                  style={{ cursor: "pointer" }}
+                >{`${el.fname} ${el.lname}`}</span>
+              }
               secondary={
                 <React.Fragment>
                   <Typography
                     sx={{ display: "inline" }}
                     component="span"
-                    variant="body2"
+                    variant="subtitle2"
                     color="text.primary"
                   >
-                    {el.created_date}
+                    {/* {el.created_time.slice(0, el.created_time.indexOf("T"))} */}
                   </Typography>
                   {el.content}
                 </React.Fragment>
@@ -77,7 +95,7 @@ const Comments = ({ open, post_id }) => {
         ))}
         <ListItem alignItems="flex-start">
           <ListItemAvatar>
-            <Avatar alt="Name" />
+            <Avatar alt="Name" src={user.photo} /> {/*revise*/}
           </ListItemAvatar>
           <ListItemText
             secondary={
@@ -88,6 +106,7 @@ const Comments = ({ open, post_id }) => {
                 spacing={1}
               >
                 <TextField
+                  sx={{ width: "85%" }}
                   label="Comment"
                   placeholder="give your comment"
                   multiline

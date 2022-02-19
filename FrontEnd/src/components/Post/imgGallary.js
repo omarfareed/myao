@@ -1,47 +1,71 @@
-// import { useState, useCallback } from "react";
-// import Gallery from "react-photo-gallery";
-// import Carousel, { Modal, ModalGateway } from "react-images";
-// import Button from "@mui/material/Button";
-
+import React, { useState } from "react";
 import {
   IconButton,
   ImageList,
   ImageListItem,
   ImageListItemBar,
+  Modal,
 } from "@mui/material";
 import { AiOutlinePlusCircle } from "react-icons/ai";
-const PostImgs = (props) => {
-  const photos = props.media;
 
+//////////////////////
+import ImageSlider from "./ImgSlider";
+
+////////////////////////
+
+const PostImgs = ({ photos = [] }) => {
+  const [open, setOpen] = React.useState(false);
   const photolength = photos.length;
+  // console.log(photos[0]);
+  const handleOpen = (ind) => {
+    setImgIndex(ind);
+    setOpen(true); /* get the img postio in array*/
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const [imgIndex, setImgIndex] = useState();
 
   let imgs;
-
   if (photolength > 3)
     imgs = (
       <ImageList
-        gap={1}
+        gap={3}
         rowHeight={121}
         variant="quilted"
-        sx={{ width: "100%", height: "auto", overflow: "hidden" }}
+        sx={{
+          width: "100%",
+          height: "auto",
+          overflow: "hidden",
+        }}
         cols={3}
       >
         <ImageListItem
           rows={2}
           cols={5}
-          sx={{ transform: "scale(1,.8)", margin: "0px" }}
+          sx={{
+            margin: "0px",
+          }}
         >
-          <img src={photos[0].img} alt={photos[0].title} />
+          <img src={photos[0]} alt={photos[0]} onClick={() => handleOpen(0)} />
         </ImageListItem>
-        <ImageListItem rows={1} cols={2} sx={{ transform: "scale(1,.8)" }}>
-          <img src={photos[1].img} alt={photos[1].title} />
+        <ImageListItem rows={1} cols={2} sx={{}}>
+          <img
+            src={photos[1]}
+            alt={photos[1]}
+            onClick={() => {
+              handleOpen(1);
+            }}
+          />
         </ImageListItem>
-        <ImageListItem
-          rows={1}
-          cols={3}
-          sx={{ transform: "scale(1,.8)", height: "150%" }}
-        >
-          <img src={photos[2].img} alt={photos[2].title} />
+        <ImageListItem rows={1} cols={3} sx={{ height: "150%" }}>
+          <img
+            src={photos[2]}
+            alt={photos[2]}
+            onClick={() => {
+              handleOpen(2);
+            }}
+          />
           <ImageListItemBar
             position="top"
             sx={{ height: "100%" }}
@@ -53,6 +77,9 @@ const PostImgs = (props) => {
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   color: "#fff",
+                }}
+                onClick={() => {
+                  handleOpen(2);
                 }}
               >
                 <AiOutlinePlusCircle />
@@ -72,22 +99,32 @@ const PostImgs = (props) => {
         sx={{ width: "100%", height: "auto", overflow: "hidden" }}
         cols={3}
       >
-        <ImageListItem
-          rows={2}
-          cols={5}
-          sx={{ transform: "scale(1,.8)", margin: "0px" }}
-        >
-          <img src={photos[0].img} alt={photos[0].title} />
+        <ImageListItem rows={2} cols={5}>
+          <img
+            src={photos[0]}
+            alt={photos[0]}
+            onClick={() => {
+              handleOpen(0);
+            }}
+          />
         </ImageListItem>
-        <ImageListItem rows={1} cols={2} sx={{ transform: "scale(1,.8)" }}>
-          <img src={photos[1].img} alt={photos[1].title} />
+        <ImageListItem rows={1} cols={2}>
+          <img
+            src={photos[1]}
+            alt={photos[1]}
+            onClick={() => {
+              handleOpen(1);
+            }}
+          />
         </ImageListItem>
-        <ImageListItem
-          rows={1}
-          cols={3}
-          sx={{ transform: "scale(1,.8)", height: "150%" }}
-        >
-          <img src={photos[2].img} alt={photos[2].title} />
+        <ImageListItem rows={1} cols={3}>
+          <img
+            src={photos[2]}
+            alt={photos[2]}
+            onClick={() => {
+              handleOpen(2);
+            }}
+          />
         </ImageListItem>
       </ImageList>
     );
@@ -102,10 +139,22 @@ const PostImgs = (props) => {
         cols={1}
       >
         <ImageListItem cols={2} sx={{ transform: "scale(1,1.2)" }}>
-          <img src={photos[0].img} alt={photos[0].title} />
+          <img
+            src={photos[0]}
+            alt={photos[0]}
+            onClick={() => {
+              handleOpen(0);
+            }}
+          />
         </ImageListItem>
         <ImageListItem cols={2} sx={{ transform: "scale(1,.8)" }}>
-          <img src={photos[1].img} alt={photos[1].title} />
+          <img
+            src={photos[1]}
+            alt={photos[1]}
+            onClick={() => {
+              handleOpen(1);
+            }}
+          />
         </ImageListItem>
       </ImageList>
     );
@@ -120,12 +169,29 @@ const PostImgs = (props) => {
         cols={1}
       >
         <ImageListItem rows={2} cols={2} sx={{ transform: "scale(1,1.2)" }}>
-          <img src={photos[0].img} alt={photos[0].title} />
+          <img
+            src={photos[0]}
+            alt={photos[0]}
+            onClick={() => {
+              handleOpen(0);
+            }}
+          />
         </ImageListItem>
       </ImageList>
     );
 
-  return <>{imgs}</>;
+  return (
+    <>
+      {imgs}
+      <Modal
+        open={open}
+        onClose={handleClose}
+        sx={{ width: "50%", margin: "auto" }}
+      >
+        <ImageSlider SliderData={photos} currentimg={imgIndex} />
+      </Modal>
+    </>
+  );
 };
 
 export default PostImgs;

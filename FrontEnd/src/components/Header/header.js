@@ -12,32 +12,46 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import { BiSearch } from "react-icons/bi";
-import { Grid, MenuItem, Tab, Tabs } from "@mui/material";
+import { Avatar, Grid, MenuItem, Tab, Tabs } from "@mui/material";
 import { AiFillHome } from "react-icons/ai";
-import { IoPersonCircle, IoSettingsSharp } from "react-icons/io5";
+import { BsFilePostFill } from "react-icons/bs";
+import { IoPersonCircle, IoSettingsSharp, IoPeople } from "react-icons/io5";
+import { FaProductHunt, FaPeopleCarry } from "react-icons/fa";
+import { GoOrganization } from "react-icons/go";
 import { MdFavorite } from "react-icons/md";
 import { useHistory, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { UserActions } from "../../Store/UserSlice";
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [value, setValue] = React.useState(0);
-  const { user } = useSelector((state) => state.reducer);
+  const { isAuth, user } = useSelector((state) => state.reducer);
   const [SettingIcon, setSettingIcon] = React.useState(false);
   const classes = useStyle();
-  const { id } = useSelector((state) => state.reducer.user);
+  const { id } = user;
   const ref = React.useRef();
   const history = useHistory();
   const location = useLocation();
+  const dispatch = useDispatch();
   React.useEffect(() => {
-    if (location.pathname === "/") setValue(0);
-    else if (
-      location.pathname.includes("profile") &&
-      id === location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
-    )
-      setValue(1);
-    else if (location.pathname === "/fav") setValue(2);
-    else setValue(3);
+    if (user.role === "surfer") {
+      if (location.pathname === "/") setValue(0);
+      else if (
+        location.pathname.includes("profile") &&
+        id === location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
+      )
+        setValue(1);
+      else if (location.pathname === "/fav") setValue(2);
+      else if (location.pathname === "/requests") setValue(3);
+      else setValue(4);
+    } else if (user.role === "admin") {
+      if (location.pathname === "/admin/surfers") setValue(0);
+      else if (location.pathname.includes("/admin/posts")) setValue(1);
+      else if (location.pathname === "/admin/products") setValue(3);
+      else setValue(4);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   React.useEffect(() => {
@@ -47,6 +61,7 @@ const Header = () => {
         e.target.value = "";
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (event, newValue) => {
@@ -62,6 +77,12 @@ const Header = () => {
     setAnchorEl(null);
     setSettingIcon(0);
   };
+  const logOut = () => {
+    document.cookie = ""; // best pracise from index jwt till find the second space (after jwt there is a space)
+    axios.post("/api/v1/user/logout");
+    dispatch(UserActions.logout());
+    history.push("/login");
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -73,7 +94,10 @@ const Header = () => {
             component="div"
             sx={{ display: { xs: "block" } }}
           >
-            MYAO
+            <Avatar
+              src="/meaw.png"
+              sx={{ width: "8rem", height: "3rem", marginRight: "-1.5rem" }}
+            />
           </Typography>
           <Search>
             <SearchIconWrapper>
@@ -86,42 +110,98 @@ const Header = () => {
             />
           </Search>
 
-          <Grid item sx={{ display: { xs: "none", md: "block" } }}>
-            <Tabs variant="fullWidth" value={value} onChange={handleChange}>
-              <Tab
-                disableRipple
-                icon={
-                  <AiFillHome
-                    style={{ color: value !== 0 ? "#555" : undefined }}
-                    className={classes.icons}
-                  />
-                }
-                aria-label="Home"
-                onClick={() => history.push("/")}
-              />
-              <Tab
-                disableRipple
-                icon={
-                  <IoPersonCircle
-                    style={{ color: value !== 1 ? "#555" : undefined }}
-                    className={classes.icons}
-                  />
-                }
-                aria-label="person"
-                onClick={() => history.push(`/profile/${user.id}`)}
-              />
-              <Tab
-                disableRipple
-                icon={
-                  <MdFavorite
-                    style={{ color: value !== 2 ? "#555" : undefined }}
-                    className={classes.icons}
-                  />
-                }
-                aria-label="favorite"
-                onClick={() => history.push("/fav")}
-              />
-            </Tabs>
+          <Grid
+            item
+            sx={{
+              transform: "translateX(-25%)",
+              display: { xs: "none", md: "block" },
+            }}
+          >
+            {isAuth && user.role === "surfer" ? (
+              <Tabs variant="fullWidth" value={value} onChange={handleChange}>
+                <Tab
+                  disableRipple
+                  icon={
+                    <AiFillHome
+                      style={{ color: value !== 0 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="Home"
+                  onClick={() => history.push("/")}
+                />
+                <Tab
+                  disableRipple
+                  icon={
+                    <IoPersonCircle
+                      style={{ color: value !== 1 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="person"
+                  onClick={() => history.push(`/profile/${user.id}`)}
+                />
+                <Tab
+                  disableRipple
+                  icon={
+                    <MdFavorite
+                      style={{ color: value !== 2 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="favorite"
+                  onClick={() => history.push("/fav")}
+                />
+                <Tab
+                  disableRipple
+                  icon={
+                    <IoPeople
+                      style={{ color: value !== 3 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="favorite"
+                  onClick={() => history.push("/requests")}
+                />{" "}
+              </Tabs>
+            ) : user.role === "admin" ? (
+              <Tabs variant="fullWidth" value={value} onChange={handleChange}>
+                <Tab
+                  disableRipple
+                  icon={
+                    <GoOrganization
+                      style={{ color: value !== 0 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="Home"
+                  onClick={() => history.push("/admin/surfers")}
+                />
+                <Tab
+                  disableRipple
+                  icon={
+                    <BsFilePostFill
+                      style={{ color: value !== 1 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="person"
+                  onClick={() => history.push(`/admin/posts`)}
+                />
+
+                <Tab
+                  disableRipple
+                  icon={
+                    <FaProductHunt
+                      style={{ color: value !== 3 ? "#555" : undefined }}
+                      className={classes.icons}
+                    />
+                  }
+                  aria-label="favorite"
+                  onClick={() => history.push("/admin/products")}
+                />
+              </Tabs>
+            ) : null}
           </Grid>
 
           <Box sx={{ flexGrow: 1 }} />
@@ -154,25 +234,27 @@ const Header = () => {
                 vertical: "top",
                 horizontal: "right",
               }}
-              style={{ marginTop: "2.2rem" }}
+              style={{ marginTop: "2.2rem", zIndex: "10000" }}
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
               <MenuItem
                 onClick={() => {
-                  setValue(3);
+                  setValue(6);
                   handleClose();
-                }}
-              >
-                Profile
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setValue(3);
-                  handleClose();
+                  history.push("/setting");
                 }}
               >
                 Setting
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setValue(6);
+                  handleClose();
+                  logOut();
+                }}
+              >
+                log out
               </MenuItem>
             </Menu>
           </div>

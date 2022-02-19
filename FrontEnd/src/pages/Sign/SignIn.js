@@ -53,9 +53,10 @@ function SignIn() {
     };
     try {
       const user = await axios.post("/api/v1/user/login", data);
-      dispatch(UserActions.AddUser(user.data.data));
+      dispatch(UserActions.AddUser(user.data.data.user));
+      history.push("/");
     } catch (err) {
-      // console.log(err);
+      alert(err);
     }
   };
   ///////////////////////////////////////////////////
@@ -105,7 +106,15 @@ function SignIn() {
             Log In
           </Button>
         </Grid>
-        {/* <Typography variant="body1">Have an account ? Login</Typography> */}
+        <Typography variant="subtitle1" style={{ margin: "1rem auto 0" }}>
+          Don't have an account ?{" "}
+          <span
+            className={classes.loginButton}
+            onClick={() => history.push("/signup")}
+          >
+            Sign up
+          </span>
+        </Typography>
       </Grid>
     </Grid>
   );

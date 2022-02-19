@@ -6,6 +6,8 @@ const userSlice = createSlice({
   reducers: {
     AddUser(state, action) {
       state.user = action.payload;
+      const slicing = state.user.id.slice(0, 3);
+      // specify type
       state.isAuth = true;
       state.loadingUser = false;
     },
@@ -14,6 +16,11 @@ const userSlice = createSlice({
     },
     setLoadingUser(state, action) {
       state.loadingUser = action.payload;
+    },
+    logout(state) {
+      state.user = {};
+      state.isAuth = false;
+      state.loadingUser = false;
     },
   },
 });

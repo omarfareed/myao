@@ -28,7 +28,7 @@ function SignUp() {
   }, [history, isAuth]);
 
   const [Gender, setGender] = useState(null);
-  const [Role, setRole] = useState(null);
+  const [Role, setRole] = useState("surfer");
   const [DateV, setDateV] = useState(null);
 
   const dispatch = useDispatch();
@@ -91,21 +91,25 @@ function SignUp() {
   ///////////////////////////////////////////////////
 
   const handleSubmit = async () => {
-    const NOW = parseDateF(Date.now());
-    const data = {
-      email: Mail,
-      password: Password,
-      fname: FName,
-      lname: LName,
-      created_date: NOW,
-      last_login: NOW,
-      gender: Gender === "male" ? 1 : 0,
-      birth_date: parseDateF(DateV),
-      role: Role,
-    };
-    const POST = await axios.post("/api/v1/user/signup", data);
+    try {
+      const NOW = parseDateF(Date.now());
 
-    dispatch(UserActions.AddUser(POST.data.data));
+      const POST = await axios.post("/api/v1/user/signup", {
+        email: Mail,
+        password: Password,
+        fname: FName,
+        lname: LName,
+        created_date: NOW,
+        last_login: NOW,
+        gender: Gender === "male" ? 1 : 0,
+        birth_date: parseDateF(DateV),
+        role: Role,
+      });
+
+      dispatch(UserActions.AddUser(POST.data.data.user));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   ////////////////////////////////////////
@@ -114,7 +118,7 @@ function SignUp() {
       container
       alignItems="center"
       justifyContent="center"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "100vh", paddingBottom: "1rem" }}
     >
       <Grid container direction="column" className={classes.SignCard}>
         <img src={MainLogo} alt="LOGO" className={classes.logo} />
@@ -156,32 +160,13 @@ function SignUp() {
                   value="female"
                   control={<Radio />}
                   label="Female"
+                  disabled={Role !== "surfer"}
                 />
                 <FormControlLabel
                   value="male"
                   control={<Radio />}
                   label="Male"
-                />
-              </RadioGroup>
-            </Grid>
-            <Grid item xs={6}>
-              <FormLabel component="legend">Acount Type</FormLabel>
-              <RadioGroup
-                row
-                aria-label="role"
-                name="row-radio-buttons-group"
-                value={Role}
-                onChange={(newv) => setRole(newv.target.value)}
-              >
-                <FormControlLabel
-                  value="surfer"
-                  control={<Radio />}
-                  label="surfer"
-                />
-                <FormControlLabel
-                  value="marketer"
-                  control={<Radio />}
-                  label="marketer"
+                  disabled={Role !== "surfer"}
                 />
               </RadioGroup>
             </Grid>
@@ -191,7 +176,7 @@ function SignUp() {
         {/* //////////////////////////////////////////////// */}
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            label="Basic example"
+            label={"Birth Date"}
             value={DateV}
             onChange={(newValue) => {
               setDateV(newValue);
@@ -234,7 +219,15 @@ function SignUp() {
             Create New Account
           </Button>
         </Grid>
-        {/* <Typography variant="body1">Have an account ? Login</Typography> */}
+        <Typography variant="subtitle1" style={{ margin: "1rem auto 0" }}>
+          Have an account ?{" "}
+          <span
+            className={classes.loginButton}
+            onClick={() => history.push("/login")}
+          >
+            login
+          </span>
+        </Typography>
       </Grid>
     </Grid>
   );
