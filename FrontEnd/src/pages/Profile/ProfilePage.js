@@ -3,7 +3,7 @@ import { SiAdblock } from "react-icons/si";
 import { MdAdminPanelSettings } from "react-icons/md";
 import useStyle from "./ProfileStyle";
 import LeftSection from "./LeftSection";
-import GetPosts from "../GlobalForAll/GetPosts";
+// import GetPosts from "../GlobalForAll/GetPosts";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -64,6 +64,7 @@ const ProfilePage = () => {
       is_active: 0,
     });
   };
+
   return (
     <Grid container className={classes.page} direction="column">
       <Paper className={classes.imageSection} elevation={3}>

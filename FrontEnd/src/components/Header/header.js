@@ -54,7 +54,7 @@ const Header = () => {
   };
   const logOut = () => {
     document.cookie = ""; // best pracise from index jwt till find the second space (after jwt there is a space)
-    axios.post("/api/v1/user/logout");
+    axios.post("/api/v1/security/logout");
     dispatch(UserActions.logout());
     history.push("/login");
   };
