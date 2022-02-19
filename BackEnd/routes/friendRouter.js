@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect, restrictTo } = require("../controller/authController");
-const restriction = restrictTo("surfer");
+const restriction = restrictTo("user");
 const {
   acceptRequest,
   beforeRequest,
@@ -19,7 +19,7 @@ router.get("/sent", getSentRequests);
 router.get("/received", getReceivedRequests);
 router.post("/accept", acceptRequest);
 router.get("/myFriends", getMyFriends);
-router.get("/:surfer_id", getFriends);
+router.get("/:user_id", getFriends);
 router
   .route("/")
   .post(beforeRequest, makeRequest)

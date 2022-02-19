@@ -5,6 +5,8 @@ import {
   StyledInputBase,
   useStyle,
 } from "./HeaderStyle";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -12,47 +14,24 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import { BiSearch } from "react-icons/bi";
-import { Avatar, Grid, MenuItem, Tab, Tabs } from "@mui/material";
-import { AiFillHome } from "react-icons/ai";
-import { BsFilePostFill } from "react-icons/bs";
-import { IoPersonCircle, IoSettingsSharp, IoPeople } from "react-icons/io5";
-import { FaProductHunt, FaPeopleCarry } from "react-icons/fa";
-import { GoOrganization } from "react-icons/go";
-import { MdFavorite } from "react-icons/md";
-import { useHistory, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { Avatar, Grid, MenuItem } from "@mui/material";
+import { IoSettingsSharp } from "react-icons/io5";
+import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import { UserActions } from "../../Store/UserSlice";
+import TabsHeader from "./tabs";
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [value, setValue] = React.useState(0);
-  const { isAuth, user } = useSelector((state) => state.reducer);
   const [SettingIcon, setSettingIcon] = React.useState(false);
   const classes = useStyle();
-  const { id } = user;
   const ref = React.useRef();
   const history = useHistory();
-  const location = useLocation();
   const dispatch = useDispatch();
-  React.useEffect(() => {
-    if (user.role === "surfer") {
-      if (location.pathname === "/") setValue(0);
-      else if (
-        location.pathname.includes("profile") &&
-        id === location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
-      )
-        setValue(1);
-      else if (location.pathname === "/fav") setValue(2);
-      else if (location.pathname === "/requests") setValue(3);
-      else setValue(4);
-    } else if (user.role === "admin") {
-      if (location.pathname === "/admin/surfers") setValue(0);
-      else if (location.pathname.includes("/admin/posts")) setValue(1);
-      else if (location.pathname === "/admin/products") setValue(3);
-      else setValue(4);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+
+  const theme = useTheme();
+  const matchDMD = useMediaQuery(theme.breakpoints.down("md"));
 
   React.useEffect(() => {
     ref.current.addEventListener("keyup", function (e) {
@@ -63,10 +42,6 @@ const Header = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -114,96 +89,15 @@ const Header = () => {
             item
             sx={{
               transform: "translateX(-25%)",
-              display: { xs: "none", md: "block" },
             }}
           >
-            {isAuth && user.role === "surfer" ? (
-              <Tabs variant="fullWidth" value={value} onChange={handleChange}>
-                <Tab
-                  disableRipple
-                  icon={
-                    <AiFillHome
-                      style={{ color: value !== 0 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="Home"
-                  onClick={() => history.push("/")}
-                />
-                <Tab
-                  disableRipple
-                  icon={
-                    <IoPersonCircle
-                      style={{ color: value !== 1 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="person"
-                  onClick={() => history.push(`/profile/${user.id}`)}
-                />
-                <Tab
-                  disableRipple
-                  icon={
-                    <MdFavorite
-                      style={{ color: value !== 2 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="favorite"
-                  onClick={() => history.push("/fav")}
-                />
-                <Tab
-                  disableRipple
-                  icon={
-                    <IoPeople
-                      style={{ color: value !== 3 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="favorite"
-                  onClick={() => history.push("/requests")}
-                />{" "}
-              </Tabs>
-            ) : user.role === "admin" ? (
-              <Tabs variant="fullWidth" value={value} onChange={handleChange}>
-                <Tab
-                  disableRipple
-                  icon={
-                    <GoOrganization
-                      style={{ color: value !== 0 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="Home"
-                  onClick={() => history.push("/admin/surfers")}
-                />
-                <Tab
-                  disableRipple
-                  icon={
-                    <BsFilePostFill
-                      style={{ color: value !== 1 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="person"
-                  onClick={() => history.push(`/admin/posts`)}
-                />
-
-                <Tab
-                  disableRipple
-                  icon={
-                    <FaProductHunt
-                      style={{ color: value !== 3 ? "#555" : undefined }}
-                      className={classes.icons}
-                    />
-                  }
-                  aria-label="favorite"
-                  onClick={() => history.push("/admin/products")}
-                />
-              </Tabs>
-            ) : null}
+            <TabsHeader
+              value={value}
+              setValue={setValue}
+              classes={classes}
+              render={!matchDMD}
+            />
           </Grid>
-
           <Box sx={{ flexGrow: 1 }} />
 
           <div>
@@ -261,29 +155,13 @@ const Header = () => {
         </Toolbar>
       </AppBar>
       <Box sx={{ flexGrow: 1, backgroundColor: "primary" }}>
-        <Grid color="primary" sx={{ display: { xs: "block", md: "none" } }}>
-          <Tabs
-            variant="fullWidth"
-            textColor="secondary"
+        <Grid color="primary">
+          <TabsHeader
             value={value}
-            onChange={handleChange}
-          >
-            <Tab
-              disableRipple
-              icon={<AiFillHome className={classes.icons} />}
-              aria-label="phone"
-            />
-            <Tab
-              disableRipple
-              icon={<MdFavorite className={classes.icons} />}
-              aria-label="favorite"
-            />
-            <Tab
-              disableRipple
-              icon={<IoPersonCircle className={classes.icons} />}
-              aria-label="person"
-            />
-          </Tabs>
+            setValue={setValue}
+            classes={classes}
+            render={matchDMD}
+          />
         </Grid>
       </Box>
     </Box>
@@ -291,3 +169,28 @@ const Header = () => {
 };
 
 export default Header;
+// eslint-disable-next-line no-lone-blocks
+{
+  /* <Tabs
+  variant="fullWidth"
+  textColor="secondary"
+  value={value}
+  onChange={handleChange}
+>
+  <Tab
+    disableRipple
+    icon={<AiFillHome className={classes.icons} />}
+    aria-label="phone"
+  />
+  <Tab
+    disableRipple
+    icon={<MdFavorite className={classes.icons} />}
+    aria-label="favorite"
+  />
+  <Tabs
+    disableRipple
+    icon={<IoPersonCircle className={classes.icons} />}
+    aria-label="person"
+  />
+</Tabs> */
+}

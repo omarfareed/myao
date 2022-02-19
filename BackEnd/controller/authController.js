@@ -94,12 +94,13 @@ exports.logout = (req, res) => {
 };
 const prepareSignupBody = async (req) => {
   req.body.id = uniqueIdGenerator();
-  req.body.role = "user";
-  req.body.password && (req.body.password = await hashPassword(body.password));
+  req.body.password &&
+    (req.body.password = await hashPassword(req.body.password));
 };
 exports.signup = catchAsync(async (req, res, next) => {
-  await prepareSignupBody(req.body);
+  await prepareSignupBody(req);
   await query(`INSERT INTO user SET ?`, req.body);
+  req.body.role = "user";
   createSendToken(req.body, 201, req, res);
 });
 const sendErrorMessage = (next, message) => {
@@ -108,21 +109,22 @@ const sendErrorMessage = (next, message) => {
 };
 const searchForUser = async (email, password, role) => {
   const [user] = await query(`select * from ${role} where email="${email}"`);
-  if (!user || !(await correctPassword(password, data[0].password)))
-    return null;
+  if (!user || !(await correctPassword(password, user.password))) return null;
   user.role = role;
   return user;
 };
+
 const getUserLogin = async (req, next) => {
   const { email, password } = req.body;
   if (!email || !password)
     return sendErrorMessage(next, "you must enter email and password");
   const user =
     (await searchForUser(email, password, "user")) ||
-    (await searchForUse(email, password, "admin"));
+    (await searchForUser(email, password, "admin"));
   if (!user) return sendErrorMessage(next, "wrong email or password");
   return user;
 };
+
 exports.login = catchAsync(async (req, res, next) => {
   const user = await getUserLogin(req, next);
   if (!user) return;
@@ -136,8 +138,8 @@ const findAuthorizationToken = (req) => {
     return req.headers.authorization.split(" ")[1];
   return req.cookies.jwt;
 };
-const getCurrentUser = async () => {
-  const token = findAuthorizationToken();
+const getCurrentUser = async (req) => {
+  const token = findAuthorizationToken(req);
   if (!token) return null;
   const { id, role } = await promisify(jwt.verify)(
     token,
@@ -148,27 +150,29 @@ const getCurrentUser = async () => {
       role === "user" ? "and is_active=1" : ""
     }`
   );
+  currentUser.role = role;
   return currentUser;
 };
 exports.getLogin = catchAsync(async (req, res, next) => {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUser(req);
   if (!currentUser) return next();
-  req.auth = { role: decoded.role, id: decoded.id };
+  req.auth = { role: currentUser.role, id: currentUser.id };
   next();
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
-  const currentUser = getCurrentUser();
+  const currentUser = getCurrentUser(req);
   if (!currentUser)
     return next(
       new appError("You are not logged in! Please log in to get access."),
       401
     );
-  req.auth = { role: decoded.role, id: decoded.id };
+  req.auth = { role: currentUser.role, id: currentUser.id };
   next();
 });
 exports.getInfo = catchAsync(async (req, res, next) => {
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser(req);
+  console.log(currentUser);
   if (!currentUser) {
     return res.status(401).json({
       status: "notAuth",
@@ -214,6 +218,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 exports.restrictTo =
   (...roles) =>
   (req, body, next) => {
+    console.log(req.url);
     if (roles.includes(req.auth.role)) return next();
     next(new appError(`you don't have the permission to make this action`));
   };
@@ -242,7 +247,7 @@ exports.changeUserRole = catchAsync(async (req, res, next) => {
 
 exports.forgetPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
-  const user = await query(`select * from surfer where email = "${email}"`);
+  const user = await query(`select * from user where email = "${email}"`);
   if (!user) return next(new appError("no user with such email"));
   const { resetToken, passwordResetExpires, passwordResetToken } =
     createPasswordResetToken();

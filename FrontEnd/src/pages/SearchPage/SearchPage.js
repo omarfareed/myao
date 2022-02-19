@@ -3,19 +3,17 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Post from "../../components/Post/post";
-import Product from "../../components/Post/Product";
-import SurferCard from "../../components/surferCard/surferCard";
+import UserCard from "../../components/userCard/userCard";
 import Wrapper from "../../components/Wrapper/Wrapper";
 
 const SearchPage = () => {
   const params = useParams();
   const [usersPosts, setUsersPosts] = useState({
     posts: [],
-    surfers: [],
-    products: [],
+    users: [],
   });
   const fetchingFunc = async () => {
-    const { data } = await axios.post("/api/v1/surfer/search", {
+    const { data } = await axios.post("/api/v1/user/search", {
       search: params.search,
     });
     console.log(data.data);
@@ -29,9 +27,9 @@ const SearchPage = () => {
   return (
     <Wrapper>
       <Grid container item xs={11} lg={7} md={8} spacing={3}>
-        {usersPosts.surfers.map((e) => (
+        {usersPosts.users.map((e) => (
           <Grid item sm={4} xs={6} key={e.id}>
-            <SurferCard user={e} />
+            <UserCard user={e} />
           </Grid>
         ))}
       </Grid>
@@ -40,7 +38,7 @@ const SearchPage = () => {
           <Post
             key={e.id}
             data={e}
-            surfer_info={e.surfer_info}
+            user_info={e.user_info}
             style={{ marginTop: "1rem" }}
           />
         ))}

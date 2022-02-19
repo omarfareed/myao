@@ -67,7 +67,7 @@ const LeftSection = ({ user }) => {
                     <FriendCard
                       imageLink={el[0].photo}
                       key={i}
-                      id={el[0].surfer_id || el[0].id}
+                      id={el[0].user_id || el[0].id}
                       name={`${el[0].fname} ${el[0].lname}`}
                     ></FriendCard>
                   </Grid>

@@ -55,7 +55,7 @@ const Comments = ({ open, post_id }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   const goProfile = (el) => {
-    history.push(`/profile/${el.surfer_id}`);
+    history.push(`/profile/${el.user_id}`);
   };
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>

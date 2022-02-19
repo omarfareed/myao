@@ -4,7 +4,7 @@ const {
   restrictTo,
   protect,
 } = require("../controller/authController");
-const restriction = restrictTo("surfer", "admin");
+const restriction = restrictTo("user", "admin");
 const shareController = require("../controller/share");
 const router = express.Router({ mergeParams: true });
 

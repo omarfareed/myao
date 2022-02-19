@@ -52,7 +52,7 @@ function SignIn() {
       password: Password,
     };
     try {
-      const user = await axios.post("/api/v1/user/login", data);
+      const user = await axios.post("/api/v1/security/login", data);
       dispatch(UserActions.AddUser(user.data.data.user));
       history.push("/");
     } catch (err) {

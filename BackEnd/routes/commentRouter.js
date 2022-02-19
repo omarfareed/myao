@@ -4,7 +4,7 @@ const {
   protect,
   restrictTo,
 } = require("../controller/authController");
-const restriction = restrictTo("surfer", "admin");
+const restriction = restrictTo("user", "admin");
 const commentController = require("../controller/comment");
 const router = express.Router({ mergeParams: true });
 
@@ -16,7 +16,7 @@ router
     protect,
     restriction,
     (req, res, next) => {
-      req.body.surfer_id = req.auth.id;
+      req.body.user_id = req.auth.id;
       next();
     },
     commentController.createComment

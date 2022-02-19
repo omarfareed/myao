@@ -16,7 +16,7 @@ const formatDate = (created_date) => {
 };
 
 const AdminReportPost = ({
-  surfer_info = {},
+  user_info = {},
   data,
   className = {},
   style = [],
@@ -37,12 +37,12 @@ const AdminReportPost = ({
             <Avatar
               color="primary"
               aria-label="recipe"
-              src={surfer_info.photo} // revise
+              src={user_info.photo} // revise
             />
           }
           title={
             <span style={{ color: "#222" }}>
-              {surfer_info.fname + " " + surfer_info.lname}
+              {user_info.fname + " " + user_info.lname}
             </span>
           }
           subheader={

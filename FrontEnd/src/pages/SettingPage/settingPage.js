@@ -18,8 +18,8 @@ const SettingPage = () => {
   const [address, setAddress] = useState(
     user.address === null ? "" : user.address
   );
-  const [cover,setCover] = useState(user.cover_photo);
-  const [coverLink,setCoverLink] = useState(user.cover_photo);
+  const [cover, setCover] = useState(user.cover_photo);
+  const [coverLink, setCoverLink] = useState(user.cover_photo);
   const [education, setEducation] = useState(
     user.education === null ? "" : user.education
   );
@@ -38,7 +38,7 @@ const SettingPage = () => {
     newPasswordConfirm.length === 0;
   const infoButtonsDisabled =
     (user.education || "") == education && (user.address || "") == address;
-  const ref = useRef()
+  const ref = useRef();
   const backToDefault = () => {
     setAddress(user.address || "");
     setEducation(user.education || "");
@@ -76,7 +76,7 @@ const SettingPage = () => {
         currentPassword: oldPass,
         newPassword,
         newPasswordConfirm,
-        role: "surfer",
+        role: "user",
       });
       console.log(d);
     } catch (err) {
@@ -88,10 +88,8 @@ const SettingPage = () => {
     if (img || cover) {
       try {
         const form = new FormData();
-        if(img)
-          form.append("photo", img);
-        if(cover)
-          form.append("cover_photo",cover);
+        if (img) form.append("photo", img);
+        if (cover) form.append("cover_photo", cover);
         await axios.patch("/api/v1/user/me", form, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -102,31 +100,40 @@ const SettingPage = () => {
       }
     }
   };
-  const changeProfileCover = (e)=>{
+  const changeProfileCover = (e) => {
     if (ref.current.files[0]) {
       setCoverLink(URL.createObjectURL(ref.current.files[0]));
       setCover(ref.current.files[0]);
     }
-  }
-  
+  };
+
   return (
     <Grid
       container
       direction="column"
       alignItems="center"
       className={classes.Page}
+    >
+      <Grid
+        container
+        height="14rem"
+        onClick={() => ref.current.click()}
+        sx={{ padding: "0" }}
+        style={{ marginBottom: "2rem", backgroundColor: "#aaa" }}
+        className={classes.container1}
       >
-      <Grid container height="14rem" onClick={()=>ref.current.click()} sx={{padding:"0"}} style={{marginBottom:"2rem",backgroundColor:"#aaa"}} className={classes.container1}>
-        {cover &&<img style={{width:"100%",height:"100%"}} src={coverLink}></img>}
+        {cover && (
+          <img style={{ width: "100%", height: "100%" }} src={coverLink}></img>
+        )}
       </Grid>
-       <input
-          ref={ref}
-          type="file"
-          accept="image/*"
-          hidden
-          // id="settingImage"
-          onChange={changeProfileCover}
-        />
+      <input
+        ref={ref}
+        type="file"
+        accept="image/*"
+        hidden
+        // id="settingImage"
+        onChange={changeProfileCover}
+      />
       <AvatarImage sendImage={recieveImage} />
       <Grid container direction="column" className={classes.container1}>
         {/* information just for showing */}
@@ -179,7 +186,7 @@ const SettingPage = () => {
           Change password
         </Button>
         <div className={classes.line} />
-        {user.role === "surfer" && (
+        {user.role === "user" && (
           <>
             <InputFieldSimple
               label={

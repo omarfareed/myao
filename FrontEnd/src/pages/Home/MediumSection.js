@@ -1,14 +1,14 @@
 import { useSelector } from "react-redux";
 import CreatePost from "../../components/Post/Create_post";
-import GetPosts from "../GlobalForAll/GetPosts";
-import useStyle from "./HomeStyle";
+// import GetPosts from "../GlobalForAll/GetPosts";
+// import useStyle from "./HomeStyle";
 
 const MediumSection = () => {
-  const classes = useStyle();
+  // const classes = useStyle();
   const user = useSelector((state) => state.reducer.user);
   return (
     <>
-      <CreatePost surfer_info={user} style={{ marginTop: "2rem" }} />
+      <CreatePost user_info={user} style={{ marginTop: "2rem" }} />
       <div
         style={{
           margin: "1rem 0",
@@ -18,10 +18,10 @@ const MediumSection = () => {
           opacity: ".2",
         }}
       ></div>
-      <GetPosts
+      {/* <GetPosts
         linkOfFetching="/api/v1/post/timeline"
         className={classes.post}
-      />
+      /> */}
     </>
   );
 };

@@ -6,7 +6,7 @@ const userSlice = createSlice({
   reducers: {
     AddUser(state, action) {
       state.user = action.payload;
-      const slicing = state.user.id.slice(0, 3);
+      // const slicing = state.user.id.slice(0, 3);
       // specify type
       state.isAuth = true;
       state.loadingUser = false;

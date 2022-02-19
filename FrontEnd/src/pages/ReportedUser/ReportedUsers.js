@@ -1,7 +1,7 @@
 import { Button, Grid } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import SurferCard from "../../components/surferCard/surferCard";
+import UserCard from "../../components/userCard/userCard";
 import Wrapper from "../../components/Wrapper/Wrapper";
 import useStyle from "./reportStyle";
 const ReportedSurf = () => {
@@ -9,9 +9,9 @@ const ReportedSurf = () => {
   const classes = useStyle();
   useEffect(() => {
     const asyFun = async () => {
-      const { data } = await axios.get("/api/v1/report/surfer");
+      const { data } = await axios.get("/api/v1/report/user");
       set_rep_sur([...data.data]);
-      //   axios.patch("/api/v1/surfer", {});
+      //   axios.patch("/api/v1/user", {});
     };
     asyFun();
   }, []);
@@ -35,7 +35,7 @@ const ReportedSurf = () => {
       <Grid container item xs={11} lg={7} md={8} spacing={3}>
         {rep_sur.map((el, ind) => (
           <Grid item sm={4} xs={6} key={el.id}>
-            <SurferCard
+            <UserCard
               user={el}
               id_given={el.reported_id}
               newThings={

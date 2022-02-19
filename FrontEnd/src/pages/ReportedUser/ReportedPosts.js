@@ -39,7 +39,7 @@ const ReportedPost = () => {
             handleBlock={handleBlock}
             key={e.id}
             data={e}
-            surfer_info={e.surfer_info}
+            user_info={e.user_info}
             style={{ marginTop: "1rem" }}
             index={i}
           />

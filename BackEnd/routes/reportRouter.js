@@ -13,20 +13,18 @@ const {
   makeReport,
   getPostReports,
   getMarketerReports,
-  getSurferReports,
+  getUserReports,
   getProductReports,
   deactivate,
 } = require("../controller/report");
 router
   .route("/")
-  .post(protect, restrictTo("surfer", "marketer"), makeReport)
+  .post(protect, restrictTo("user", "marketer"), makeReport)
   .get(protect, restrictTo("admin"), getReportsForTables)
   .delete(protect, restrictTo("admin"), deleteReport);
 router.get("/myReports", getMyReports);
 router.get("/post", protect, restrictTo("admin"), getPostReports);
-router.get("/marketer", protect, restrictTo("admin"), getMarketerReports);
-router.get("/surfer", protect, restrictTo("admin"), getSurferReports);
-router.get("/product", protect, restrictTo("admin"), getProductReports);
+router.get("/user", protect, restrictTo("admin"), getUserReports);
 router
   .route("/:reporter_id")
   .get(transferParamsToBody, protect, restrictTo("admin"), getReportedReports);

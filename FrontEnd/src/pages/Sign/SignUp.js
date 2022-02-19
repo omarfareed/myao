@@ -28,7 +28,6 @@ function SignUp() {
   }, [history, isAuth]);
 
   const [Gender, setGender] = useState(null);
-  const [Role, setRole] = useState("surfer");
   const [DateV, setDateV] = useState(null);
 
   const dispatch = useDispatch();
@@ -94,7 +93,7 @@ function SignUp() {
     try {
       const NOW = parseDateF(Date.now());
 
-      const POST = await axios.post("/api/v1/user/signup", {
+      const POST = await axios.post("/api/v1/security/signup", {
         email: Mail,
         password: Password,
         fname: FName,
@@ -103,7 +102,6 @@ function SignUp() {
         last_login: NOW,
         gender: Gender === "male" ? 1 : 0,
         birth_date: parseDateF(DateV),
-        role: Role,
       });
 
       dispatch(UserActions.AddUser(POST.data.data.user));
@@ -160,13 +158,11 @@ function SignUp() {
                   value="female"
                   control={<Radio />}
                   label="Female"
-                  disabled={Role !== "surfer"}
                 />
                 <FormControlLabel
                   value="male"
                   control={<Radio />}
                   label="Male"
-                  disabled={Role !== "surfer"}
                 />
               </RadioGroup>
             </Grid>

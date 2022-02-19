@@ -45,7 +45,7 @@ exports.resizePostPhotos = catchAsync(async (req, res, next) => {
   next();
 });
 
-const getSurferPosts = async (
+const getUserPosts = async (
   userId,
   additionalJoin = "",
   additionalCondition = "",
@@ -215,7 +215,7 @@ exports.getSinglePost = catchAsync(async (req, res, next) => {
   });
 });
 exports.getSinglePost = catchAsync(async (req, res, next) => {
-  const data = await getSurferPosts(
+  const data = await getUserPosts(
     req.auth?.id,
     "",
     `post.id = "${req.body.id}"`,
@@ -241,7 +241,7 @@ exports.getMyPosts = catchAsync(async (req, res, next) => {
   });
 });
 exports.getMyPosts = catchAsync(async (req, res, next) => {
-  const data = await getSurferPosts(
+  const data = await getUserPosts(
     req.auth.id,
     "",
     `post.user_id = "${req.auth.id}"`,
@@ -267,7 +267,7 @@ exports.getUserPosts = catchAsync(async (req, res, next) => {
   });
 });
 exports.getUserPosts = catchAsync(async (req, res, next) => {
-  const data = await getSurferPosts(
+  const data = await getUserPosts(
     req.auth.id,
     "",
     `post.user_id = "${req.body.user_id}"`,
@@ -391,7 +391,7 @@ exports.getTimeLine = catchAsync(async (req, res, next) => {
   });
 });
 // exports.getTimeLine = catchAsync(async (req, res, next) => {
-//   const data = await getSurferPosts(
+//   const data = await getUserPosts(
 //     req.auth.id,
 //     `JOIN friend
 //     ON (friend.source_id = post.user_id AND friend.target_id = "${req.auth.id}")

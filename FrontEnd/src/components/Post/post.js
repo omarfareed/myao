@@ -8,7 +8,6 @@ import axios from "axios";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
-import { RiShareForwardLine } from "react-icons/ri";
 import ReportPost from "./ReportPost";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaRegComment } from "react-icons/fa";
@@ -23,7 +22,7 @@ const formatDate = (created_date) => {
   let date = new Date(created_date);
   return date.toUTCString().slice(0, 16);
 };
-const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
+const Post = ({ id, user_info = {}, data, className, style = {} }) => {
   const [LikesCounter, setLikesCounter] = React.useState(data.like_counter);
   const history = useHistory();
   const [like_checked, set_like_checked] = React.useState(data.liked);
@@ -53,7 +52,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
     }
   };
   const openProfile = () => {
-    history.push(`/profile/${data.surfer_id}`);
+    history.push(`/profile/${data.user_id}`);
   };
   const likeHandler = async () => {
     try {
@@ -61,7 +60,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
         await axios.post("/api/v1/like/unlike", {
           type: 0,
           post_id: data.post_id || data.id,
-          surfer_id: user.id,
+          user_id: user.id,
         });
         set_like_checked(0);
         setLikesCounter((l) => l - 1);
@@ -89,14 +88,14 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
             <Avatar
               color="primary"
               aria-label="recipe"
-              src={surfer_info.photo}
+              src={user_info.photo}
               onClick={openProfile}
               sx={{ cursor: "pointer" }}
             />
           }
           title={
             <span style={{ color: "#222" }}>
-              {surfer_info.fname + " " + surfer_info.lname}
+              {user_info.fname + " " + user_info.lname}
             </span>
           }
           subheader={
@@ -141,7 +140,7 @@ const Post = ({ id, surfer_info = {}, data, className, style = {} }) => {
                 >
                   Add To favourite
                 </MenuItem>
-                {user.id !== data.surfer_id && (
+                {user.id !== data.user_id && (
                   <ReportPost reported_id={data.post_id} />
                 )}
               </Menu>

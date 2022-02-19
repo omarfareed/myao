@@ -7,13 +7,13 @@ const {
 } = require("../controller/authController");
 const fav_postController = require("../controller/fav_post");
 const router = express.Router({ mergeParams: true });
-const restriction = restrictTo("surfer", "admin");
+const restriction = restrictTo("user", "admin");
 // router.get("/", transferParamsToBody, , fav_postController.getfav_post);
 router.get(
   "/myfav_posts",
   protect,
-  restrictTo("surfer"),
-  convertAuthTo("surfer_id"),
+  restrictTo("user"),
+  convertAuthTo("user_id"),
   fav_postController.getMyfav_posts
 );
 router

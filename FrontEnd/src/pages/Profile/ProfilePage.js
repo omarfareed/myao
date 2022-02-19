@@ -16,7 +16,7 @@ const ProfilePage = () => {
   const params = useParams();
   useEffect(() => {
     const fetchingFunc = async () => {
-      const { data } = await axios.get(`/api/v1/surfer/${params.id}`);
+      const { data } = await axios.get(`/api/v1/user/${params.id}`);
       setProfileUser(data.data[0]);
     };
     try {
@@ -43,10 +43,11 @@ const ProfilePage = () => {
   //   });
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
+
   const makeAdmin = async () => {
     try {
       await axios.post("/api/v1/user/changeRole", {
-        oldRole: "surfer",
+        oldRole: "user",
         newRole: "admin",
         user_id: profileUser.id,
         newData: {
@@ -57,8 +58,9 @@ const ProfilePage = () => {
       alert(err.message);
     }
   };
+
   const handleBlock = async () => {
-    await axios.patch(`/api/v1/surfer/${params.id}`, {
+    await axios.patch(`/api/v1/user/${params.id}`, {
       is_active: 0,
     });
   };
@@ -105,7 +107,7 @@ const ProfilePage = () => {
         <Typography variant="subtitle1" className={classes.address}>
           {profileUser.address && `${profileUser.address}`}
         </Typography>
-        {params.id !== user.id && user.role === "surfer" && (
+        {params.id !== user.id && user.role === "user" && (
           <FriendSectionButton source_id={user.id} target_id={params.id} />
         )}
       </Paper>
@@ -115,10 +117,10 @@ const ProfilePage = () => {
         </Grid>
         <Grid container className={classes.rightSection} item lg={7}>
           <Grid container style={{ height: "fit-content" }}>
-            <GetPosts
+            {/* <GetPosts
               className={classes.post}
-              linkOfFetching={`/api/v1/surfer/${params.id}/post`}
-            />
+              linkOfFetching={`/api/v1/user/${params.id}/post`}
+            /> */}
             <div style={{ height: "1rem", width: "100%" }}></div>
           </Grid>
         </Grid>

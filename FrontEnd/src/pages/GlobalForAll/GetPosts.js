@@ -5,7 +5,7 @@ import axios from "axios";
 const GetPosts = ({
   linkOfFetching,
   className,
-  surfer_info_ready = null,
+  user_info_ready = null,
   allowScroll = true,
 }) => {
   const [page, setPage] = useState(1);
@@ -77,7 +77,7 @@ const GetPosts = ({
           data={el}
           key={index}
           className={className}
-          surfer_info={el.surfer_info}
+          user_info={el.user_info}
         />
       ))}
     </>

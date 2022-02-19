@@ -15,8 +15,8 @@ import theme from "../../Utilities/Theme";
 import axios from "axios";
 import parseDateF from "../../Utilities/ParsingDate";
 
-const CreatePost = ({ surfer_info = {}, style = {} }) => {
-  const [open, setOpen] = React.useState(0);
+const CreatePost = ({ user_info = {}, style = {} }) => {
+  const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [imgs, setImgs] = React.useState([]);
   const handleOpen = () => {
@@ -24,7 +24,6 @@ const CreatePost = ({ surfer_info = {}, style = {} }) => {
   };
   const handleClose = () => {
     setOpen(false);
-    console.log("ddd");
   };
   const createPost = async () => {
     try {
@@ -53,10 +52,10 @@ const CreatePost = ({ surfer_info = {}, style = {} }) => {
       >
         <Card sx={{ width: "100%", cursor: "pointer" }}>
           <CardHeader
-            avatar={<Avatar aria-label="recipe" src={surfer_info.photo} />}
+            avatar={<Avatar aria-label="recipe" src={user_info.photo} />}
             title={
               <span style={{ color: "#222", fontSize: "1rem" }}>
-                {surfer_info.fname + " " + surfer_info.lname}
+                {user_info.fname + " " + user_info.lname}
               </span>
             }
           />
@@ -101,16 +100,15 @@ const CreatePost = ({ surfer_info = {}, style = {} }) => {
             </Typography>
           </Box>
           <Stack direction="row" alignItems="center">
-            <Item elevation="0">
-              <Avatar src={surfer_info.photo} sx={{ width: 56, height: 56 }} />
+            <Item elevation={0}>
+              <Avatar src={user_info.photo} sx={{ width: 56, height: 56 }} />
             </Item>
-            <Item elevation="0">
+            <Item elevation={0}>
               <Typography variant="h5">
-                {surfer_info.fname + " " + surfer_info.lname}
+                {user_info.fname + " " + user_info.lname}
               </Typography>
             </Item>
           </Stack>
-
           <Stack direction="row" justifyContent="center">
             <TextField
               id="outlined-textarea"

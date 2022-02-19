@@ -2,7 +2,7 @@ import { Button, Grid } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import BackToMainScreen from "../../components/emptyScreen/NoFriendReq";
-import SurferCard from "../../components/surferCard/surferCard";
+import UserCard from "../../components/userCard/userCard";
 import Wrapper from "../../components/Wrapper/Wrapper";
 import imgMail from "../../Material/Images/requests.svg";
 import parseDateF from "../../Utilities/ParsingDate";
@@ -38,7 +38,7 @@ const FriendRequestPage = () => {
         <Grid container item xs={11} lg={7} md={8} spacing={3}>
           {Requests.map((e, i) => (
             <Grid item sm={4} xs={6} key={e.id}>
-              <SurferCard
+              <UserCard
                 user={e}
                 newThings={
                   <Button

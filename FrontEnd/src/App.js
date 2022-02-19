@@ -1,18 +1,18 @@
 import SignIn from "./pages/Sign/SignIn";
-import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import SignUp from "./pages/Sign/SignUp";
+import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import MainPage from "./pages/Home/MainPage";
-import SettingPage from "./pages/SettingPage/settingPage";
+// import SettingPage from "./pages/SettingPage/settingPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import Header from "./components/Header/header";
 import getMe from "./Store/Thunk/getMe";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import SearchPage from "./pages/SearchPage/SearchPage";
-import FriendRequestPage from "./pages/FriendRequests/FriendRequestPage";
-import FavPosts from "./pages/favPosts/favPosts";
-import ReportedSurf from "./pages/ReportedSurf/ReportedSurf";
-import ReportedPost from "./pages/ReportedSurf/ReportedPosts";
+// import SearchPage from "./pages/SearchPage/SearchPage";
+// import FriendRequestPage from "./pages/FriendRequests/FriendRequestPage";
+// import FavPosts from "./pages/favPosts/favPosts";
+// import ReportedSurf from "./pages/ReportedSurf/ReportedSurf";
+// import ReportedPost from "./pages/ReportedSurf/ReportedPosts";
 
 function App() {
   const dispatch = useDispatch();
@@ -24,26 +24,26 @@ function App() {
     dispatch(getMe());
   }, [dispatch]);
   useEffect(() => {
-    const locationPath = location.pathname;
-    if (!loadingUser)
-      if (
-        isAuth &&
-        (locationPath.includes("/login") || locationPath.includes("/signup"))
-      ) {
-        if (user.role === "admin") history.push("/admin/surfers");
-        else history.push("/");
-      } else if (
-        !isAuth &&
-        !locationPath.includes("/login") &&
-        !locationPath.includes("/signup")
-      )
-        history.push("/login");
-      else {
-        if (user.role === "user" && locationPath.includes("admin"))
-          history.push("/");
-      }
-    if (user.role === "admin" && locationPath === "/")
-      history.push("/admin/surfers");
+    // const locationPath = location.pathname;
+    // if (!loadingUser)
+    //   if (
+    //     isAuth &&
+    //     (locationPath.includes("/login") || locationPath.includes("/signup"))
+    //   ) {
+    //     if (user.role === "admin") history.push("/admin/users");
+    //     else history.push("/");
+    //   } else if (
+    //     !isAuth &&
+    //     !locationPath.includes("/login") &&
+    //     !locationPath.includes("/signup")
+    //   )
+    //     history.push("/login");
+    //   else {
+    //     if (user.role === "user" && locationPath.includes("admin"))
+    //       history.push("/");
+    //   }
+    // if (user.role === "admin" && locationPath === "/")
+    //   history.push("/admin/users");
   }, [history, isAuth, loadingUser, location.pathname, user.role]);
   return (
     <>
@@ -60,14 +60,15 @@ function App() {
             <Route path="/signup">
               <SignUp />
             </Route>
+            <Route path="/profile/:id">
+              <ProfilePage />
+            </Route>
+            {/*
             <Route path="/setting">
               <SettingPage />
             </Route>
             <Route path="/search/:search">
               <SearchPage />
-            </Route>
-            <Route path="/profile/:id">
-              <ProfilePage />
             </Route>
             <Route path="/fav">
               <FavPosts />
@@ -80,7 +81,7 @@ function App() {
             </Route>
             <Route path="/admin/posts">
               <ReportedPost />
-            </Route>
+            </Route> */}
           </Switch>
         </>
       )}

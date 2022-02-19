@@ -6,7 +6,7 @@ const {
   restrictTo,
   getLogin,
 } = require("../controller/authController");
-const restriction = restrictTo("surfer");
+const restriction = restrictTo("user");
 const postController = require("../controller/post");
 const router = express.Router({ mergeParams: true });
 const postMediaRouter = require("./postMediaRouter");
@@ -29,7 +29,7 @@ router.get(
   "/myPosts",
   transferParamsToBody,
   protect,
-  restrictTo("surfer"),
+  restrictTo("user"),
   postController.getMyPosts
 );
 router

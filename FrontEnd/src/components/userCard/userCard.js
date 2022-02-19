@@ -42,7 +42,7 @@ const useStyle = makeStyles({
     borderRadius: "5px 5px 0 0",
   },
 });
-const SurferCard = ({ user = {}, newThings = null, id_given = undefined }) => {
+const UserCard = ({ user = {}, newThings = null, id_given = undefined }) => {
   const classes = useStyle();
   const history = useHistory();
   function goProfile() {
@@ -82,4 +82,4 @@ const SurferCard = ({ user = {}, newThings = null, id_given = undefined }) => {
     </Paper>
   );
 };
-export default SurferCard;
+export default UserCard;

@@ -5,7 +5,7 @@ const {
   protect,
   restrictTo,
 } = require("../controller/authController");
-const restriction = restrictTo("surfer", "admin");
+const restriction = restrictTo("user", "admin");
 const likeController = require("../controller/like");
 const AppError = require("../utilities/appError");
 const router = express.Router({ mergeParams: true });
@@ -25,7 +25,7 @@ router.post(
   protect,
   restriction,
   (req, res, next) => {
-    req.body.surfer_id = req.auth.id;
+    req.body.user_id = req.auth.id;
     next();
   },
   likeController.createLike
