@@ -12,12 +12,12 @@ const LeftSection = ({ user }) => {
   const [Friends, setFriends] = useState([]);
   useEffect(() => {
     const asyncFunction = async () => {
-      const { data } = await axios.get("/api/v1/friend/myFriends");
+      const { data } = await axios.get(`/api/v1/friend/${user.id}`);
       console.log(data.data);
       setFriends([...data.data]);
     };
     asyncFunction();
-  }, []);
+  }, [user.id]);
   const infoKeys = {
     education: { convertTo: "studied at", icon: <IoMdSchool /> },
     address: { convertTo: "Lives in", icon: <AiFillHome /> },
@@ -62,13 +62,14 @@ const LeftSection = ({ user }) => {
             </Grid>
             <Grid container spacing={1.5}>
               {Friends.map((el, i) => {
+                console.log(el);
                 return (
                   <Grid item xs={4} key={el}>
                     <FriendCard
-                      imageLink={el[0].photo}
+                      imageLink={el.photo}
                       key={i}
-                      id={el[0].user_id || el[0].id}
-                      name={`${el[0].fname} ${el[0].lname}`}
+                      id={el.id}
+                      name={`${el.fname} ${el.lname}`}
                     ></FriendCard>
                   </Grid>
                 );

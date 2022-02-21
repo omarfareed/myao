@@ -57,22 +57,28 @@ exports.getUserPosts = (userId) =>
 
 const prepareBodyForPostCreate = (req) => {
   req.body.id = uniqueIdGenerator();
-  req.body.media = undefined;
-  req.body.has_multimedia = body.media?.length > 0 || 0;
-  req.body.user_id = authId;
+  req.body.has_media = req.body.media?.length > 0 || 0;
+  delete req.body.media;
+  req.body.user_id = req.auth.id;
   return req.body;
 };
 const insertPost = async (req) => {
-  const preparedBody = prepareBodyForPostCreate();
+  const preparedBody = prepareBodyForPostCreate(req);
+  console.log(preparedBody);
   return await query(`INSERT INTO post SET ?`, preparedBody);
 };
 const preparePostMedia = (postMedia, post_id) =>
-  postMedia.map(({ link, type }) => [uniqueIdGenerator(), type, post_id, link]);
+  (postMedia || []).map(({ link, type }) => [
+    uniqueIdGenerator(),
+    type,
+    post_id,
+    link,
+  ]);
 const insertPostMedia = async (postMedia, post_id) => {
-  const preparedPostMedia = preparePostMedia();
+  const preparedPostMedia = preparePostMedia(postMedia, post_id);
   return await query(
     "INSERT INTO post_media (id , type , post_id , link) VALUES ?",
-    [media]
+    [postMedia]
   );
 };
 const deleteMedia = async (media) => {
@@ -84,8 +90,12 @@ const deleteMedia = async (media) => {
 exports.createPost = catchAsync(async (req, res, next) => {
   const { media } = req.body;
   try {
-    const post = await insertPost(req);
-    const post_media = await insertPostMedia(media, req.body.id);
+    await insertPost(req);
+    if (!req.body.has_media)
+      return res.json({
+        staus: "success",
+      });
+    await insertPostMedia(media, req.body.id);
     return res.json({ status: "success" });
   } catch (err) {
     await deleteMedia(media);
