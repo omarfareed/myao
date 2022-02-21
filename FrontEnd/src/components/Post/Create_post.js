@@ -13,7 +13,6 @@ import PostButton from "./PostButton";
 import { style as Style, Item } from "./PopPostStyle";
 import theme from "../../Utilities/Theme";
 import axios from "axios";
-import parseDateF from "../../Utilities/ParsingDate";
 
 const CreatePost = ({ user_info = {}, style = {} }) => {
   const [open, setOpen] = React.useState(false);
@@ -28,9 +27,8 @@ const CreatePost = ({ user_info = {}, style = {} }) => {
   const createPost = async () => {
     try {
       const form = new FormData();
-      imgs.forEach((e) => form.append("media", e));
-      form.append("post_text", value);
-      form.append("created_date", parseDateF(Date.now()));
+      // imgs.forEach((e) => form.append("media", e));
+      form.append("content", value);
       await axios.post("/api/v1/post", form, {
         headers: {
           "Content-Type": "multipart/form-data",

@@ -49,7 +49,8 @@ class APIFeatures {
   }
   #join() {
     return this.#options.joins.reduce(
-      (prev, cur) => `${prev}JOIN ${cur.table} ON ${cur.condition}`,
+      (prev, cur) =>
+        `${prev}${cur.type} JOIN ${cur.table} ON ${cur.condition} `,
       ""
     );
   }

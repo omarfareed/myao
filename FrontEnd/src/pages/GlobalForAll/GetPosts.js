@@ -2,12 +2,7 @@ import Post from "../../components/Post/post";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const GetPosts = ({
-  linkOfFetching,
-  className,
-  user_info_ready = null,
-  allowScroll = true,
-}) => {
+const GetPosts = ({ linkOfFetching, className, allowScroll = true }) => {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState([]);
   const [finished, setFinished] = useState(false);
@@ -21,6 +16,7 @@ const GetPosts = ({
           data = await axios.get(`${linkOfFetching}?limit=8&page=${page}`);
         else data = await axios.get(`${linkOfFetching}`);
         data = data.data;
+        console.log(data);
         if (data.data.length === 0) {
           setFinished(true);
         } else {
@@ -69,6 +65,7 @@ const GetPosts = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts.length, fetching, finished]);
 
+  console.log("POSTS:" , posts);
   return (
     <>
       {posts.map((el, index) => (
@@ -77,7 +74,7 @@ const GetPosts = ({
           data={el}
           key={index}
           className={className}
-          user_info={el.user_info}
+          user_info={el}
         />
       ))}
     </>

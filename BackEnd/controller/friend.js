@@ -20,7 +20,7 @@ exports.getFriendRequests = catchAsync(async (req, res, next) => {
   select fname,lname,photo,user.id,time_sending
   from user JOIN friend_requests 
   ON receiver = user.id 
-  AND user.id = "${req.auth.id}"
+  AND user.id = "${req.params.user_id}"
   `);
   res.json({
     status: "success",
@@ -72,15 +72,16 @@ exports.getTypeOfRelation = catchAsync(async (req, res, next) => {
   (select concat(sender," ",receiver) from friend_request where sender = "${req.params.user_id}"
   and receiver = "${req.auth.id}" or sender = "${req.auth.id}" and receiver = "${req.params.user_id}") as sender_receiver`);
 
-  let data;
-  if (friends) data = 2;
-  else if (sender_receiver)
-    if (sender_receiver.slice(0, 12) === req.auth.id) data = 1;
-    else data = 4;
-  else data = 0;
-
+  const [sender_id, receiver_id] = (sender_receiver || "").split(" ");
+  const [NO_RELATION, FRIEND, SENDER, RECEIVER] = [0, 1, 2, 3];
   res.json({
     status: "success",
-    data,
+    data: friends
+      ? FRIEND
+      : sender_receiver
+      ? sender_id === req.auth.id
+        ? SENDER
+        : RECEIVER
+      : NO_RELATION,
   });
 });

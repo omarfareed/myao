@@ -22,7 +22,7 @@ const formatDate = (created_date) => {
   let date = new Date(created_date);
   return date.toUTCString().slice(0, 16);
 };
-const Post = ({ id, user_info = {}, data, className, style = {} }) => {
+const Post = ({ id, data = {}, className, style = {} }) => {
   const [LikesCounter, setLikesCounter] = React.useState(data.like_counter);
   const history = useHistory();
   const [like_checked, set_like_checked] = React.useState(data.liked);
@@ -88,14 +88,14 @@ const Post = ({ id, user_info = {}, data, className, style = {} }) => {
             <Avatar
               color="primary"
               aria-label="recipe"
-              src={user_info.photo}
+              src={data.photo}
               onClick={openProfile}
               sx={{ cursor: "pointer" }}
             />
           }
           title={
             <span style={{ color: "#222" }}>
-              {user_info.fname + " " + user_info.lname}
+              {data.fname + " " + data.lname}
             </span>
           }
           subheader={
@@ -148,9 +148,9 @@ const Post = ({ id, user_info = {}, data, className, style = {} }) => {
           }
         />
 
-        <PostContent text={data.post_text} />
+        <PostContent text={data.content} />
 
-        {media}
+        {data.has_media ? media : undefined}
         <Stack
           direction="row"
           justifyContent="space-between"

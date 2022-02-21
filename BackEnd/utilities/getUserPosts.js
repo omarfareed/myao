@@ -1,3 +1,8 @@
+const { promisify } = require("util");
+const connection = require("../connection");
+const query = promisify(connection.query).bind(connection);
+const APIFeatures = require("./apiFeatures");
+
 const preparePostMedia = (posts) => {
   let postHashed = {};
   posts.forEach((post) => {
@@ -14,19 +19,23 @@ const preparePostMedia = (posts) => {
 };
 const getIsLikedPostQuery = (userId, authId) =>
   query(`select post.id from post 
-    JOIN likes ON post_likes.post_id = post.id 
+    JOIN post_likes ON post_likes.post_id = post.id 
     where post.user_id = "${userId}"
     AND post_likes.user_id = "${authId}"
     `);
 
-const getPostQuery = (userId) =>
+const getPostQuery = (userId, req) =>
   query(
     new APIFeatures("post", {
-      ...req.params,
+      ...req.query,
       fields: "post.*,fname,lname,photo,link",
       joins: [
-        { table: "user", condition: "post.user_id = user.id" },
-        { table: "post_media", condition: "post.id = post_media.post_id" },
+        { type: "", table: "user", condition: "post.user_id = user.id" },
+        {
+          type: "LEFT",
+          table: "post_media",
+          condition: "post.id = post_media.post_id",
+        },
       ],
       conditions: [`post.user_id="${userId}"`],
     })
@@ -39,10 +48,13 @@ const preparePostLikes = (posts, isLiked) => {
   });
 };
 
-module.exports = async (userId, authId) => {
+module.exports = async (userId, req) => {
+  console.log(req.auth);
+  console.log(userId);
+  console.log(req.query);
   const [posts, isLiked] = await Promise.all([
-    getPostQuery(userId),
-    getIsLikedPostQuery(userId, authId),
+    getPostQuery(userId, req),
+    getIsLikedPostQuery(userId, req.auth.id),
   ]);
   const postWithMedia = preparePostMedia(posts);
   preparePostLikes(postWithMedia, isLiked);

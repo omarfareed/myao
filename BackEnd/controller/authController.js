@@ -157,7 +157,9 @@ const getCurrentUser = async (req) => {
   return currentUser;
 };
 exports.getLogin = catchAsync(async (req, res, next) => {
+  console.log("test")
   const currentUser = await getCurrentUser(req);
+  console.log(currentUser);
   if (!currentUser) return next();
   req.auth = { role: currentUser.role, id: currentUser.id };
   next();
