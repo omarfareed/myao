@@ -118,6 +118,7 @@ const ReportPost = ({ reported_id, is_post = true, myButton }) => {
             >
               {reasons.map((element, index) => (
                 <FormControlLabel
+                  key={index}
                   value={index}
                   label={element}
                   control={<Radio />}

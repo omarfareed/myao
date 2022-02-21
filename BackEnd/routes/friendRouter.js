@@ -8,6 +8,7 @@ const {
   sendRequest,
   respondRequest,
   getTypeOfRelation,
+  unfriend,
 } = require("../controller/friend");
 router.use(protect);
 router
@@ -16,6 +17,6 @@ router
   .put(respondRequest)
   .get(getFriendRequests);
 router.get("/:user_id/relation", getTypeOfRelation);
-router.get("/:user_id", getUserFriends);
+router.route("/:user_id").get(getUserFriends).delete(unfriend);
 
 module.exports = router;

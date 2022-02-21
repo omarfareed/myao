@@ -28,7 +28,7 @@ exports.getFriendRequests = catchAsync(async (req, res, next) => {
   });
 });
 exports.sendRequest = catchAsync(async (req, res, next) => {
-  const data = await query(`INSERT INTO friend_requests SET ?`, {
+  const data = await query(`INSERT INTO friend_request SET ?`, {
     sender: req.auth.id,
     receiver: req.body.receiver,
   });
@@ -37,11 +37,21 @@ exports.sendRequest = catchAsync(async (req, res, next) => {
     data,
   });
 });
+exports.unfriend = catchAsync(async (req, res, next) => {
+  await query(`
+    delete from friend where user1_id="${req.params.user_id}" and user2_id="${req.auth.id}" OR
+    user2_id="${req.params.user_id}" and user1_id="${req.auth.id}"
+    `);
+  res.json({
+    status: "success",
+  });
+});
 // TODO: stored procedure
 exports.respondRequest = catchAsync(async (req, res, next) => {
   const data = await Promise.all([
     query(
-      `DELETE FROM friend_requests WHERE receiver = "${req.auth.id}" AND sender = "${req.body.sender}"`
+      `DELETE FROM friend_request WHERE receiver = "${req.auth.id}" AND sender = "${req.body.sender}" OR
+      receiver = "${req.body.sender}" AND sender = "${req.auth.id}"`
     ),
     !req.body.accept ||
       query(`INSERT INTO friend SET ?`, {
@@ -63,11 +73,11 @@ exports.getTypeOfRelation = catchAsync(async (req, res, next) => {
   and receiver = "${req.auth.id}" or sender = "${req.auth.id}" and receiver = "${req.params.user_id}") as sender_receiver`);
 
   let data;
-  if (friends) data = "f";
+  if (friends) data = 2;
   else if (sender_receiver)
-    if (sender_receiver.slice(0, 13) === req.auth.id) data = "s";
-    else data = "r";
-  else data = "n";
+    if (sender_receiver.slice(0, 12) === req.auth.id) data = 1;
+    else data = 4;
+  else data = 0;
 
   res.json({
     status: "success",

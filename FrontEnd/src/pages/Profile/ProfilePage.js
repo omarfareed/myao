@@ -7,7 +7,7 @@ import useStyle from "./ProfileStyle";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-// import FriendSectionButton from "./firstSectionButton";
+import FriendSectionButton from "./firstSectionButton";
 import axios from "axios";
 const ProfilePage = () => {
   const classes = useStyle();
@@ -108,9 +108,9 @@ const ProfilePage = () => {
         <Typography variant="subtitle1" className={classes.address}>
           {profileUser.address && `${profileUser.address}`}
         </Typography>
-        {/* {params.id !== user.id && user.role === "user" && (
-          // <FriendSectionButton source_id={user.id} target_id={params.id} />
-        )} */}
+        {params.id !== user.id && user.role === "user" && (
+          <FriendSectionButton source_id={user.id} target_id={params.id} />
+        )}
       </Paper>
       <Grid container>
         <Grid item sm={12} lg={5} style={{ height: "fit-content" }}>
