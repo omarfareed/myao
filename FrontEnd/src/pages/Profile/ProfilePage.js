@@ -2,12 +2,12 @@ import { Avatar, Grid, IconButton, Paper, Typography } from "@mui/material";
 import { SiAdblock } from "react-icons/si";
 import { MdAdminPanelSettings } from "react-icons/md";
 import useStyle from "./ProfileStyle";
-import LeftSection from "./LeftSection";
+// import LeftSection from "./LeftSection";
 // import GetPosts from "../GlobalForAll/GetPosts";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import FriendSectionButton from "./firstSectionButton";
+// import FriendSectionButton from "./firstSectionButton";
 import axios from "axios";
 const ProfilePage = () => {
   const classes = useStyle();
@@ -108,13 +108,13 @@ const ProfilePage = () => {
         <Typography variant="subtitle1" className={classes.address}>
           {profileUser.address && `${profileUser.address}`}
         </Typography>
-        {params.id !== user.id && user.role === "user" && (
-          <FriendSectionButton source_id={user.id} target_id={params.id} />
-        )}
+        {/* {params.id !== user.id && user.role === "user" && (
+          // <FriendSectionButton source_id={user.id} target_id={params.id} />
+        )} */}
       </Paper>
       <Grid container>
         <Grid item sm={12} lg={5} style={{ height: "fit-content" }}>
-          <LeftSection user={user} />
+          {/* <LeftSection user={user} /> */}
         </Grid>
         <Grid container className={classes.rightSection} item lg={7}>
           <Grid container style={{ height: "fit-content" }}>

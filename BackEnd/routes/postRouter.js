@@ -25,16 +25,9 @@ router
     postController.resizePostPhotos,
     postController.createPost
   );
-router.get(
-  "/myPosts",
-  transferParamsToBody,
-  protect,
-  restrictTo("user"),
-  postController.getMyPosts
-);
+
 router
   .route("/:id")
-  .get(transferParamsToBody, getLogin, postController.getSinglePost)
   .patch(
     transferParamsToBody,
     protect,

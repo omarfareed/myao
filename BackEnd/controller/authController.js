@@ -145,12 +145,15 @@ const getCurrentUser = async (req) => {
     token,
     process.env.JWT_SECRET
   );
-  const currentUser = await query(
-    `select * from ${role} where id="${id}" ${
-      role === "user" ? "and is_active=1" : ""
-    }`
-  );
+  const currentUser = (
+    await query(
+      `select * from ${role} where id="${id}" ${
+        role === "user" ? "and is_active=1" : ""
+      }`
+    )
+  )[0];
   currentUser.role = role;
+  // currentUser.id = id;
   return currentUser;
 };
 exports.getLogin = catchAsync(async (req, res, next) => {
@@ -161,7 +164,7 @@ exports.getLogin = catchAsync(async (req, res, next) => {
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
-  const currentUser = getCurrentUser(req);
+  const currentUser = await getCurrentUser(req);
   if (!currentUser)
     return next(
       new appError("You are not logged in! Please log in to get access."),
@@ -172,7 +175,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 exports.getInfo = catchAsync(async (req, res, next) => {
   const currentUser = await getCurrentUser(req);
-  console.log(currentUser);
   if (!currentUser) {
     return res.status(401).json({
       status: "notAuth",
@@ -180,7 +182,7 @@ exports.getInfo = catchAsync(async (req, res, next) => {
   }
   return res.status(200).json({
     status: "success",
-    data: currentUser[0],
+    data: currentUser,
   });
 });
 
@@ -218,7 +220,6 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 exports.restrictTo =
   (...roles) =>
   (req, body, next) => {
-    console.log(req.url);
     if (roles.includes(req.auth.role)) return next();
     next(new appError(`you don't have the permission to make this action`));
   };
@@ -260,7 +261,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   const [{ password: hashedPass }] = await query(
     `select password from ${role} where id = "${req.auth.id}" AND is_active = 1`
   );
-  console.log(req.auth.id);
   if (!hashedPass) next(new appError("account is deleted"));
   if (!(await correctPassword(currentPassword, hashedPass)))
     next(new appError("wrong password"));

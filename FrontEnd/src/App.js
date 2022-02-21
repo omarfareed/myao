@@ -2,8 +2,8 @@ import SignIn from "./pages/Sign/SignIn";
 import SignUp from "./pages/Sign/SignUp";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import MainPage from "./pages/Home/MainPage";
-// import SettingPage from "./pages/SettingPage/settingPage";
-// import ProfilePage from "./pages/Profile/ProfilePage";
+import SettingPage from "./pages/SettingPage/settingPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import Header from "./components/Header/header";
 import getMe from "./Store/Thunk/getMe";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,7 +24,15 @@ function App() {
     dispatch(getMe());
   }, [dispatch]);
   useEffect(() => {
-    // const locationPath = location.pathname;
+    const locationPath = location.pathname;
+    if (loadingUser) return;
+    if (locationPath.match(/login|signup/)) {
+      if (isAuth) history.push("/");
+      return;
+    } else if (!isAuth) {
+      history.push("/login");
+      return;
+    }
     // if (!loadingUser)
     //   if (
     //     isAuth &&
@@ -60,11 +68,13 @@ function App() {
             <Route path="/signup">
               <SignUp />
             </Route>
-            <Route path="/profile/:id">{/* <ProfilePage /> */}</Route>
-            {/*
+            <Route path="/profile/:id">
+              <ProfilePage />
+            </Route>
             <Route path="/setting">
               <SettingPage />
             </Route>
+            {/*
             <Route path="/search/:search">
               <SearchPage />
             </Route>

@@ -3,7 +3,7 @@ import useStyle from "./AvatarStyle";
 import { AiFillCamera } from "react-icons/ai";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
-const AvatarImage = ({ sendImage }) => {
+const AvatarImage = ({ sendImage, className }) => {
   const classes = useStyle();
   const ref = useRef();
   const user = useSelector((state) => state.reducer.user);
@@ -20,7 +20,7 @@ const AvatarImage = ({ sendImage }) => {
   };
   sendImage(sentImg);
   return (
-    <Grid item className={classes.avatarContainer}>
+    <Grid item className={`${classes.avatarContainer} ${className}`}>
       <Avatar
         src={!image ? user.photo : image}
         sx={{ width: "11rem", height: "11rem" }}

@@ -16,6 +16,7 @@ const columns = require("../utilities/tableColumns.js");
 
 const sharp = require("sharp");
 const multer = require("multer");
+const getUserPosts = require("../utilities/getUserPosts");
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) cb(null, true);
@@ -45,308 +46,49 @@ exports.resizePostPhotos = catchAsync(async (req, res, next) => {
   next();
 });
 
-const getUserPosts = async (
-  userId,
-  additionalJoin = "",
-  additionalCondition = "",
-  queryObj
-) => {
-  const { page, limit } = queryObj;
-  const [posts, likes_counter, isLikes, posts_media] = await Promise.all([
-    query(
-      paginate(
-        `
-   select post.id as post_id , post.user_id as user_id ,
-  post_text , post.created_date as created_date ,
-  comment_counter , fname , lname , photo
-  from post JOIN user
-  ON user.id = post.user_id
-  ${additionalJoin}
-  ${additionalCondition === "" ? "" : "where " + additionalCondition}
-  `,
-        page,
-        limit
-      )
-    ),
-    query(
-      `select COUNT(*) as like_counter , post.id as post_id
-      from post JOIN post_likes 
-      ON post.id = post_likes.post_id 
-      ${additionalJoin}
-      ${additionalCondition === "" ? "" : "where " + additionalCondition}
-      group by post.id`
-    ),
-    query(
-      `select post.id as post_id from post_likes JOIN post ON post_likes.post_id = post.id 
-      ${additionalJoin}
-      where post_likes.user_id = "${userId}"
-      ${additionalCondition === "" ? "" : "AND " + additionalCondition}
-      `
-    ),
-    query(
-      `select post.id as post_id , link 
-      from post JOIN post_media 
-      ON post_media.post_id = post.id 
-      ${additionalJoin}
-      ${additionalCondition === "" ? "" : "where " + additionalCondition}
-      `
-    ),
-  ]);
-  let postHashed = {};
-  posts.forEach((post) => {
-    const { fname, lname, photo, user_id, post_id } = post;
-    postHashed[post_id] = {
-      ...post,
-      user_info: {
-        fname,
-        lname,
-        photo,
-        user_id,
-      },
-      liked: false,
-      like_counter: 0,
-      media: [],
-    };
-  });
-  likes_counter.forEach(({ like_counter, post_id }) => {
-    if (postHashed.hasOwnProperty(post_id))
-      postHashed[post_id].like_counter = like_counter;
-  });
-  isLikes.forEach(({ post_id }) => {
-    if (postHashed.hasOwnProperty(post_id)) postHashed[post_id].liked = true;
-  });
-  posts_media.forEach(({ link, post_id }) => {
-    if (postHashed.hasOwnProperty(post_id))
-      postHashed[post_id].media.push(link);
-  });
-  return Object.values(postHashed);
-};
-
-exports.getPost = catchAsync(async (req, res, next) => {
-  const post = await query(`SELECT * FROM post WHERE id=${req.body.id}`);
-  if (!post) return next(new appError("no post with this id"));
-  post.media = (
-    await query(`SELECT * FROM post_media WHERE post_id=${post.id}`)
-  ).map((media) => media.link);
-  return res.json({
-    status: "success",
-    data: post,
-  });
-});
-
-const detailedPosts = async (posts, userId) => {
-  if (posts.length === 0) return [];
-  let postsHashed = {};
-  await Promise.all(
-    posts.map(async (post) => {
-      const [user_info, like_counter, if_liked] = await Promise.all([
-        query(
-          `select fname , lname , photo from user where id="${post.user_id}"`
-        ),
-        query(
-          `select count(*) as like_counter from post_likes where post_id="${post.id}"`
-        ),
-        query(
-          `select * from post_likes where post_id="${post.id}" and user_id="${userId}"`
-        ),
-      ]);
-      postsHashed[post.id] = {
-        ...post,
-        media: [],
-        user_info: user_info[0],
-        like_counter: like_counter[0].like_counter,
-        liked: if_liked.length > 0,
-      };
-    })
-  );
-  // return res.json({ posts, postsHashed });
-  const reducedCondition = posts.reduce(
-    (prev, cur, index) =>
-      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
-    ""
-  );
-  const posts_media = await query(
-    `SELECT * FROM post_media WHERE post_id IN (${reducedCondition})`
-  );
-  posts_media.forEach(({ post_id, link }) =>
-    postsHashed[post_id].media.push(link)
-  );
-  return Object.values(postsHashed);
-};
-exports.getAllPosts = catchAsync(async (req, res, next) => {
-  if (req.body.user_id) req.query.user_id = req.body.user_id;
-  const queryStr = new APIFeatures("post", req.query)
-    .filter()
-    .sort()
-    .paginate().query;
-  const posts = await query(queryStr);
-  if (posts.length === 0)
-    return res.json({
+exports.getUserPosts = (userId) =>
+  catchAsync(async (req, res, next) => {
+    const data = await getUserPosts(userId, req.auth.id);
+    res.json({
       status: "success",
-      data: posts,
+      data,
     });
-  let postsHashed = {};
-  posts.forEach((post) => {
-    postsHashed[post.id] = { ...post, media: [] };
   });
-  const reducedCondition = posts.reduce(
-    (prev, cur, index) =>
-      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
-    ""
-  );
-  const posts_media = await query(
-    `SELECT * FROM post_media WHERE post_id IN (${reducedCondition})`
-  );
-  posts_media.forEach(({ post_id, link }) =>
-    postsHashed[post_id].media.push(link)
-  );
-  res.json({
-    status: "success",
-    data: Object.values(postsHashed),
-  });
-});
 
-exports.getSinglePost = catchAsync(async (req, res, next) => {
-  const posts = await query(`select * from post where id="${req.body.id}"`);
-  const data = await detailedPosts(posts, req.auth.id);
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getSinglePost = catchAsync(async (req, res, next) => {
-  const data = await getUserPosts(
-    req.auth?.id,
-    "",
-    `post.id = "${req.body.id}"`,
-    req.query
+const prepareBodyForPostCreate = (req) => {
+  req.body.id = uniqueIdGenerator();
+  req.body.media = undefined;
+  req.body.has_multimedia = body.media?.length > 0 || 0;
+  req.body.user_id = authId;
+  return req.body;
+};
+const insertPost = async (req) => {
+  const preparedBody = prepareBodyForPostCreate();
+  return await query(`INSERT INTO post SET ?`, preparedBody);
+};
+const preparePostMedia = (postMedia, post_id) =>
+  postMedia.map(({ link, type }) => [uniqueIdGenerator(), type, post_id, link]);
+const insertPostMedia = async (postMedia, post_id) => {
+  const preparedPostMedia = preparePostMedia();
+  return await query(
+    "INSERT INTO post_media (id , type , post_id , link) VALUES ?",
+    [media]
   );
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getMyPosts = catchAsync(async (req, res, next) => {
-  req.query.user_id = req.auth?.id;
-  if (!req.query.user_id) return next(new appError("unexpected error"));
-  const queryStr = new APIFeatures("post", req.query)
-    .filter()
-    .sort()
-    .paginate().query;
-  const posts = await query(queryStr);
-  const data = await detailedPosts(posts, req.auth.id);
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getMyPosts = catchAsync(async (req, res, next) => {
-  const data = await getUserPosts(
-    req.auth.id,
-    "",
-    `post.user_id = "${req.auth.id}"`,
-    req.query
-  );
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getUserPosts = catchAsync(async (req, res, next) => {
-  if (req.body.user_id) req.query.user_id = req.body.user_id;
-  else return next(new appError("user_id must be given"));
-  const queryStr = new APIFeatures("post", req.query)
-    .filter()
-    .sort()
-    .paginate().query;
-  const posts = await query(queryStr);
-  const data = await detailedPosts(posts, req.auth?.id);
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getUserPosts = catchAsync(async (req, res, next) => {
-  const data = await getUserPosts(
-    req.auth.id,
-    "",
-    `post.user_id = "${req.body.user_id}"`,
-    req.query
-  );
-  res.json({
-    status: "success",
-    data,
-  });
-});
-exports.getPosts = catchAsync(async (req, res, next) => {
-  console.log(req.query);
-  const posts = await query(
-    addWhereCondition(
-      `SELECT * FROM post`,
-      // filterObjTo(req.body, columns["post"])
-      req.body
-    )
-  );
-  if (posts.length === 0)
-    return res.json({
-      status: "success",
-      data: posts,
-    });
-  let postsHashed = {};
-  posts.forEach((post) => {
-    postsHashed[post.id] = { ...post, media: [] };
-  });
-  const reducedCondition = posts.reduce(
-    (prev, cur, index) =>
-      `${prev} ${index == 0 ? "'" + cur.id + "'" : "," + "'" + cur.id + "'"}`,
-    ""
-  );
-  const posts_media = await query(
-    `SELECT * FROM post_media WHERE post_id IN (${reducedCondition})`
-  );
-  posts_media.forEach(({ post_id, link }) =>
-    postsHashed[post_id].media.push(link)
-  );
-  res.json({
-    status: "success",
-    data: Object.values(postsHashed),
-  });
-});
+};
+const deleteMedia = async (media) => {
+  media?.length &&
+    (await Promise.all(
+      media.map(({ link }) => unlink(`../FrontEnd/public${link}`))
+    ));
+};
 exports.createPost = catchAsync(async (req, res, next) => {
-  const { media: postMedia } = req.body;
+  const { media } = req.body;
   try {
-    const id = uniqueIdGenerator("post");
-    req.body["id"] = id;
-    req.body["has_multimedia"] = 0;
-    delete req.body.media;
-    if (postMedia?.length > 0) req.body["has_multimedia"] = 1;
-    req.body.user_id = req.auth.id;
-    const post = await query(
-      `INSERT INTO post set ? `,
-      // filterObjTo(req.body, columns["post"])
-      req.body
-    );
-    if (!postMedia?.length)
-      return res.json({
-        status: "success",
-        data: post,
-      });
-    const media = postMedia.map(({ link, type }) => [
-      uniqueIdGenerator("MEPO"),
-      type,
-      id,
-      link,
-    ]);
-    const post_media = await query(
-      "INSERT INTO post_media (id , type , post_id , link) VALUES ?",
-      [media]
-    );
-    return res.json({ status: "success", post_media });
+    const post = await insertPost(req);
+    const post_media = await insertPostMedia(media, req.body.id);
+    return res.json({ status: "success" });
   } catch (err) {
-    postMedia?.length &&
-      (await Promise.all(
-        postMedia.map(({ link }) => unlink(`../FrontEnd/public${link}`))
-      ));
+    await deleteMedia(media);
     throw err;
   }
 });
@@ -390,20 +132,3 @@ exports.getTimeLine = catchAsync(async (req, res, next) => {
     data,
   });
 });
-// exports.getTimeLine = catchAsync(async (req, res, next) => {
-//   const data = await getUserPosts(
-//     req.auth.id,
-//     `JOIN friend
-//     ON (friend.source_id = post.user_id AND friend.target_id = "${req.auth.id}")
-//     OR (friend.target_id = post.user_id AND friend.source_id = "${req.auth.id}")
-//     `,
-//     `friendship_time IS NULL`,
-//     req.query
-//   );
-//   res.json({
-//     status: "success",
-//     data,
-//   });
-// });
-// get posts with person information
-// if liked , count

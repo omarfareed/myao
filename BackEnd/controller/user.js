@@ -3,6 +3,7 @@ const controller = require("./globalController");
 const { promisify } = require("util");
 const catchAsync = require("../utilities/catchAsync");
 const query = promisify(connection.query).bind(connection);
+const APIFeature = require("../utilities/apiFeatures");
 exports.getUsers = controller.select("user");
 exports.createUser = controller.create("user");
 exports.updateUser = controller.update("user", ["id", "created_date"]);
@@ -14,7 +15,6 @@ exports.deleteUser = (req, res, next) => {
 const sharp = require("sharp");
 const multer = require("multer");
 const AppError = require("../utilities/appError");
-const { paginate } = require("../utilities/postUtilities");
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) cb(null, true);
@@ -40,85 +40,6 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
 
   next();
 });
-
-const getUserPosts = async (
-  userId,
-  additionalJoin = "",
-  additionalCondition = "",
-  queryObj
-) => {
-  const { page, limit } = queryObj;
-  const [posts, likes_counter, isLikes, posts_media] = await Promise.all([
-    query(
-      paginate(
-        `
-   select post.id as post_id , post.user_id as user_id ,
-  post_text , post.created_date as created_date ,
-  comment_counter , fname , lname , photo
-  from post JOIN user
-  ON user.id = post.user_id
-  ${additionalJoin}
-  ${additionalCondition === "" ? "" : "where " + additionalCondition}
-  `,
-        page,
-        limit
-      )
-    ),
-    query(
-      `select COUNT(*) as like_counter , post.id as post_id
-      from post JOIN \`like\` 
-      ON post.id = \`like\`.post_id 
-      ${additionalJoin}
-      ${additionalCondition === "" ? "" : "where " + additionalCondition}
-      group by post.id`
-    ),
-    query(
-      `select post.id as post_id from \`like\` JOIN post ON \`like\`.post_id = post.id 
-      ${additionalJoin}
-      where \`like\`.user_id = "${userId}"
-      ${additionalCondition === "" ? "" : "AND " + additionalCondition}
-      `
-    ),
-    query(
-      `select post.id as post_id , link 
-      from post JOIN post_media 
-      ON post_media.post_id = post.id 
-      ${additionalJoin}
-      ${additionalCondition === "" ? "" : "where " + additionalCondition}
-      `
-    ),
-  ]);
-  let postHashed = {};
-  posts.forEach((post) => {
-    const { fname, lname, photo, user_id, post_id } = post;
-    postHashed[post_id] = {
-      ...post,
-      user_info: {
-        fname,
-        lname,
-        photo,
-        user_id,
-      },
-      liked: false,
-      like_counter: 0,
-      media: [],
-    };
-  });
-  likes_counter.forEach(({ like_counter, post_id }) => {
-    if (postHashed.hasOwnProperty(post_id))
-      postHashed[post_id].like_counter = like_counter;
-  });
-  isLikes.forEach(({ post_id }) => {
-    if (postHashed.hasOwnProperty(post_id)) postHashed[post_id].liked = true;
-  });
-  posts_media.forEach(({ link, post_id }) => {
-    if (postHashed.hasOwnProperty(post_id))
-      postHashed[post_id].media.push(link);
-  });
-  return Object.values(postHashed);
-};
-
-/////////////////////////////////
 
 exports.searchUser = catchAsync(async (req, res, next) => {
   const search = req.body.search?.split(" ");

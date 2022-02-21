@@ -10,10 +10,26 @@ const useStyle = makeStyles({
     height: "8rem",
     backgroundColor: "red",
   },
+  AvatarImage: {
+    "&.MuiGrid-root": {
+      transform: "translateY(-50%)",
+      marginBottom: "-6rem",
+    },
+  },
   container1: {
     padding: "3rem 0",
     maxWidth: "40rem",
     width: "5vw",
+  },
+  coverContainer: {
+    "&.MuiGrid-root": {
+      padding: "0",
+      maxWidth: "40rem",
+      backgroundColor: "#aaa",
+      height: "15rem",
+      borderRadius: "5px",
+      overflow: "hidden",
+    },
   },
   line: {
     height: "1px",
