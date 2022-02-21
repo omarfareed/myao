@@ -37,7 +37,7 @@ const SettingPage = () => {
     newPassword.length === 0 ||
     newPasswordConfirm.length === 0;
   const infoButtonsDisabled =
-    (user.education || "") == education && (user.address || "") == address;
+    (user.education || "") === education && (user.address || "") === address;
   const ref = useRef();
   const backToDefault = () => {
     setAddress(user.address || "");
@@ -84,7 +84,6 @@ const SettingPage = () => {
     }
   };
   const uploadThePhoto = async () => {
-    console.log(cover);
     if (img || cover) {
       try {
         const form = new FormData();
@@ -116,14 +115,17 @@ const SettingPage = () => {
     >
       <Grid
         container
-        height="14rem"
         onClick={() => ref.current.click()}
-        sx={{ padding: "0" }}
-        style={{ marginBottom: "2rem", backgroundColor: "#aaa" }}
-        className={classes.container1}
+        // sx={{ padding: "0" }}
+        // style={{ backgroundColor: "#aaa" }}
+        className={classes.coverContainer}
       >
         {cover && (
-          <img style={{ width: "100%", height: "100%" }} src={coverLink}></img>
+          <img
+            alt="cover"
+            style={{ width: "100%", height: "100%" }}
+            src={coverLink}
+          ></img>
         )}
       </Grid>
       <input
@@ -131,10 +133,9 @@ const SettingPage = () => {
         type="file"
         accept="image/*"
         hidden
-        // id="settingImage"
         onChange={changeProfileCover}
       />
-      <AvatarImage sendImage={recieveImage} />
+      <AvatarImage sendImage={recieveImage} className={classes.AvatarImage} />
       <Grid container direction="column" className={classes.container1}>
         {/* information just for showing */}
         <InputFieldSimple label="Email" disable={true} value={user.email} />

@@ -2,12 +2,12 @@ import { Avatar, Grid, IconButton, Paper, Typography } from "@mui/material";
 import { SiAdblock } from "react-icons/si";
 import { MdAdminPanelSettings } from "react-icons/md";
 import useStyle from "./ProfileStyle";
-import LeftSection from "./LeftSection";
+// import LeftSection from "./LeftSection";
 // import GetPosts from "../GlobalForAll/GetPosts";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import FriendSectionButton from "./firstSectionButton";
+// import FriendSectionButton from "./firstSectionButton";
 import axios from "axios";
 const ProfilePage = () => {
   const classes = useStyle();
