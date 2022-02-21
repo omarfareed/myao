@@ -9,7 +9,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 const LeftSection = ({ user }) => {
   const classes = useStyle();
-  const [Friends, setFriends] = useState([]);
+  const [, setFriends] = useState([]);
+  const Friends = [
+    { fname: "ahmed", lname: "aref", id: 0 },
+    { fname: "ahmed", lname: "aref", id: 1 },
+    { fname: "ahmed", lname: "aref", id: 2 },
+    { fname: "ahmed", lname: "aref", id: 3 },
+  ];
   useEffect(() => {
     const asyncFunction = async () => {
       const { data } = await axios.get(`/api/v1/friend/${user.id}`);
@@ -34,35 +40,15 @@ const LeftSection = ({ user }) => {
     job: user.jop,
   };
   return (
-    <Grid
-      container
-      direction="column"
-      height="fit-content"
-      id="leftSectionProfile"
-      className={classes.scrollFunc}
-    >
+    <Grid container id="leftSectionProfile" rowGap={3}>
       {Friends.length !== 0 && (
-        <Paper
-          // style={{ backgroundColor: "red" }}
-          style={{
-            paddingBottom:
-              Friends.length === 3
-                ? "2rem"
-                : Friends.length === 2
-                ? "4rem"
-                : Friends.length === 1
-                ? "5rem"
-                : undefined,
-          }}
-          className={classes.friendSection}
-        >
-          <Grid container justifyContent="space-between">
+        <Paper className={classes.friendSection}>
+          <Grid container>
             <Grid container style={{ margin: "0 0 0 1rem" }}>
               <Typography variant="h2">Friends</Typography>
             </Grid>
-            <Grid container spacing={1.5}>
+            <Grid container columnSpacing={2}>
               {Friends.map((el, i) => {
-                console.log(el);
                 return (
                   <Grid item xs={4} key={el}>
                     <FriendCard

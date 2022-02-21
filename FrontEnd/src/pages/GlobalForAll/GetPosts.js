@@ -2,12 +2,7 @@ import Post from "../../components/Post/post";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const GetPosts = ({
-  linkOfFetching,
-  className,
-  user_info_ready = null,
-  allowScroll = true,
-}) => {
+const GetPosts = ({ linkOfFetching, className, allowScroll = true }) => {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState([]);
   const [finished, setFinished] = useState(false);

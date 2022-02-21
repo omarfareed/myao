@@ -14,7 +14,7 @@ const useStyle = makeStyles({
     },
   },
   imageSection: {
-    marginBottom: "4rem",
+    marginBottom: "3rem",
     paddingBottom: "2rem",
     [theme.breakpoints.down("lg")]: {
       marginBottom: "2rem",
@@ -109,14 +109,7 @@ const useStyle = makeStyles({
   },
   friendSection: {
     padding: "1rem",
-    marginBottom: "2rem",
-  },
-  scrollFunc: {
-    "&.MuiGrid-root": {
-      [theme.breakpoints.up("lg")]: {
-        width: "29.2rem",
-      },
-    },
+    width: "100%",
   },
   rightSection: {
     [theme.breakpoints.up("lg")]: {
