@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import "./Utilities/normalize.css";
+import "./Utilities/keyFrames.css";
 import App from "./App";
 import theme from "./Utilities/Theme";
 import { BrowserRouter } from "react-router-dom";

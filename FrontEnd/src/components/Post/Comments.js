@@ -1,134 +1,144 @@
 import {
   Avatar,
-  Button,
   Collapse,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Stack,
+  Drawer,
+  Grid,
+  Input,
+  InputLabel,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { BsFillArrowRightCircleFill } from "react-icons/bs";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-const Comments = ({ open, post_id }) => {
-  const [info, setInfo] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [noComment, setNoComments] = useState(false);
-  const [value, setValue] = useState("");
-  const history = useHistory();
-  const user = useSelector((state) => state.reducer.user);
-  const fetching = async () => {
-    setLoading(true);
-    const { data } = await axios.patch("/api/v1/comment", { post_id });
-    setInfo([...info, ...data.data]);
-    setLoading(false);
-    setNoComments(true);
-  };
-  const createComment = async () => {
-    if (value.length > 0) {
-      try {
-        const date = new Date().toISOString();
-        let dataToSend = {
-          content: value,
-          created_time: (0, date.slice(0, date.indexOf("T"))),
-          post_id,
-        };
-        await axios.post("/api/v1/comment", dataToSend);
-        dataToSend = { ...dataToSend, ...user };
-        setInfo([...info, dataToSend]);
-        setValue("");
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (open && info.length === 0 && !loading && !noComment) {
-      fetching();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-  const goProfile = (el) => {
-    history.push(`/profile/${el.user_id}`);
-  };
+import getTimeFrom from "../../Utilities/getTime";
+import useStyle from "./Post-style";
+const Comment = (props) => {
+  const classes = useStyle();
+  const { fname, lname, photo, content, comment_time } = props;
   return (
-    <Collapse in={open} timeout="auto" unmountOnExit>
-      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-        {info.map((el) => (
-          <ListItem alignItems="flex-start" key={el.post_id}>
-            <ListItemAvatar>
-              <Avatar
-                alt="Remy Sharp"
-                style={{ cursor: "pointer" }}
-                src={el.photo}
-                onClick={() => goProfile(el)}
-              />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <span
-                  onClick={goProfile}
-                  style={{ cursor: "pointer" }}
-                >{`${el.fname} ${el.lname}`}</span>
-              }
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    sx={{ display: "inline" }}
-                    component="span"
-                    variant="subtitle2"
-                    color="text.primary"
-                  >
-                    {/* {el.created_time.slice(0, el.created_time.indexOf("T"))} */}
-                  </Typography>
-                  {el.content}
-                </React.Fragment>
-              }
+    <Grid container columnGap={2} alignItems="flex-start">
+      <Grid item>
+        <Avatar src={photo} />
+      </Grid>
+      <Grid item direction="column">
+        <Grid item className={classes.commentContent}>
+          <Typography>{`${fname} ${lname}`}</Typography>
+          <Typography>{content}</Typography>
+        </Grid>
+        <Grid item container alignItems="center" direction="row">
+          <Typography
+            sx={{ fontSize: "1rem", marginLeft: "1rem" }}
+            className={classes.commentLike}
+          >
+            like
+          </Typography>
+          <Typography sx={{ fontSize: "1rem", marginLeft: "1rem" , color : "rgba(0,0,0,0.5)"}}>
+            {getTimeFrom(comment_time)}
+          </Typography>
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+};
+const Comments = (props) => {
+  const { post_id, commentOpen, setCommentOpen } = props;
+  const [comments, setComments] = useState([]);
+  const [fetching, setFetching] = useState(false);
+  const [insertNewComment, setInsertNewComment] = useState(false);
+  const [page, setPage] = useState(1);
+  const classes = useStyle();
+  const [content, setContent] = useState("");
+  const { fname, lname, photo } = useSelector((state) => state.reducer.user);
+  const handleInsertComment = (event) => {
+    if (event.key === "Enter") setInsertNewComment(true);
+  };
+  useEffect(() => {
+    console.log(1);
+    const insertComment = async () => {
+      try {
+        await axios.post(`/api/v1/post/${post_id}/comment/`, {
+          content,
+          post_id,
+        });
+        setComments([
+          { fname, lname, photo, content, comment_time: "now" },
+          ...comments,
+        ]);
+        setContent("");
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (insertNewComment) {
+      setInsertNewComment(false);
+      content.length > 0 && insertComment();
+    }
+  }, [insertNewComment]);
+  useEffect(() => {
+    console.log(2);
+    const fetchComments = async () => {
+      try {
+        setFetching(true);
+        const {
+          data: { data },
+        } = await axios.get(
+          `/api/v1/post/${post_id}/comment?limit=8&page=${page}&sort=-comment_time`
+        );
+        console.log(data);
+        setFetching(false);
+        setComments([...data, ...comments]);
+        console.log(comments);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchComments();
+    // eslint-disable-next-line
+  }, [page, post_id]);
+  console.log(commentOpen);
+  console.log(comments);
+  return (
+    <Collapse
+      in={commentOpen}
+      sx={{ marginBottom: "-3.5rem" }}
+      timeout="auto"
+      unmountOnExit
+    >
+      <Grid
+        container
+        direction="column"
+        rowGap={3}
+        className={classes.commentContainer}
+        justifyContent="center"
+      >
+        <Grid item container columnGap={3}>
+          <Grid item>
+            <Avatar></Avatar>
+          </Grid>
+          <Grid item xs={9}>
+            <InputLabel htmlFor="input-label-insert-comment">
+              add new comment
+            </InputLabel>
+            <Input
+              onKeyPress={handleInsertComment}
+              onChange={(e) => setContent(e.target.value)}
+              id="input-label-insert-comment"
+              label="add new comment"
+              variant="standard"
+              fullWidth
+              className={classes.insertComment}
+              value={content}
             />
-          </ListItem>
+          </Grid>
+        </Grid>
+        {comments.map((comment, i) => (
+          <Grid item>
+            <Comment {...comment} />
+          </Grid>
         ))}
-        <ListItem alignItems="flex-start">
-          <ListItemAvatar>
-            <Avatar alt="Name" src={user.photo} /> {/*revise*/}
-          </ListItemAvatar>
-          <ListItemText
-            secondary={
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={1}
-              >
-                <TextField
-                  sx={{ width: "85%" }}
-                  label="Comment"
-                  placeholder="give your comment"
-                  multiline
-                  variant="standard"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                />
-                <Button
-                  onClick={createComment}
-                  variant="text"
-                  centerRipple
-                  size="small"
-                  disabled={value.length === 0}
-                  startIcon={<BsFillArrowRightCircleFill />}
-                />
-              </Stack>
-            }
-          />
-        </ListItem>
-      </List>
+      </Grid>
     </Collapse>
   );
 };
-
 export default Comments;

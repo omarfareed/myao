@@ -1,0 +1,6 @@
+@keyframes likeClick {
+  50% {
+    color: red;
+    transform: scale(2);
+  }
+}

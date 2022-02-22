@@ -3,6 +3,7 @@ const controller = require("./globalController");
 const catchAsync = require("../utilities/catchAsync");
 const { promisify } = require("util");
 const { uniqueIdGenerator } = require("../utilities/control");
+const APIFeatures = require("../utilities/apiFeatures");
 const query = promisify(connection.query).bind(connection);
 exports.getComments = catchAsync(async (req, res, next) => {
   const data = await query(
@@ -15,13 +16,33 @@ exports.getComments = catchAsync(async (req, res, next) => {
     data,
   });
 });
+const getCommentQuery = (req) =>
+  query(
+    new APIFeatures("comments", {
+      ...req.query,
+      fields: "comments.*,fname,lname,photo",
+      joins: [
+        { type: "", table: "user", condition: "comments.user_id = user.id" },
+      ],
+      conditions: [`comments.post_id="${req.params.post_id}"`],
+    })
+      .filter()
+      .sort()
+      .paginate().query
+  );
+exports.getComments = catchAsync(async (req, res, next) => {
+  const data = await getCommentQuery(req);
+  console.log("iam here", data);
+  res.json({
+    status: "success",
+    data,
+  });
+});
 
 exports.createComment = catchAsync(async (req, res, next) => {
-  const id = uniqueIdGenerator("comment");
-  const { post_id, content, created_time } = req.body;
-  const data = await query(
-    `call insert_comment("${post_id}" , "${req.auth.id}" , "${content}" , "${created_time}" , "${id}")`
-  );
+  req.body.id = uniqueIdGenerator();
+  req.body.user_id = req.auth.id;
+  const data = await query(`insert into comments set ?`, req.body);
   res.json({
     status: "success",
     data,
