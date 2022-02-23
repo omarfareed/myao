@@ -1,4 +1,4 @@
-import Post from "../../components/Post/post";
+import Post from "../../components/post/post";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -16,6 +16,7 @@ const GetPosts = ({ linkOfFetching, className, allowScroll = true }) => {
           data = await axios.get(`${linkOfFetching}?limit=8&page=${page}`);
         else data = await axios.get(`${linkOfFetching}`);
         data = data.data;
+        console.log(data);
         if (data.data.length === 0) {
           setFinished(true);
         } else {
@@ -67,13 +68,7 @@ const GetPosts = ({ linkOfFetching, className, allowScroll = true }) => {
   return (
     <>
       {posts.map((el, index) => (
-        <Post
-          id={`post_id_${index}`}
-          data={el}
-          key={index}
-          className={className}
-          user_info={el.user_info}
-        />
+        <Post data={el} key={index} />
       ))}
     </>
   );

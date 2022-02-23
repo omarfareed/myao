@@ -9,17 +9,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 const LeftSection = ({ user }) => {
   const classes = useStyle();
-  const [, setFriends] = useState([]);
-  const Friends = [
-    { fname: "ahmed", lname: "aref", id: 0 },
-    { fname: "ahmed", lname: "aref", id: 1 },
-    { fname: "ahmed", lname: "aref", id: 2 },
-    { fname: "ahmed", lname: "aref", id: 3 },
-  ];
+  const [Friends, setFriends] = useState([]);
   useEffect(() => {
     const asyncFunction = async () => {
       const { data } = await axios.get(`/api/v1/friend/${user.id}`);
-      console.log(data.data);
       setFriends([...data.data]);
     };
     asyncFunction();
@@ -40,7 +33,7 @@ const LeftSection = ({ user }) => {
     job: user.jop,
   };
   return (
-    <Grid container id="leftSectionProfile" rowGap={3}>
+    <Grid container id="leftSectionProfile" className={classes.controlFixed}>
       {Friends.length !== 0 && (
         <Paper className={classes.friendSection}>
           <Grid container>

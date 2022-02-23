@@ -16,7 +16,6 @@ const likeRouter = require("./likeRouter");
 router.get("/timeline", protect, postController.getTimeLine);
 router
   .route("/")
-  .get(transferParamsToBody, getLogin, postController.getUserPosts)
   .post(
     transferParamsToBody,
     protect,
@@ -26,6 +25,7 @@ router
     postController.createPost
   );
 
+router.get("/:user_id", getLogin, postController.getUserPosts);
 router
   .route("/:id")
   .patch(

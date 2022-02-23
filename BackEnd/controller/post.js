@@ -46,14 +46,15 @@ exports.resizePostPhotos = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.getUserPosts = (userId) =>
-  catchAsync(async (req, res, next) => {
-    const data = await getUserPosts(userId, req.auth.id);
-    res.json({
-      status: "success",
-      data,
-    });
+exports.getUserPosts = catchAsync(async (req, res, next) => {
+  console.log(req.params);
+  const { user_id } = req.params;
+  const data = await getUserPosts(user_id, req);
+  res.json({
+    status: "success",
+    data,
   });
+});
 
 const prepareBodyForPostCreate = (req) => {
   req.body.id = uniqueIdGenerator();

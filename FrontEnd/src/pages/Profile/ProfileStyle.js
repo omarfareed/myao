@@ -110,6 +110,12 @@ const useStyle = makeStyles({
   friendSection: {
     padding: "1rem",
     width: "100%",
+    marginBottom: "1.2rem",
+  },
+  controlFixed: {
+    "&.MuiGrid-root": {
+      width: "29rem",
+    },
   },
   rightSection: {
     [theme.breakpoints.up("lg")]: {

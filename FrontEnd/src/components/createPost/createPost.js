@@ -8,9 +8,9 @@ import { HiPhotograph } from "react-icons/hi";
 import { BsFillCameraVideoFill } from "react-icons/bs";
 import { AiFillCamera } from "react-icons/ai";
 import { Box } from "@mui/system";
-import UploadButton from "./UploadButton";
-import PostButton from "./PostButton";
-import { style as Style, Item } from "./PopPostStyle";
+import UploadButton from "./uploadButton";
+import PostButton from "./postButton";
+import { style as Style, Item } from "./createPostStyle";
 import theme from "../../Utilities/Theme";
 import axios from "axios";
 

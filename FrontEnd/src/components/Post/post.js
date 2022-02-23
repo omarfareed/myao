@@ -1,196 +1,141 @@
-import * as React from "react";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-// import CardMedia from "@mui/material/CardMedia";
-// import CardContent from "@mui/material/CardContent";
-import Avatar from "@mui/material/Avatar";
-import axios from "axios";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import { Checkbox, Grid, Menu, MenuItem, Paper, Stack } from "@mui/material";
-import ReportPost from "./ReportPost";
-import { FiMoreVertical } from "react-icons/fi";
-import { FaRegComment } from "react-icons/fa";
-import { MdOutlineFavoriteBorder, MdOutlineFavorite } from "react-icons/md";
-import Comments from "./Comments";
-import PostContent from "./PostContent";
-import PostImgs from "./imgGallary";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-import parseDateF from "../../Utilities/ParsingDate";
-const formatDate = (created_date) => {
-  let date = new Date(created_date);
-  return date.toUTCString().slice(0, 16);
-};
-const Post = ({ id, user_info = {}, data, className, style = {} }) => {
-  const [LikesCounter, setLikesCounter] = React.useState(data.like_counter);
-  const history = useHistory();
-  const [like_checked, set_like_checked] = React.useState(data.liked);
-  const CommentCounter = data.comment_counter;
-  const user = useSelector((state) => state.reducer.user);
-  const media =
-    data.media.length > 0 ? <PostImgs photos={data.media} /> : <></>;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const label = { inputProps: { "aria-label": "Checkbox demo" } };
-
-  const [openComment, setOpenComment] = React.useState(0);
-
-  const handleCommentClick = () => {
-    setOpenComment(!openComment);
-  };
-  const addToFav = async () => {
-    // console.log(data.post_id);
-    try {
-      await axios.post(`/api/v1/favpost/${data.post_id || data.id}`);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-  const openProfile = () => {
-    history.push(`/profile/${data.user_id}`);
-  };
-  const likeHandler = async () => {
-    try {
-      if (like_checked) {
-        await axios.post("/api/v1/like/unlike", {
-          type: 0,
-          post_id: data.post_id || data.id,
-          user_id: user.id,
-        });
-        set_like_checked(0);
-        setLikesCounter((l) => l - 1);
-      } else {
-        await axios.post("/api/v1/like/like", {
-          type: 0,
-          post_id: data.post_id || data.id,
-          like_time: parseDateF(Date.now()),
-        });
-        set_like_checked(1);
-        setLikesCounter((l) => l + 1);
-      }
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+import {
+  Avatar,
+  Button,
+  Card,
+  Grid,
+  ImageList,
+  ImageListItem,
+  Typography,
+} from "@mui/material";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaCommentAlt } from "react-icons/fa";
+import { BiShare } from "react-icons/bi";
+import useStyle from "./Post-style";
+import { useState } from "react";
+import Comment from "./Comments";
+import getTimeFrom from "../../Utilities/getTime";
+import PostReact from "./PostReact";
+const PostHeader = ({ fname, lname, photo, created_date }) => {
+  const classes = useStyle();
   return (
-    <Paper
-      style={{ width: "100%", height: "fit-content", ...style }}
-      className={className}
-    >
-      <Card id={id}>
-        <CardHeader
-          avatar={
-            <Avatar
-              color="primary"
-              aria-label="recipe"
-              src={user_info.photo}
-              onClick={openProfile}
-              sx={{ cursor: "pointer" }}
-            />
-          }
-          title={
-            <span style={{ color: "#222" }}>
-              {user_info.fname + " " + user_info.lname}
-            </span>
-          }
-          subheader={
-            <span style={{ fontSize: ".75rem" }}>
-              {formatDate(data.created_date)}
-            </span>
-          }
-          action={
-            <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <FiMoreVertical />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorEl)}
-                onClose={() => {
-                  setAnchorEl(null);
-                }}
-              >
-                <MenuItem
-                  onClick={() => {
-                    addToFav();
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add To favourite
-                </MenuItem>
-                {user.id !== data.user_id && (
-                  <ReportPost reported_id={data.post_id} />
-                )}
-              </Menu>
-            </div>
-          }
-        />
-
-        <PostContent text={data.post_text} />
-
-        {media}
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="body2" marginLeft="1rem" marginRight="auto">
-            {!LikesCounter ? null : `${LikesCounter} Reaction`}
-          </Typography>
-          <Grid container width="fit-content" marginLeft="auto">
-            <Typography variant="body2" marginRight=".5rem">
-              {!CommentCounter ? null : `${CommentCounter} Comments`}
-            </Typography>
+    <Grid container direction="row" alignItems="center">
+      <Grid
+        item
+        className={classes.userPhoto}
+        component={Avatar}
+        src={photo}
+      ></Grid>
+      <Grid item>
+        <Grid container direction="column">
+          <Grid item component={Typography}>{`${fname} ${lname}`}</Grid>
+          <Grid item component={Typography} className={classes.createdDate}>
+            {getTimeFrom(created_date)}
           </Grid>
-        </Stack>
-        {/* {line} */}
-        <Stack
-          direction="row"
-          justifyContent="space-evenly"
-          alignItems="center"
-          spacing={3}
-        >
-          <Checkbox
-            onClick={likeHandler}
-            {...label}
-            icon={<MdOutlineFavoriteBorder size={25} />}
-            checkedIcon={<MdOutlineFavorite size={25} />}
-            checked={like_checked}
-          />
-          <IconButton aria-label="share" onClick={handleCommentClick}>
-            <FaRegComment />
-          </IconButton>
-
-          {/* <IconButton aria-label="share">
-            <RiShareForwardLine />
-          </IconButton> */}
-        </Stack>
-        <Comments open={openComment} post_id={data.post_id || data.id} />
-      </Card>
-    </Paper>
+        </Grid>
+      </Grid>
+      <Grid item className={classes.optionsButton}>
+        <BsThreeDotsVertical />
+      </Grid>
+    </Grid>
   );
 };
 
+const PostFooter = (props) => {
+  const { setCommentOpen } = props;
+  const classes = useStyle();
+  return (
+    <Grid
+      container
+      justifyContent="center"
+      className={classes.reactionContainer}
+    >
+      <PostReact />
+      <Grid
+        item
+        component={Button}
+        disableRipple
+        columnGap={1}
+        onClick={() => setCommentOpen((state) => !state)}
+      >
+        <Typography>comment</Typography>
+        <FaCommentAlt />
+      </Grid>
+      <Grid item component={Button} disableRipple columnGap={1}>
+        <Typography>share</Typography>
+        <BiShare />
+      </Grid>
+    </Grid>
+  );
+};
+const getNumOfColumns = (numOfImgs, imgNum) => {
+  if ((numOfImgs === imgNum) === 3 || numOfImgs === 1) return 2;
+  return 1;
+};
+const maxImgCapacity = (numOfImgs, imgNum) => numOfImgs > 4 && imgNum === 4;
+
+const PostPhotos = ({ media }) => {
+  const classes = useStyle();
+  const numOfImgs = media.length;
+  return (
+    <ImageList className={classes.imgContainer}>
+      {media.slice(0, 4).map((link, i) => (
+        <ImageListItem
+          key={i}
+          rows={1}
+          cols={getNumOfColumns(numOfImgs, i + 1)}
+          sx={{ position: "relative" }}
+        >
+          <img src={link} alt="post" />
+          {maxImgCapacity(numOfImgs, i + 1) && (
+            <Button disableRipple className={classes.showAllImgs}>{`+${
+              numOfImgs - 3
+            }`}</Button>
+          )}
+        </ImageListItem>
+      ))}
+    </ImageList>
+  );
+};
+const Post = ({ data }) => {
+  const classes = useStyle();
+  const [commentOpen, setCommentOpen] = useState(false);
+
+  return (
+    <Grid
+      direction="column"
+      container
+      component={Card}
+      className={classes.postContainer}
+    >
+      <Grid item component={PostHeader} {...data} />
+      <Grid item component={Typography} className={classes.postContent}>
+        {data.content}
+      </Grid>
+      <Grid
+        item
+        component={PostPhotos}
+        media={[
+          "/img/users/user-photo-marky7ekmc6v.jpeg",
+          "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+          // "/img/users/user-photo-marky7ekmc6v.jpeg",
+        ]}
+      ></Grid>
+      <Grid item component={PostFooter} setCommentOpen={setCommentOpen} />
+      <Comment
+        post_id={data.id}
+        commentOpen={commentOpen}
+        setCommentOpen={setCommentOpen}
+      />
+    </Grid>
+  );
+};
 export default Post;

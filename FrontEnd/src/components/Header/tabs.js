@@ -32,7 +32,7 @@ const TabsHeader = ({ value, setValue, classes, render }) => {
     } else if (user.role === "admin") {
       if (location.pathname === "/admin/users") setValue(0);
       else if (location.pathname.includes("/admin/posts")) setValue(1);
-      else setValue(4);
+      else setValue(3);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -40,7 +40,14 @@ const TabsHeader = ({ value, setValue, classes, render }) => {
   return render ? (
     <>
       {isAuth && user.role === "user" ? (
-        <Tabs variant="fullWidth" value={value} onChange={handleChange}>
+        <Tabs
+          variant="fullWidth"
+          TabIndicatorProps={{
+            style: { backgroundColor: value === 4 && "transparent" },
+          }}
+          value={value}
+          onChange={handleChange}
+        >
           <Tab
             disableRipple
             icon={
@@ -84,7 +91,8 @@ const TabsHeader = ({ value, setValue, classes, render }) => {
             }
             aria-label="favorite"
             onClick={() => history.push("/requests")}
-          />{" "}
+          />
+          <Tab disabled></Tab>
         </Tabs>
       ) : user.role === "admin" ? (
         <Tabs variant="fullWidth" value={value} onChange={handleChange}>

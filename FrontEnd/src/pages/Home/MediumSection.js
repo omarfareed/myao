@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import CreatePost from "../../components/Post/Create_post";
+import CreatePost from "../../components/createPost/createPost";
 // import GetPosts from "../GlobalForAll/GetPosts";
 // import useStyle from "./HomeStyle";
 

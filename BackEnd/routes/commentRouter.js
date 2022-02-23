@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .patch(transferParamsToBody, commentController.getComments)
+  .get(commentController.getComments)
   .post(
     transferParamsToBody,
     protect,

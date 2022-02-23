@@ -1,20 +1,22 @@
 import { Button, Grid } from "@mui/material";
 import axios from "axios";
 import { useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AvatarImage from "../../components/AvatarImage/AvatarImage";
 import InputFieldSimple from "../../components/InputField.js/InputField";
+import { UserActions } from "../../Store/UserSlice";
 import useStyle from "./settingStyle";
 
 const SettingPage = () => {
   const classes = useStyle();
-  const { user } = useSelector((state) => state.reducer);
   const [oldPass, setOldPass] = useState("");
-  const [newPassword, SetNewPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const dispatch = useDispatch();
   const [oldPassError, setOldPassError] = useState(false);
   const [newPasswordError, setNewPasswordError] = useState(false);
   const [newPassConfirmError, setNewPassConfirmError] = useState(false);
+  let { user } = useSelector((state) => state.reducer);
   const [address, setAddress] = useState(
     user.address === null ? "" : user.address
   );
@@ -39,16 +41,13 @@ const SettingPage = () => {
   const infoButtonsDisabled =
     (user.education || "") === education && (user.address || "") === address;
   const ref = useRef();
-  const backToDefault = () => {
-    setAddress(user.address || "");
-    setEducation(user.education || "");
-  };
   const updateInfo = async () => {
-    const res = await axios.patch("/api/v1/user/me", {
+    await axios.patch("/api/v1/security/me", {
       address,
       education,
     });
-    console.log(res);
+    user = { ...user, address, education };
+    dispatch(UserActions.AddUser(user));
   };
   const oldPassHandler = (e) => {
     setOldPass(e.target.value);
@@ -57,7 +56,7 @@ const SettingPage = () => {
     setOldPassError(false);
   };
   const newPassHandler = (e) => {
-    SetNewPassword(e.target.value);
+    setNewPassword(e.target.value);
     if (e.target.value === "") return setNewPasswordError(false);
     if (e.target.value.length < 8) return setNewPasswordError(true);
     setNewPasswordError(false);
@@ -72,13 +71,15 @@ const SettingPage = () => {
   };
   const changePassHandler = async () => {
     try {
-      const d = await axios.post("/api/v1/user/changePassword", {
+      await axios.post("/api/v1/security/changePassword", {
         currentPassword: oldPass,
         newPassword,
         newPasswordConfirm,
         role: "user",
       });
-      console.log(d);
+      setOldPass("");
+      setNewPasswordConfirm("");
+      setNewPassword("");
     } catch (err) {
       console.log(err);
     }
@@ -190,21 +191,15 @@ const SettingPage = () => {
         {user.role === "user" && (
           <>
             <InputFieldSimple
-              label={
-                user.address === null
-                  ? "add your address"
-                  : "change your address"
-              }
+              label="Address"
+              placeholder="Add your Address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
             <InputFieldSimple
-              label={
-                user.education === null
-                  ? "add your education"
-                  : "change your education"
-              }
+              label={"Education"}
               value={education}
+              placeholder="Add your education"
               onChange={(e) => setEducation(e.target.value)}
             />
             <Grid container>
@@ -217,16 +212,6 @@ const SettingPage = () => {
                 style={{ width: "15rem" }}
               >
                 update information
-              </Button>
-              <Button
-                variant="contained"
-                className={classes.changePass}
-                style={{ width: "15rem" }}
-                disableRipple
-                disabled={infoButtonsDisabled}
-                onClick={backToDefault}
-              >
-                back to default
               </Button>
             </Grid>
           </>
